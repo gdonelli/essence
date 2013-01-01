@@ -1,7 +1,26 @@
 
-# OS X stuff
+### OS X stuff ###
 .DS_Store
 
 xcuserdata
 secret
 tmp
+
+### NODE.JS ###
+
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+npm-debug.log
+node_modules
+
