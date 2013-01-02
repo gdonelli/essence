@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:app/app.js">
+   </FileRef>
+   <FileRef
+      location = "group:app/views">
+   </FileRef>
+   <FileRef
+      location = "group:app/routes">
+   </FileRef>
+   <FileRef
+      location = "group:app/public">
+   </FileRef>
+   <FileRef
+      location = "group:secret">
+   </FileRef>
+   <FileRef
+      location = "group:tools">
+   </FileRef>
+</Workspace>

@@ -61,6 +61,9 @@ http.createServer(app).listen(app.get('port'), function(){
 });
 
 
+// ---------------------
+// Login Routes
+
 function _makeOAuth(options)
 {
     var result =  {
