@@ -9,10 +9,10 @@ var     express = require('express')
     ,	assert  = require('assert')
     ;
 
-var 	authentication = require('./routes/authentication')
-    ,   twitter = require('./routes/twitter')
-    ,   routes  = require('./routes')
-    ,   io      = require('./routes/io')
+var 	authentication = require('./code/authentication')
+    ,   twitter = require('./code/twitter')
+    ,   routes  = require('./code')
+    ,   io      = require('./code/io')
     ;
 
 var MongoStore = require('connect-mongo')(express);
@@ -29,6 +29,8 @@ var sessionStore = new MongoStore({
                         ,   url: process.env.SESSION_DB_URL
                         ,   auto_reconnect: true
                         });
+
+express.errorHandler.title = 'Oops...'
 
 app.configure(function() {
     app.set('port', process.env.PORT || 3001);

@@ -11,7 +11,7 @@
       location = "group:app/views">
    </FileRef>
    <FileRef
-      location = "group:app/routes">
+      location = "group:app/code">
    </FileRef>
    <FileRef
       location = "group:app/public">
