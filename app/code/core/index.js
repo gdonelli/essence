@@ -3,7 +3,14 @@
  * GET home page.
  */
 
-exports.index = function(quest, ponse)
+var index = exports;
+
+index.path = {};
+index.route = {};
+
+index.path.index = '/';
+
+index.route.index = function(quest, ponse)
     {
         var user;
         

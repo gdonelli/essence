@@ -1,7 +1,0 @@
-
-/*
- * Service
- */
-
-var service = exports;
-

@@ -1,14 +1,21 @@
 extends layout
 
+block head-extra
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
+    script(src="/socket.io/socket.io.js")
+    script(src='/javascripts/serviceAPI.js')
+    script(src='/javascripts/index_user.js')
+
 block content
-    h1 Hi 
-       span= user.name 
-       //- |  (@
-       //-  span= user.screen_name
-       //-  | ,
-       //-  img(src=user.profile_image_url_https, width='22', heigth='22')
-       //-  |)
-       , welcome to Essence
-       
+    #header
+        h1 Hi 
+           span= user.name
+           , welcome to Essence
+        p Essence sends you an email once a day containing the tweets from the people you care the most
+    
+
+    #content
+        button(onclick='test()') test button
+
     #footer
         a(href='/logout') logout

@@ -3,8 +3,8 @@
 var     request = require('request')
     ,   assert  = require('assert')
     ,   querystring = require('querystring')
-    ,   _ = require('underscore')
-    ,	async = require('async')
+    ,   _       = require('underscore')
+    ,	async   = require('async')
     ;
 
 var twitter = exports;

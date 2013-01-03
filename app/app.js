@@ -11,6 +11,10 @@ if ( isApp ) { // enable profiling
         ,   ['Essence', process.env.SUBDOMAIN, process.env.NODE_ENV ] );
 }
 
+// Use setup
+require( __dirname + '/code/lib/use' ).setup([ __dirname + '/code' ]);
+
+
 // Import
 var     express = require('express')
     ,   http    = require('http')
@@ -18,10 +22,10 @@ var     express = require('express')
     ,	assert  = require('assert')
     ;
 
-var 	authentication = require('./code/authentication')
-    ,   twitter = require('./code/twitter')
-    ,   routes  = require('./code')
-    ,   io      = require('./code/io')
+var 	authentication  = use('authentication')
+    ,   twitter         = use('twitter')
+    ,   index           = use('index')
+    ,   io              = use('io')
     ;
 
 // Startup
@@ -67,13 +71,25 @@ app.configure('development', function(){
     app.use(express.errorHandler());
 });
 
+
 // ---------------------
 //  Routes
 
-app.get('/', routes.index);
-app.get( authentication.path.login,         authentication.route.login);
-app.get( authentication.path.loginResponse, authentication.route.loginResponse);
-app.get( authentication.path.logout,        authentication.route.logout);
+var routes = {};
+routes[ index.path.index                    ] = index.route.index;
+routes[ authentication.path.login           ] = authentication.route.login;
+routes[ authentication.path.loginResponse   ] = authentication.route.loginResponse;
+routes[ authentication.path.logout          ] = authentication.route.logout;
+
+console.log('Routes:');
+
+Object.keys(routes).forEach(
+    function(path)
+    {
+        app.get(path, routes[path]);
+        console.log('   ' + path);
+    });
+
 
 // ---------------------
 // Http Server
@@ -85,15 +101,17 @@ expressServer.listen(app.get('port'),
         console.log("Essence server listening on port " + app.get('port'));
     });
 
+
 // ---------------------
 // Socket.io
 
 io.setup(expressServer, cookieParser, sessionStore, sessionKey);
 
+io.addRoutesFromModule('service');
+
 
 // ---------------------
 // Test
-
 
 app.get( '/friends',
     function(quest, ponse)

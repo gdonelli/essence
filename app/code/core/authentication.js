@@ -7,14 +7,12 @@ var querystring = require('querystring')
     ,   request = require('request')
     ,	assert  = require('assert')
     ,   _       = require('underscore')
+
+    ,   twitter = use('twitter');
     ;
 
-var twitter = require('./twitter');
 
 var authentication = exports;
-
-
-
 
 authentication.path = {};
 authentication.route= {};
@@ -30,7 +28,7 @@ authentication.route.login =
 
         var requestTokenURL = 'https://api.twitter.com/oauth/request_token';
         
-        var oauth = _makeOAuth( { callback: 'http://local.essence.com:3001/login-response' } );
+        var oauth = _makeOAuth( { callback: _dialogRedirectURL(quest) } );
         
         request.post({url:requestTokenURL, oauth:oauth},
             function (err, postPonse, body)
@@ -50,6 +48,7 @@ authentication.route.login =
                 ponse.redirect(authenticateURL);
             });
     };
+
 
 authentication.path.loginResponse = '/login-response';
 
@@ -160,19 +159,6 @@ authentication.userFromRequest =
         return quest.session.user;
     };
 
-function _makeOAuth(options)
-{
-    var result =  {
-            consumer_key:       process.env.CONSUMER_KEY
-        ,   consumer_secret:    process.env.CONSUMER_SECRET
-        };
-    
-    if (options)
-        _.extend(result, options);
-    
-    return result;
-}
-
 authentication.oauthFromRequest =
     function(quest)
     {
@@ -188,3 +174,26 @@ authentication.oauthFromRequest =
         
         return result;
     };
+
+function _makeOAuth(options)
+{
+    var result =  {
+            consumer_key:       process.env.CONSUMER_KEY
+        ,   consumer_secret:    process.env.CONSUMER_SECRET
+        };
+    
+    if (options)
+        _.extend(result, options);
+    
+    return result;
+}
+
+
+function _dialogRedirectURL(quest)
+{
+    var questHeaders = quest.headers;
+    var questHost    = questHeaders.host;
+    
+    return 'http://' + questHost + authentication.path.loginResponse;
+}
+

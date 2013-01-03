@@ -5,7 +5,7 @@
 
 var socketio    = require('socket.io')
     _           = require('underscore')
-    a           = require('./a')
+    a           = use('a')
     ;
 
 var io = exports;
@@ -130,7 +130,7 @@ io.addRoutesFromModule =
     {
         a.assert_def(moduleName,     'moduleName is undefined');
     
-        var module = require(moduleName);
+        var module = use(moduleName);
 
         a.assert_def(module,        'module is undefined');
         a.assert_def(module.event,  'module.event is undefined');
