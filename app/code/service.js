@@ -1,0 +1,7 @@
+
+/*
+ * Service
+ */
+
+var service = exports;
+

@@ -1,9 +1,9 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
+  "name": "essence",
+  "version": "0.0.1-1",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "start": "app.js"
   },
   "dependencies": {
     "express": "3.0.5",
@@ -12,6 +12,12 @@
     "request": "*",
     "connect-mongo": "*",
     "underscore": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "nodefly": "stable"
+  },
+  "subdomain": "essence",
+  "author": "Giovanni Donelli <giovanni.donelli@gmail.com>",
+  "engines": {
+    "node": "v0.8.x"
   }
 }

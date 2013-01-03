@@ -1,8 +1,17 @@
+//
+//  Essence
+//
 
-/**
- * Module dependencies.
- */
+// Nodefly
+var isApp = ( require.main.filename.indexOf('app.js') > 0 );
+if ( isApp ) { // enable profiling
+    console.log(' [ nodefly running... ] ');
+    require('nodefly').profile(
+            process.env.NODEFLY_ID
+        ,   ['Essence', process.env.SUBDOMAIN, process.env.NODE_ENV ] );
+}
 
+// Import
 var     express = require('express')
     ,   http    = require('http')
     ,   path    = require('path')
@@ -15,8 +24,10 @@ var 	authentication = require('./code/authentication')
     ,   io      = require('./code/io')
     ;
 
-var MongoStore = require('connect-mongo')(express);
+// Startup
 
+var MongoStore = require('connect-mongo')(express);
+var sessionKey = 'essence.session.id'; ;
 var app = express();
 
 assert( process.env.SESSION_DB_URL != undefined,    'process.env.SESSION_DB_URL undefined');
@@ -44,7 +55,7 @@ app.configure(function() {
     
         // Session
     app.use(cookieParser);
-    app.use(express.session({   key:    process.env.SESSION_SECRET
+    app.use(express.session({   key:    sessionKey
                             ,   store:  sessionStore			}));
 
     app.use(app.router);
@@ -56,19 +67,32 @@ app.configure('development', function(){
     app.use(express.errorHandler());
 });
 
-app.get('/', routes.index);
+// ---------------------
+//  Routes
 
+app.get('/', routes.index);
 app.get( authentication.path.login,         authentication.route.login);
 app.get( authentication.path.loginResponse, authentication.route.loginResponse);
 app.get( authentication.path.logout,        authentication.route.logout);
 
-http.createServer(app).listen(app.get('port'), function(){
-    console.log("Essence server listening on port " + app.get('port'));
-});
+// ---------------------
+// Http Server
+
+var expressServer = http.createServer(app);
+
+expressServer.listen(app.get('port'),
+    function(){
+        console.log("Essence server listening on port " + app.get('port'));
+    });
+
+// ---------------------
+// Socket.io
+
+io.setup(expressServer, cookieParser, sessionStore, sessionKey);
 
 
 // ---------------------
-//  Routes
+// Test
 
 
 app.get( '/friends',

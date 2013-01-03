@@ -53,7 +53,7 @@ io.setup =
                             return accept(err, false);
                         }
 
-                        var sessionID = data.signedCookies[identity.sessionKey()];
+                        var sessionID = data.signedCookies[sessionKey];
                         
                         sessionStore.get(sessionID,
                             function(err, session)
