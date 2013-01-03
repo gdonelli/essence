@@ -150,30 +150,55 @@ authentication.route.logout =
     };
 
 
-authentication.userFromRequest =
-    function(quest)
-    {
-        assert(quest.session      != undefined,   'quest.session is undefined' );
-        assert(quest.session.user != undefined,   'quest.session.user is undefined' );
-        
-        return quest.session.user;
-    };
+function _dialogRedirectURL(quest)
+{
+    var questHeaders = quest.headers;
+    var questHost    = questHeaders.host;
+    
+    return 'http://' + questHost + authentication.path.loginResponse;
+}
 
-authentication.oauthFromRequest =
-    function(quest)
-    {
-        assert(quest.session            != undefined,   'quest.session is undefined' );
-        assert(quest.session.perm_token != undefined,   'quest.session.perm_token is undefined' );
-        
-        var perm_token = quest.session.perm_token;
-        
-        var result = _makeOAuth( {
-                token:          perm_token.oauth_token
-            ,   token_secret:   perm_token.oauth_token_secret
-            });
-        
-        return result;
-    };
+
+// Session Getters
+
+authentication.userFromRequest  = _userFromObject;
+authentication.userFromSocket   = _userFromObject;
+
+function _userFromObject(o)
+{
+    return _userFromSession(o.session);
+}
+
+function _userFromSession(session)
+{
+    assert(session      != undefined,   'quest.session is undefined' );
+    assert(session.user != undefined,   'quest.session.user is undefined' );
+    
+    return session.user;
+}
+
+authentication.oauthFromRequest = _oauthFromObject;
+authentication.oauthFromSocket  = _oauthFromObject;
+
+function _oauthFromObject(o)
+{
+    return _oauthFromSession(o.session);
+}
+
+function _oauthFromSession(session)
+{
+    assert(session            != undefined,   'quest.session is undefined' );
+    assert(session.perm_token != undefined,   'quest.session.perm_token is undefined' );
+    
+    var perm_token = session.perm_token;
+    
+    var result = _makeOAuth( {
+            token:          perm_token.oauth_token
+        ,   token_secret:   perm_token.oauth_token_secret
+        });
+    
+    return result;
+};
 
 function _makeOAuth(options)
 {
@@ -188,12 +213,4 @@ function _makeOAuth(options)
     return result;
 }
 
-
-function _dialogRedirectURL(quest)
-{
-    var questHeaders = quest.headers;
-    var questHost    = questHeaders.host;
-    
-    return 'http://' + questHost + authentication.path.loginResponse;
-}
 

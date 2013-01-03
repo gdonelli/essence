@@ -119,7 +119,6 @@ app.get( '/friends',
         var oauth   = authentication.oauthFromRequest(quest);
         var user    = authentication.userFromRequest(quest);
 
-
         twitter.getFriends(oauth, user.id,
             function(err, data) {
                 console.log('twitter.getFriends:');

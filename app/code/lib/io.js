@@ -33,7 +33,7 @@ io.setup =
                 
                 // Create Session for Socket
                 socket.session = socket.handshake.session;
-                var user = socket.session.user;
+//                var user = socket.session.user;
                 _socketListen(socket);
             });
 

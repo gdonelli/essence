@@ -5,6 +5,7 @@ var     request = require('request')
     ,   querystring = require('querystring')
     ,   _       = require('underscore')
     ,	async   = require('async')
+    ,	EventEmitter   = require('events').EventEmitter
     ;
 
 var twitter = exports;
@@ -78,19 +79,28 @@ function _users_lookup100(oauth, arrayOfUserIds, callback /* (err, data) */)
 twitter.users.lookup =
     function(oauth, arrayOfUserIds, callback /* (err, data) */)
     {
+        var progressEmitter = new EventEmitter();
+        
         var userSegments = [];
         
-        var count = arrayOfUserIds.length;
+        var count = Math.min( 1000, arrayOfUserIds.length );
         for (var i=0; i<count; i+=100 )
         {
             var slice = arrayOfUserIds.slice(i, Math.min(count, i + 100) );
             
             userSegments.push(slice);
         }
-
+        
+        var completedSegments = 0;
+        
         async.map(userSegments,
             function(slice, lookupCallback) {
-                _users_lookup100(oauth, slice, lookupCallback);
+                _users_lookup100(oauth, slice,
+                    function(err, data){
+                        completedSegments++;
+                        progressEmitter.emit('progress', (completedSegments / userSegments.length) );
+                        lookupCallback(err, data);
+                    });
             },
             function(err, results)
             {
@@ -100,6 +110,8 @@ twitter.users.lookup =
                 var allUser = _.flatten(results);
                 callback(null, allUser);
             } );
+        
+        return progressEmitter;
     };
 
 twitter.users.search =
@@ -128,30 +140,48 @@ twitter.friends.ids =
 twitter.getFriends =
     function(oauth, user_id, callback)
     {
+        var progressEmitter = new EventEmitter();
+        
+        process.nextTick(
+            function() {
+                progressEmitter.emit('progress', 0);
+            });
+        
         twitter.friends.ids(oauth, user_id,
             function(err, data) {
-            
+                progressEmitter.emit('progress', 0.25);
+                
                 if (err)
                     return callback(err);
                 else if (data.ids == undefined)
                     return callback(new Error('data.ids is undefined'));
                 
-                twitter.users.lookup( oauth, data.ids,
-                    function(err, data)
-                    {
-                        var result = _.map(data,
-                            function(userInfo) {
-                                var propertiesToPick = [ 'id'
-                                    , 'name'
-                                    , 'screen_name'
-                                    , 'profile_image_url'
-                                    , 'profile_image_url_https' ];
-                                    
-                                return _.pick(userInfo, propertiesToPick);
-                            } );
-                        
-                        callback(null, result);
+                var lookup =
+                    twitter.users.lookup( oauth, data.ids,
+                        function(err, data)
+                        {
+                            var result = _.map(data,
+                                function(userInfo) {
+                                    var propertiesToPick =
+                                        [   'id'
+                                        ,   'name'
+                                        ,   'screen_name'
+                                        ,   'profile_image_url'
+                                        ,   'profile_image_url_https'
+                                        ];
+                                        
+                                    return _.pick(userInfo, propertiesToPick);
+                                } );
+                            
+                            callback(null, result);
+                        });
+                
+                lookup.on('progress',
+                    function(value) {
+                        progressEmitter.emit('progress', 0.25 + value * 0.75);
                     });
 
             });
+        
+        return progressEmitter;
     }
