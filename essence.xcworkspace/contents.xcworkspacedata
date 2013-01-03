@@ -5,6 +5,9 @@
       location = "group:app/app.js">
    </FileRef>
    <FileRef
+      location = "group:app/package.json">
+   </FileRef>
+   <FileRef
       location = "group:app/views">
    </FileRef>
    <FileRef

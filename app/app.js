@@ -4,17 +4,16 @@
  */
 
 var     express = require('express')
-    ,   routes  = require('./routes')
-
     ,   http    = require('http')
     ,   path    = require('path')
     ,	assert  = require('assert')
     ;
 
-var authentication = require('./routes/authentication');
-var twitter = require('./routes/twitter');
-
-
+var 	authentication = require('./routes/authentication')
+    ,   twitter = require('./routes/twitter')
+    ,   routes  = require('./routes')
+    ,   io      = require('./routes/io')
+    ;
 
 var MongoStore = require('connect-mongo')(express);
 

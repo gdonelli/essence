@@ -11,6 +11,7 @@
     "stylus": "*",
     "request": "*",
     "connect-mongo": "*",
-    "underscore": "*"
+    "underscore": "*",
+    "socket.io": "*"
   }
 }

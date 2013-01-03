@@ -116,7 +116,7 @@ twitter.users.search =
 twitter.friends = {};
 
 twitter.friends.ids =
-    function(oauth, user_id, callback /* (err, data) */) {
+    function(oauth, user_id, callback /* (err, data) */ ) {
         var apiURL = 'https://api.twitter.com/1.1/friends/ids.json';
         var params = {  user_id: user_id };
         
