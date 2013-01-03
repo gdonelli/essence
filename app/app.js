@@ -5,7 +5,6 @@
 
 var     express = require('express')
     ,   routes  = require('./routes')
-    ,   user    = require('./routes/user')
 
     ,   http    = require('http')
     ,   path    = require('path')
@@ -13,6 +12,8 @@ var     express = require('express')
     ;
 
 var authentication = require('./routes/authentication');
+var twitter = require('./routes/twitter');
+
 
 
 var MongoStore = require('connect-mongo')(express);
@@ -55,7 +56,6 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
-app.get('/users', user.list);
 
 app.get( authentication.path.login,         authentication.route.login);
 app.get( authentication.path.loginResponse, authentication.route.loginResponse);
@@ -73,7 +73,18 @@ http.createServer(app).listen(app.get('port'), function(){
 app.get( '/friends',
     function(quest, ponse)
     {
-        ponse.send('My friends');
+        var oauth   = authentication.oauthFromRequest(quest);
+        var user    = authentication.userFromRequest(quest);
+
+
+        twitter.getFriends(oauth, user.id,
+            function(err, data) {
+                console.log('twitter.getFriends:');
+                console.log(data);
+                
+                ponse.send(data);
+            });
+        
     });
 
 

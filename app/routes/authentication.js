@@ -7,23 +7,14 @@ var querystring = require('querystring')
     ,   request = require('request')
     ,	assert  = require('assert')
     ,   _       = require('underscore')
+    ;
 
+var twitter = require('./twitter');
 
 var authentication = exports;
 
 
-function _makeOAuth(options)
-{
-    var result =  {
-            consumer_key:       process.env.CONSUMER_KEY
-        ,   consumer_secret:    process.env.CONSUMER_SECRET
-        };
-    
-    if (options)
-        _.extend(result, options);
-    
-    return result;
-}
+
 
 authentication.path = {};
 authentication.route= {};
@@ -91,21 +82,29 @@ authentication.route.loginResponse =
             function (e, r, body) {
                 var perm_token = querystring.parse(body);
                 quest.session.perm_token = perm_token;
-                
-                var oauth = _makeOAuth( {   token: perm_token.oauth_token
-                                        ,   token_secret: perm_token.oauth_token_secret
-                                        });
 
-                var showURL = 'https://api.twitter.com/1/users/show.json?';
-                var params =    {   screen_name: perm_token.screen_name
-                                ,   user_id: perm_token.user_id
-                                };
+                var oauth = authentication.oauthFromRequest(quest);
                 
-                showURL += querystring.stringify(params);
-                
-                request.get({url:showURL, oauth:oauth, json:true},
-                    function (e, r, userInfo)
+                twitter.users.show(oauth, perm_token.user_id, perm_token.screen_name, 
+                    function (err, userInfo)
                     {
+                        if (err)
+                            throw err;
+                        
+                        if (userInfo.errors)
+                        {
+                        	console.error('Error loading user, returned:');
+                            console.error(userInfo.errors);
+                            
+                            var err = new Error( userInfo.errors[0].message );
+                            throw err;
+                        }
+                        else if ( Object.keys(userInfo).length < 5 ) {
+                        	console.error('Error loading user, returned:');
+                            console.error(userInfo);
+                            throw new Error('Failed loading twitter user profile');
+                        }
+                        
                         var userPropertiesToPick = [
                                     'id'
                                 ,   'id_str'
@@ -133,8 +132,6 @@ authentication.route.loginResponse =
                         quest.session.user = _.pick(userInfo, userPropertiesToPick);
                         
                         console.log(quest.session.user);
-                        
-//                        ponse.send( perm_token.screen_name + ', welcome to Essence' );
 
                         ponse.redirect('/');
                     });
@@ -154,3 +151,40 @@ authentication.route.logout =
     };
 
 
+authentication.userFromRequest =
+    function(quest)
+    {
+        assert(quest.session      != undefined,   'quest.session is undefined' );
+        assert(quest.session.user != undefined,   'quest.session.user is undefined' );
+        
+        return quest.session.user;
+    };
+
+function _makeOAuth(options)
+{
+    var result =  {
+            consumer_key:       process.env.CONSUMER_KEY
+        ,   consumer_secret:    process.env.CONSUMER_SECRET
+        };
+    
+    if (options)
+        _.extend(result, options);
+    
+    return result;
+}
+
+authentication.oauthFromRequest =
+    function(quest)
+    {
+        assert(quest.session            != undefined,   'quest.session is undefined' );
+        assert(quest.session.perm_token != undefined,   'quest.session.perm_token is undefined' );
+        
+        var perm_token = quest.session.perm_token;
+        
+        var result = _makeOAuth( {
+                token:          perm_token.oauth_token
+            ,   token_secret:   perm_token.oauth_token_secret
+            });
+        
+        return result;
+    };

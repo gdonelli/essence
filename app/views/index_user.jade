@@ -1,8 +1,13 @@
 extends layout
 
 block content
-    h1 Ciao 
-       span= username
+    h1 Hi 
+       span= user.name 
+       //- |  (@
+       //-  span= user.screen_name
+       //-  | ,
+       //-  img(src=user.profile_image_url_https, width='22', heigth='22')
+       //-  |)
        , welcome to Essence
        
     #footer

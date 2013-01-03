@@ -16,7 +16,7 @@ exports.index = function(quest, ponse)
             
             ponse.render('index_user', {
                     title: title,
-                    username: user.name
+                    user: user
                 } );
         }
         else
