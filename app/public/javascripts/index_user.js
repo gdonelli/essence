@@ -4,6 +4,11 @@ var serviceAPI = new ServiceAPI();
 
 function test()
 {
+    $('#user-menu').dropdown();
+}
+
+function test_2()
+{
     console.log('test');
     
     var getFriends = serviceAPI.getFriends(

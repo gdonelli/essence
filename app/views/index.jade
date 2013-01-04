@@ -1,10 +1,16 @@
 extends layout
 
+block last-section
+    li.active
+        a(href="/login") Sign in
+
 block content
-    #header
-        h1 Essence
-        p Essence sends you an email once a day containing the tweets from the people you care the most
-    div
-        a(href='/login')
-            img(src='https://dev.twitter.com/sites/default/files/images_documentation/sign-in-with-twitter-gray.png'
-                alt='Sign in with Twitter')
+    .jumbotron
+        h1 Never miss a tweet you care about
+        
+        p.lead Essence sends you an email once a day containing the tweets from the people you care the most
+
+        a.btn.btn-large.btn-primary(href='/login') 
+            img#white-bird(src='/images/twitter-white.png')
+            | Sign in with Twitter
+

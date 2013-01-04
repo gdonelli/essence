@@ -1,21 +1,33 @@
 extends layout
 
-block head-extra
-    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
-    script(src="/socket.io/socket.io.js")
+block extra-script
     script(src='/javascripts/serviceAPI.js')
     script(src='/javascripts/index_user.js')
 
+
+//block others-section
+//    li.active
+//        a Setup
+
+block last-section
+    li.active.dropdown
+        a.dropdown-toggle(data-toggle="dropdown", href="#")
+            img#avatar(src=user.profile_image_url_https)
+            = user.screen_name
+            &nbsp;
+            b.caret
+        ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
+            li
+                a(href="/logout") Logout
+
 block content
-    #header
-        h1 Hi 
-           span= user.name
-           , welcome to Essence
-        p Essence sends you an email once a day containing the tweets from the people you care the most
-    
+    .jumbotron
+        h2 Pick your friends
+        p.muted Select the people you would like to collect tweets from
+
+        h2 Your email
+        p.muted The email address where you would like to receive your Essence
 
     #content
         button(onclick='test()') test button
 
-    #footer
-        a(href='/logout') logout
