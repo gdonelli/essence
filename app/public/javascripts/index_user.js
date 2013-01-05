@@ -39,6 +39,30 @@ function _friendSearchField()
     return $('#friend-search');
 }
 
+function AddFriend(id, element)
+{
+    console.log('Add friend with id: ' + id);
+    
+    console.log(element);
+}
+
+function _HTMLRowForFriend(friendEntry)
+{
+    var row = '<div class="_row">';
+    
+    row += '<button type="button" class="btn btn-small" onclick="AddFriend(\''  + friendEntry.id + '\', this)">';
+    row += 'Add';
+    row += '&nbsp;<i class="icon-arrow-right"></i>';
+    row += '</button>';
+    
+    row += '<img src="' + friendEntry.profile_image_url + '"></img>';
+    row += '<h5 class="user-name">' + friendEntry.name + '</h5>';
+    row += '<p class="user-screenname">@' + friendEntry.screen_name + '</p>';
+    row += '</div>';
+    
+    return row;
+}
+
 function _showFriends(array)
 {
     var friendTableRows = _friendTableRows()
@@ -48,13 +72,7 @@ function _showFriends(array)
         function(friendEntry) {
             if (friendEntry.screen_name)
             {
-                var row = '<div class="_row">';
-                row += '<button type="button" class="btn btn-small">Add</button>'
-                row += '<img src="' + friendEntry.profile_image_url + '"></img>';
-                row += '<h5 class="user-name">' + friendEntry.name + '</h5>';
-                row += '<p class="user-screenname">@' + friendEntry.screen_name + '</p>';
-                row += '</div>';
-            
+                var row = _HTMLRowForFriend(friendEntry);
                 friendTableRows.append( row );
             }
             else
@@ -111,7 +129,7 @@ function _searchFriend(value)
         
         entriesToShow = entriesToShow.sort(
             function(a, b) {
-                return (a._sort < b._sort);
+                return (a._sort - b._sort);
             });
     }
 
@@ -138,8 +156,12 @@ function _matchEntry(friendEntry, seachString)
     return -1;
 }
 
-function LoadUsers()
+function LoadFriends()
 {
+    $('#error-header').css(   'display', 'none');
+    $('#search-header').css(  'display', 'none');
+    $('#loading-header').css( 'display', 'block');
+
     var getFriends = serviceAPI.getFriends(
         function(err, friends)
         {
@@ -151,12 +173,19 @@ function LoadUsers()
                 console.error(err);
                 
                 $('#friends-table').css( 'background-color', 'red');
-                $('#loading-label').text('Failed to load your friends');
+
+                $('#error-header').css(   'display', 'block');
+                $('#search-header').css(  'display', 'none');
+                $('#loading-header').css( 'display', 'none');
             }
             else
             {
                 _friends = friends;
                 _searchFriend('');
+
+                $('#error-header').css(   'display', 'none');
+                $('#search-header').css(  'display', 'block');
+                $('#loading-header').css( 'display', 'none');
             }
         });
     
@@ -168,7 +197,6 @@ function LoadUsers()
             
             console.log('getFriends -progress: ' + percentage);
             bar.css('width', percentage );
-            
         });
 }
 

@@ -19,7 +19,7 @@ index.route.index = function(quest, ponse)
         
         if (user)
         {
-            var title = '@ ' + user.screen_name + ' welcome to Essence';
+            var title = 'Essence (@' + user.screen_name + ')';
             
             ponse.render('index_user', {
                     title: title,

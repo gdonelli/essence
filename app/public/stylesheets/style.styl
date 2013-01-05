@@ -76,33 +76,46 @@ body
         padding-top: 8px
         padding-bottom: 16px
         height: 40px;
+        // background-color: orange;
 
-        #search-header
-            display: none;
-
-            #friend-search
-                width: 128px;
-
-        #loading-header
+        headerTabItem()
             position: absolute;
+            display: none;
             width: 200px
             left: -100px;
+            top: 0px;
             margin-left: 50%;
-            background-color: yellow;
+
+        #search-header
+            headerTabItem()
+            top: 16px
+            width: 260px
+            left: -130px
+            span
+                position: relative
+                top: 1px
+            input
+                margin-left: 16px
+                width: 150px
+
+        #loading-header
+            headerTabItem()
+            top: 8px
+            // background-color: yellow;
 
             #friends-progress
-                margin-top: 8px;
+                margin-top: 8px
                 height: 8px
                 .bar
-                    width: 0;
-
-            #loading-label
-                margin-top: 2px;
-
+                    width: 0
 
         #error-header
-            position: absolute;
+            headerTabItem()
             display: none;
+            top: 8px
+
+        ._label
+            margin-top: 2px
 
     ._rows
         margin:0

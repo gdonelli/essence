@@ -6,7 +6,7 @@ block extra-script
     script
         $('body').ready(
             function() {
-                LoadUsers();
+                LoadFriends();
             });
 
 block last-section
@@ -29,18 +29,19 @@ block content
         #friends-table
             #friends-table-header
                 #search-header
+                    span Name:
                     input#friend-search.input-medium.search-query(
                         type="text", 
                         placeholder="Search...")
 
                 #loading-header
-                    #loading-label Loading your friends...
+                    p._label Loading your friends...
                     #friends-progress.progress.active
                         .bar
 
                 #error-header
-                    p Error Loading your friends.
-                    a Try again
+                    p._label Oops... Twitter error!
+                    a(onclick='LoadFriends()') Try again
 
             ._rows
 
