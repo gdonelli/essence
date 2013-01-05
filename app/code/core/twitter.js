@@ -21,8 +21,24 @@ twitter.get =
         request.get( { url:theURL, oauth:oauth, json:true },
             function(err, ponse, payload)
             {
-                if (err)
+                if (err) {
+                    console.error('twitter.get failed for API:');
+                    console.error(theURL);
+                    console.error('error:');
+                    console.error(err);
                     return callback(err);
+                }
+                else if (ponse.statusCode != 200)
+                {
+                    var err;
+                    if (ponse.statusCode == 429)
+                        err = new Error('Too Many Requests - Rate Limit');
+                    else
+                        err = new Error('Twitter API GET status: ' + ponse.statusCode);
+                    
+                    err.code = ponse.statusCode;
+                    return callback(err);
+                }
                 
                 callback(null, payload);
             });
@@ -149,12 +165,12 @@ twitter.getFriends =
         
         twitter.friends.ids(oauth, user_id,
             function(err, data) {
-                progressEmitter.emit('progress', 0.25);
-                
                 if (err)
                     return callback(err);
                 else if (data.ids == undefined)
                     return callback(new Error('data.ids is undefined'));
+
+                progressEmitter.emit('progress', 0.25);
                 
                 var lookup =
                     twitter.users.lookup( oauth, data.ids,

@@ -25,8 +25,11 @@ service.socket.getFriends =
             twitter.getFriends(oauth, user.id,
                 function(err, data)
                 {
-                    if (err)
+                    if (err) {
+                        console.error('twitter.getFriends failed with error:');
+                        console.error(err);
                         return callback( { error: err } );
+                    }
                     
                     callback(data);
                 });

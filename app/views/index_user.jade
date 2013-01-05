@@ -1,21 +1,21 @@
 extends layout
 
 block extra-script
-    script(src='/javascripts/serviceAPI.js')
+    script(src='/javascripts/ServiceAPI.js')
     script(src='/javascripts/index_user.js')
-
-
-//block others-section
-//    li.active
-//        a Setup
+    script
+        $('body').ready(
+            function() {
+                LoadUsers();
+            });
 
 block last-section
-    li.active.dropdown
-        a.dropdown-toggle(data-toggle="dropdown", href="#")
+    li.dropdown
+        a.dropdown-toggle.muted(data-toggle="dropdown", href="#")
             img#avatar(src=user.profile_image_url_https)
             = user.screen_name
             &nbsp;
-            b.caret
+            b.caret.muted
         ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
             li
                 a(href="/logout") Logout
@@ -24,6 +24,28 @@ block content
     .jumbotron
         h2 Pick your friends
         p.muted Select the people you would like to collect tweets from
+
+
+        #friends-table
+            #friends-table-header
+                #search-header
+                    input#friend-search.input-medium.search-query(
+                        type="text", 
+                        placeholder="Search...")
+
+                #loading-header
+                    #loading-label Loading your friends...
+                    #friends-progress.progress.active
+                        .bar
+
+                #error-header
+                    p Error Loading your friends.
+                    a Try again
+
+            ._rows
+
+
+        hr
 
         h2 Your email
         p.muted The email address where you would like to receive your Essence

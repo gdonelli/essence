@@ -21,7 +21,8 @@ body
     font-size: 72px
     line-height: 1
 
-.jumbotron .btn
+
+#jumbotron-btn
     font-size: 21px
     padding: 14px 24px
 
@@ -53,3 +54,98 @@ body
     margin-right: 8px
 
     padding: 0
+
+#beta
+    position: relative
+    font-size: 9px;
+    top: 2px;
+
+
+#friends-table
+    position: relative
+
+    padding 1px
+
+    display: inline-block
+    border-radius: 8px
+    background-color: #fbfbfb
+    width: 300px
+
+    #friends-table-header
+        position: relative;
+        padding-top: 8px
+        padding-bottom: 16px
+        height: 40px;
+
+        #search-header
+            display: none;
+
+            #friend-search
+                width: 128px;
+
+        #loading-header
+            position: absolute;
+            width: 200px
+            left: -100px;
+            margin-left: 50%;
+            background-color: yellow;
+
+            #friends-progress
+                margin-top: 8px;
+                height: 8px
+                .bar
+                    width: 0;
+
+            #loading-label
+                margin-top: 2px;
+
+
+        #error-header
+            position: absolute;
+            display: none;
+
+    ._rows
+        margin:0
+        padding:0
+
+        :nth-child(even)
+            background-color: white;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: 200px
+
+    ._row
+        position: relative
+
+        height: 48px
+        text-align: center;
+
+        img
+            position: absolute
+            top: 8px;
+            left: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px
+
+        .user-name
+            background-color: transparent;
+            position: absolute
+            top: -4px;
+            left: 48px;
+
+        .user-screenname
+            background-color: transparent;
+            position: absolute
+            font-size: 11px;
+            top: 20px;
+            left: 48px;
+
+        button
+            position: absolute
+            top:   12px;
+            right: 16px;
+
+
+
