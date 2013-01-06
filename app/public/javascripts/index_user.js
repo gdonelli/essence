@@ -39,9 +39,17 @@ function _friendSearchField()
     return $('#friend-search');
 }
 
-function AddFriend(id, element)
+function AddFriend(id, screenName, element)
 {
     console.log('Add friend with id: ' + id);
+    
+    serviceAPI.addFriend(id, screenName,
+        function(err, ponse) {
+            console.log('addFriend err:');
+            console.log(err);
+            console.log('addFriend ponse:');
+            console.log(ponse);
+        });
     
     console.log(element);
 }
@@ -50,7 +58,10 @@ function _HTMLRowForFriend(friendEntry)
 {
     var row = '<div class="_row">';
     
-    row += '<button type="button" class="btn btn-small" onclick="AddFriend(\''  + friendEntry.id + '\', this)">';
+    row += '<button type="button" class="btn btn-small" ';
+    row += 'onclick="AddFriend(\''  + friendEntry.id + '\', \'' + friendEntry.screen_name +'\', this)"';
+    row += '>';
+    
     row += 'Add';
     row += '&nbsp;<i class="icon-arrow-right"></i>';
     row += '</button>';

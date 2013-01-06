@@ -7,6 +7,8 @@ var querystring = require('querystring')
     ,   request = require('request')
     ,	assert  = require('assert')
     ,   _       = require('underscore')
+    ,   package = require('./../../package.json')
+
 
     ,   twitter = use('twitter')
     ,   database= use('database')
@@ -14,6 +16,8 @@ var querystring = require('querystring')
 
 
 var authentication = exports;
+
+authentication.version = package.version;
 
 authentication.path = {};
 authentication.route= {};
@@ -152,11 +156,20 @@ authentication.route.loginResponse =
                                     return _loginFail(quest, ponse, err);
                                 }
                                 
+                                quest.session.user._id = userEntry._id;
+                                quest.session.version = authentication.version;
+                                
+                                
+                                /*
                                 console.log('perm_token:');
                                 console.log(perm_token);
                                 
                                 console.log('userEntry:');
                                 console.log(userEntry);
+                                */
+                                
+                                console.log('quest.session.user:');
+                                console.log(quest.session.user);
                                 
                                 ponse.redirect('/');
                             });

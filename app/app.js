@@ -20,6 +20,7 @@ var     express = require('express')
     ,   http    = require('http')
     ,   path    = require('path')
     ,	assert  = require('assert')
+    ,	fs      = require('fs')
     ;
 
 var 	authentication  = use('authentication')
@@ -71,6 +72,13 @@ app.configure('development', function(){
     app.use(express.errorHandler());
 });
 
+try {
+    if (process.env.TMPDIR)
+        fs.mkdirSync(process.env.TMPDIR);
+}
+catch (e) {
+    console.log( 'tmp is ' + process.env.TMPDIR  );
+}
 
 // ---------------------
 //  Routes

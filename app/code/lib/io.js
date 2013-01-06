@@ -96,16 +96,36 @@ function _socketListen(socket)
     Object.keys(eventRoutes).forEach(
         function(key) {
             socket.on(key,
-                function(data, fn)
+                function(data, callback)
                 {
+                    var ioroute = eventRoutes[key];
                     try {
-                        eventRoutes[key](socket, data, fn);
+                        ioroute(socket, data,
+                            function(err, data)
+                            {
+                                console.log('route err');
+                                console.log(err);
+                                
+                                if (err) {
+                                    var errObject = {};
+                                    errObject.error = null;
+                                    
+                                    if (err.message)
+                                        errObject.error = err.message;
+                                    if (err.code)
+                                        errObject.errorCode = err.code;
+                                    
+                                    return callback(errObject);
+                                }
+                                
+                                callback(data);
+                            });
                     }
                     catch(err) {
-                        console.error('Error in socket.io event: `' + key + '`');
+                        console.error('Exception in socket.io event: `' + key + '`');
                         console.error(err.stack);
                       
-                        if (fn) {
+                        if (callback) {
                             var errObject = {};
                       
                             if (err.name)
@@ -115,7 +135,7 @@ function _socketListen(socket)
                             if (err.stack)
                                 errObject.stack = err.stack;
                       
-                            fn( { error: errObject });
+                            callback( { error: errObject });
                         }
                     }
                 });

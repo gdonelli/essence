@@ -210,11 +210,10 @@ twitter.cache = {};
 
 function _cacheDir()
 {
-    //if (process.env.TMPDIR)
-    //    return process.env.TMPDIR;
-    //else
-    
-    return '/tmp';
+    if (process.env.TMPDIR)
+        return process.env.TMPDIR;
+    else
+        return '/tmp';
 }
 
 twitter.cache.getFriends =

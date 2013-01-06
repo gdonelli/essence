@@ -13,7 +13,6 @@ var a = use('a');
 
 var database = exports;
 
-
 database.makeTwitterUserEntry =
     function(user, oauth)
     {
@@ -59,11 +58,39 @@ database.userLogin =
                     // First user login ever ...
                     _addUser(freshUserEntry, callback);
                 },
-                _saveUser
+                database.saveUserEntry
             ],
             callback);
     };
 
+database.getUserEntryById =
+    function(id, callback /* (err, userEntry) */ )
+    {
+        a.assert_def(id);
+        
+        _findUser( { _id: id }, callback);
+    }
+
+database.saveUserEntry =
+    function(userEntry, callback /* (err, userEntry) */ )
+    {
+        _getUserCollection(
+            function(err, userCollection)
+            {
+                if (err)
+                    return callback(err);
+                    
+                userCollection.save( userEntry, { safe: true },
+                    function(err, count) {
+                        if (err)
+                            return callback(err, null);
+                        else if (count != 1)
+                            return callback(new Error('updated count should be 1, is #' + count), null);
+                        
+                        callback(err, userEntry);
+                    });
+            });
+    };
 
 function _addUser(userInfo, callback /* (err, userEntry) */)
 {
@@ -87,25 +114,6 @@ function _addUser(userInfo, callback /* (err, userEntry) */)
         });
 };
 
-function _saveUser(userInfo, callback /* (err, userInfo) */ )
-{
-    _getUserCollection(
-        function(err, userCollection)
-        {
-            if (err)
-                return callback(err);
-                
-            userCollection.save( userInfo, { safe: true },
-                function(err, count) {
-                    if (err)
-                        return callback(err, null);
-                    else if (count != 1)
-                        return callback(new Error('updated count should be 1, is #' + count), null);
-                    
-                    callback(err, userInfo);
-                });
-        });
-}
 
 
 function _findUserWithTwitterId(id, callback)

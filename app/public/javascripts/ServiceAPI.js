@@ -30,8 +30,18 @@ ServiceAPI.prototype._peformService =
             {
                 this.socket.removeAllListeners(progressEvent);
                 
-                if (ponse.error)
-                    callback(ponse.error);
+                if (ponse.hasOwnProperty('error')) {
+                    var ponseError = ponse.error;
+                    var err = new Error();
+                    
+                    if ( ponseError && ponseError.message )
+                        err.message = ponseError.message;
+                        
+                    if ( ponseError && ponseError.code )
+                        err.code = ponseError.code;
+
+                    callback(err);
+                }
                 else
                     callback(null, ponse);
             });
@@ -55,7 +65,7 @@ ServiceAPI.prototype.addFriend =
     function(friend_id, friend_screen_name, callback /* (err, ponse) */)
     {
         var input = {
-                friend_id:	friend_id,
+                friend_id:          friend_id
             ,	friend_screen_name: friend_screen_name
             };
         

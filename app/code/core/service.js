@@ -18,7 +18,7 @@ service.socket  = {};
 service.event.getFriends = 'service.getFriends';
 
 service.socket.getFriends =
-    function(socket, inputData /* { } */, callback /* (data) */ )
+    function(socket, inputData /* { } */, callback /* (err, data) */ )
     {
         var oauth = authentication.oauthFromSocket(socket);
         var user  = authentication.userFromSocket(socket);
@@ -27,13 +27,10 @@ service.socket.getFriends =
             twitter.cache.getFriends(oauth, user.id,
                 function(err, data)
                 {
-                    if (err) {
-                        console.error('twitter.getFriends failed with error:');
-                        console.error(err);
-                        return callback( { error: err } );
-                    }
+                    if (err)
+                        return callback( err );
                     
-                    callback(data);
+                    callback(null, data);
                 });
         
         getFriends.on('progress',
@@ -59,7 +56,7 @@ service.socket.addFriend =
     function(socket, inputData /* { friend_id, friend_screen_name } */, callback /* (data) */ )
     {
         var oauth = authentication.oauthFromSocket(socket);
-        var user  = authentication.userFromSocket(socket);
+        var userId  = authentication.userFromSocket(socket)._id;
         
         var friendId = inputData.friend_id;
         var friendScreenName = inputData.friend_screen_name;
@@ -68,4 +65,10 @@ service.socket.addFriend =
         a.assert_def('friendScreenName', 'friend_screen_name');
         
         console.log('ADD: ' + friendId + ', ' + friendScreenName);
+        
+        database.getUserEntryById(userId,
+            function(err, userEntry)
+            {
+                if (1) {};
+            });
     };
