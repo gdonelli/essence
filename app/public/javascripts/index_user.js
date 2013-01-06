@@ -172,6 +172,8 @@ function LoadFriends()
                 console.error('Failed to load friends');
                 console.error(err);
                 
+                $('#error-header-code').text(' (#' + err.code + ')' );
+                
                 $('#friends-table').css( 'background-color', 'red');
 
                 $('#error-header').css(   'display', 'block');
@@ -195,8 +197,11 @@ function LoadFriends()
             
             var bar = _loadingFriendsProgressBar();
             
-            console.log('getFriends -progress: ' + percentage);
             bar.css('width', percentage );
+            
+            console.log('bar: ');
+            console.log(bar);
+            
         });
 }
 

@@ -50,3 +50,15 @@ ServiceAPI.prototype.getFriends =
         return this._peformService( 'service.getFriends', { }, callback );
     };
 
+
+ServiceAPI.prototype.addFriend =
+    function(friend_id, friend_screen_name, callback /* (err, ponse) */)
+    {
+        var input = {
+                friend_id:	friend_id,
+            ,	friend_screen_name: friend_screen_name
+            };
+        
+        return this._peformService( 'service.addFriend', input, callback);
+    };
+

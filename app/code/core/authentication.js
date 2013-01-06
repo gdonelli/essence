@@ -35,7 +35,7 @@ authentication.route.login =
             function (err, postPonse, body)
             {
                 if (err)
-                    return ponse.send('Login to Essence failed with error:' + err.stack );
+                    return _loginFail(quest, ponse, err);
                 
                 var access_token = querystring.parse(body);
        
@@ -50,6 +50,10 @@ authentication.route.login =
             });
     };
 
+function _loginFail(quest, ponse, err)
+{
+    ponse.send('Login to Essence failed with error:' + err.stack );
+}
 
 authentication.path.loginResponse = '/login-response';
 
@@ -79,7 +83,10 @@ authentication.route.loginResponse =
         var accessTokenURL = 'https://api.twitter.com/oauth/access_token';
         
         request.post({url:accessTokenURL, oauth:oauth},
-            function (e, r, body) {
+            function (err, postPonse, body) {
+                if (err)
+                    return _loginFail(quest, ponse, err);
+
                 var perm_token = querystring.parse(body);
                 quest.session.perm_token = perm_token;
 
@@ -88,19 +95,21 @@ authentication.route.loginResponse =
                 twitter.users.show(oauth, perm_token.user_id, perm_token.screen_name, 
                     function (err, userInfo)
                     {
-                        if (err)
-                            throw err;
+                        if (err) {
+                            return _loginFail(quest, ponse, err);
+                        }
                         else if (userInfo.errors)
                         {
                         	console.error('Error loading user, returned:');
                             console.error(userInfo.errors);
                             var err = new Error( userInfo.errors[0].message );
-                            throw err;
+                            return _loginFail(quest, ponse, err);
                         }
                         else if ( Object.keys(userInfo).length < 5 ) {
                         	console.error('Error loading user, returned:');
                             console.error(userInfo);
-                            throw new Error('Failed loading twitter user profile');
+                            var err = Error('Failed loading twitter user profile');
+                            return _loginFail(quest, ponse, err);
                         }
                         
                         var userPropertiesToPick = [
@@ -140,7 +149,7 @@ authentication.route.loginResponse =
                                 if (err) {
                                 	console.error('database.userLogin err:');
                                     console.error(err);
-                                    return ponse.send('Failed to log in: ' + err.message);
+                                    return _loginFail(quest, ponse, err);
                                 }
                                 
                                 console.log('perm_token:');

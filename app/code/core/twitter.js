@@ -5,7 +5,9 @@ var     request = require('request')
     ,   querystring = require('querystring')
     ,   _       = require('underscore')
     ,	async   = require('async')
-    ,	EventEmitter   = require('events').EventEmitter
+    ,	path    = require('path')
+    ,	fs      = require('fs')
+    ,	EventEmitter = require('events').EventEmitter
     ;
 
 var twitter = exports;
@@ -201,3 +203,110 @@ twitter.getFriends =
         
         return progressEmitter;
     }
+
+// Cache
+
+twitter.cache = {};
+
+function _cacheDir()
+{
+    //if (process.env.TMPDIR)
+    //    return process.env.TMPDIR;
+    //else
+    
+    return '/tmp';
+}
+
+twitter.cache.getFriends =
+    function(oauth, user_id, callback)
+    {
+        var progressEmitter = new EventEmitter();
+        
+        process.nextTick(
+            function() {
+                progressEmitter.emit('progress', 0);
+            });
+        
+        var cachePath = _getFriends_cache_file(user_id);
+        console.log(cachePath);
+        
+        fs.readFile(cachePath,
+            function (err, data) {
+                progressEmitter.emit('progress', 0.1);
+
+                if (err) { // cache miss
+                    console.log('cache miss');
+                    _getFriends_cache_miss(progressEmitter, oauth, user_id, callback);
+                }
+                else // Cache hit
+                {
+                    var resultData;
+                    
+                    try {
+                        var cache = JSON.parse(data);
+                        if (!cache.data)
+                            throw Error('no cache.data');
+                   
+                        var timeDiff = new Date() - new Date(cache.created);
+                        if (timeDiff > 60 * 1000)
+                            throw Error('cache is not fresh');
+                    
+                        resultData = cache.data;
+                    }
+                    catch(e) {
+                        console.log(e.message);
+                    }
+                    
+                    if (resultData)
+                    {
+                        progressEmitter.emit('progress', 1);
+                        callback(err, resultData);
+                    }
+                    else
+                        _getFriends_cache_miss(progressEmitter, oauth, user_id, callback);
+                }
+                
+            });
+        
+        return progressEmitter;
+    };
+
+function _getFriends_cache_file(user_id)
+{
+    var cacheName = 'twitter.cache.getFriends_' + user_id + '.json';
+    return _cacheDir() + '/' + cacheName;
+}
+
+function _getFriends_cache_miss(progressEmitter, oauth, user_id, callback)
+{
+    var cachePath = _getFriends_cache_file(user_id);
+    
+    var p = twitter.getFriends(oauth, user_id,
+        function(err, data) {
+            if (err)
+                return callback(err);
+            
+            console.log('about to save cache');
+            var cache = { data: data, created: new Date() };
+            
+            // save cache
+            fs.writeFile(cachePath, JSON.stringify(cache),
+                function(err) {
+                    if (err) {
+                        console.error('Writing cache failed:');
+                        console.error(err.stack);
+                    }
+                    else
+                        console.error('Wrote cache to:' + cachePath);
+                        
+                    callback(null, data);
+                });
+        });
+    
+    p.on('progress',
+        function(value) {
+            progressEmitter.emit('progress', value);
+        } );
+}
+
+

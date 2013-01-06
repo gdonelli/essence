@@ -5,6 +5,7 @@
 
 var     authentication  = use('authentication')
     ,   twitter         = use('twitter')
+    ,	a = use('a');
     ;
 
 
@@ -12,6 +13,7 @@ var service = exports;
 
 service.event   = {};
 service.socket  = {};
+
 
 service.event.getFriends = 'service.getFriends';
 
@@ -22,7 +24,7 @@ service.socket.getFriends =
         var user  = authentication.userFromSocket(socket);
         
         var getFriends =
-            twitter.getFriends(oauth, user.id,
+            twitter.cache.getFriends(oauth, user.id,
                 function(err, data)
                 {
                     if (err) {
@@ -49,4 +51,21 @@ service.socket.getFriends =
                 });
         }
 
+    };
+
+service.event.addFriend = 'service.addFriend';
+
+service.socket.addFriend =
+    function(socket, inputData /* { friend_id, friend_screen_name } */, callback /* (data) */ )
+    {
+        var oauth = authentication.oauthFromSocket(socket);
+        var user  = authentication.userFromSocket(socket);
+        
+        var friendId = inputData.friend_id;
+        var friendScreenName = inputData.friend_screen_name;
+        
+        a.assert_def('friendId', 'friend_id');
+        a.assert_def('friendScreenName', 'friend_screen_name');
+        
+        console.log('ADD: ' + friendId + ', ' + friendScreenName);
     };

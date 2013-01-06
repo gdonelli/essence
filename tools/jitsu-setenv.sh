@@ -22,3 +22,8 @@ jitsu env set SMTP_USER $SMTP_USER
 jitsu env set SMTP_PASSWORD $SMTP_PASSWORD
 jitsu env set SMTP_HOST $SMTP_HOST
 
+jitsu env set DB_HOST $DB_HOST
+jitsu env set DB_PORT $DB_PORT
+jitsu env set DB_NAME $DB_NAME
+jitsu env set DB_USERNAME $DB_USERNAME
+jitsu env set DB_PASSWORD $DB_PASSWORD

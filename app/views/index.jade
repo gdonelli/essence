@@ -1,8 +1,45 @@
 extends layout
 
+block extra-script
+    script(src='/javascripts/spin.min.js')
+    script
+        function DisableLogin()
+        {
+            $('#jumbo-signup-button').addClass('disabled');
+            
+            var opts = {
+              lines: 13, // The number of lines to draw
+              length: 7, // The length of each line
+              width: 4, // The line thickness
+              radius: 10, // The radius of the inner circle
+              corners: 1, // Corner roundness (0..1)
+              rotate: 0, // The rotation offset
+              color: '#FFF', // #rgb or #rrggbb
+              speed: 1, // Rounds per second
+              trail: 60, // Afterglow percentage
+              shadow: false, // Whether to render a shadow
+              hwaccel: true, // Whether to use hardware acceleration
+              className: 'spinner', // The CSS class to assign to the spinner
+              zIndex: 2e9, // The z-index (defaults to 2000000000)
+              top: 'auto', // Top position relative to parent in px
+              left: 'auto' // Left position relative to parent in px
+            };
+            
+            var spinner = new Spinner( opts ).spin();
+            $('#signup-spinner').append(spinner.el);
+            
+            setTimeout( RenableLogin, 5000 );
+        }
+
+        function RenableLogin()
+        {
+            $('#jumbo-signup-button').removeClass('disabled');
+            $('#signup-spinner').html('');
+        }
+
 block last-section
     li.active
-        a(href="/login") Sign in
+        a(href="/login", onclick='DisableLogin()') Sign in
 
 block content
     .jumbotron
@@ -10,6 +47,7 @@ block content
         
         p.lead Essence sends you an email once a day containing the tweets from the people you care the most
 
-        a#jumbotron-btn.btn.btn-large.btn-primary(href='/login', data-loading-text="Loading...")
+        a#jumbo-signup-button.btn.btn-large.btn-primary( href='/login', onclick='DisableLogin()', data-loading-text="Loading...")
             img#white-bird(src='/images/twitter-white.png')
             | Sign in with Twitter
+            #signup-spinner
