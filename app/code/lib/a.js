@@ -47,6 +47,14 @@ a.assert_def =
         return value;
     };
 
+a.assert_number =
+    function(value, name_opz)
+    {
+        assert( value != undefined, ( name_opz ? name_opz : 'value' ) + ' is undefined' );
+        assert( _.isNumber(value),  ( name_opz ? name_opz : 'number' ) + ' expected is: ' + typeof value );
+        return value;
+    };
+
 a.assert_null =
     function(value, name_opz)
     {

@@ -8,7 +8,8 @@ var querystring = require('querystring')
     ,	assert  = require('assert')
     ,   _       = require('underscore')
 
-    ,   twitter = use('twitter');
+    ,   twitter = use('twitter')
+    ,   database= use('database')
     ;
 
 
@@ -89,12 +90,10 @@ authentication.route.loginResponse =
                     {
                         if (err)
                             throw err;
-                        
-                        if (userInfo.errors)
+                        else if (userInfo.errors)
                         {
                         	console.error('Error loading user, returned:');
                             console.error(userInfo.errors);
-                            
                             var err = new Error( userInfo.errors[0].message );
                             throw err;
                         }
@@ -128,11 +127,31 @@ authentication.route.loginResponse =
                                 ,   'profile_image_url_https'
                                 ];
                         
-                        quest.session.user = _.pick(userInfo, userPropertiesToPick);
+                        var user = _.pick(userInfo, userPropertiesToPick);
+                        quest.session.user = user;
                         
-                        console.log(quest.session.user);
-
-                        ponse.redirect('/');
+                        console.log('Twitter User:');
+                        console.log(user);
+                        
+                        var entry = database.makeTwitterUserEntry( user, oauth );
+                        
+                        database.userLogin( entry,
+                            function(err, userEntry) {
+                                if (err) {
+                                	console.error('database.userLogin err:');
+                                    console.error(err);
+                                    return ponse.send('Failed to log in: ' + err.message);
+                                }
+                                
+                                console.log('perm_token:');
+                                console.log(perm_token);
+                                
+                                console.log('userEntry:');
+                                console.log(userEntry);
+                                
+                                ponse.redirect('/');
+                            });
+                        
                     });
     
             });
