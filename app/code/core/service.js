@@ -3,9 +3,10 @@
  * Service
  */
 
-var     authentication  = use('authentication')
+var		authentication  = use('authentication')
+    ,	database        = use('database')
     ,   twitter         = use('twitter')
-    ,	a = use('a');
+    ,	a				= use('a');
     ;
 
 
@@ -53,10 +54,10 @@ service.socket.getFriends =
 service.event.addFriend = 'service.addFriend';
 
 service.socket.addFriend =
-    function(socket, inputData /* { friend_id, friend_screen_name } */, callback /* (data) */ )
+    function(socket, inputData /* { friend_id: <string>, friend_screen_name: <string> } */, callback /* (err, vipEntry) */ )
     {
-        var oauth = authentication.oauthFromSocket(socket);
-        var userId  = authentication.userFromSocket(socket)._id;
+        var oauth  = authentication.oauthFromSocket(socket);
+        var userId = authentication.userFromSocket(socket)._id;
         
         var friendId = inputData.friend_id;
         var friendScreenName = inputData.friend_screen_name;
@@ -69,6 +70,44 @@ service.socket.addFriend =
         database.getUserEntryById(userId,
             function(err, userEntry)
             {
-                if (1) {};
+                if (err)
+                    return callback(err);
+                
+                var vipList = [];
+                if (userEntry.vipList)
+                    vipList = userEntry.vipList;
+
+                // Make sure we don't have it already
+                var vipEntry = _.find(vipList,
+                                    function(vip) {
+                                        return (vip.id_str == friendId);
+                                    });
+                                  
+                console.log('already vipEntry:');
+                console.log(vipEntry);
+                                
+                // Already there, we have nothing to do
+                if (vipEntry)
+                    return callback(null, vipEntry);
+                
+                vipEntry = database.makeTwitterVIPEntry(friendId, friendScreenName);
+                vipList.push(vipEntry);
+                userEntry.vipList = vipList;
+                
+                console.log('userEntry.vipList:');
+                console.log(userEntry.vipList);
+                
+                database.saveUserEntry(userEntry,
+                    function(err, userEntry)
+                    {
+                        if (err) {
+                            console.error('failed to save userEntry');
+                            return callback(err);
+                        }
+                        
+                        callback(err, vipEntry);
+                    });
             });
     };
+
+

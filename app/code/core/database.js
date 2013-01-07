@@ -29,7 +29,23 @@ database.makeTwitterUserEntry =
                 ,   oauth: nomalizedOAuth
                 }
             };
-    }
+   };
+
+
+database.makeTwitterVIPEntry =
+    function(idstr, screen_name)
+    {
+        a.assert_string(idstr);
+        a.assert_string(screen_name);
+        
+        var result = {};
+        
+        // result.type = 0;
+        result.id_str = idstr;
+        result.screen_name = screen_name;
+        
+        return result;
+    };
 
 database.userLogin =
     function( freshUserEntry, callback /* (err, userEntry) */)
@@ -64,11 +80,22 @@ database.userLogin =
     };
 
 database.getUserEntryById =
-    function(id, callback /* (err, userEntry) */ )
+    function(idstr, callback /* (err, userEntry) */ )
     {
-        a.assert_def(id);
+        a.assert_string(idstr);
         
-        _findUser( { _id: id }, callback);
+        var momgoId = mongodb.ObjectID(idstr);
+        
+        _findUser( { _id: momgoId },
+            function(err, userEntry) {
+                if (err)
+                    return callback(err);
+                  
+                if (!userEntry)
+                    return callback( new Error('Cannot find user with id: `'+ momgoId + '`') );
+                  
+                callback(null, userEntry);
+            } );
     }
 
 database.saveUserEntry =

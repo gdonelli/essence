@@ -33,7 +33,13 @@ io.setup =
                 
                 // Create Session for Socket
                 socket.session = socket.handshake.session;
-//                var user = socket.session.user;
+                
+                var userId = socket.session.user._id;
+                console.log('Socket connection from userId: ' + userId );
+                
+                // Put all user sockets in the same room
+                socket.join(userId);
+                
                 _socketListen(socket);
             });
 
@@ -103,10 +109,10 @@ function _socketListen(socket)
                         ioroute(socket, data,
                             function(err, data)
                             {
-                                console.log('route err');
-                                console.log(err);
-                                
                                 if (err) {
+                                    console.error('Socket.io Route Error:');
+                                	console.error(err);
+
                                     var errObject = {};
                                     errObject.error = null;
                                     

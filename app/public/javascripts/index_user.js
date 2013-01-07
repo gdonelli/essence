@@ -45,11 +45,22 @@ function AddFriend(id, screenName, element)
     
     serviceAPI.addFriend(id, screenName,
         function(err, ponse) {
-            console.log('addFriend err:');
-            console.log(err);
-            console.log('addFriend ponse:');
-            console.log(ponse);
+            if (err) {
+                console.log('addFriend error:');
+            	console.log(err);
+                $(element).addClass('btn-danger');
+                $(element).removeClass('disabled');
+                $(element).removeAttr('disabled');
+                return;
+            }
+            
+            $(element).addClass('btn-success');
+            $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-ok"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
         });
+    
+    $(element).addClass('disabled');
+    $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-refresh"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
+    $(element).attr('disabled', 'disabled');
     
     console.log(element);
 }
@@ -210,8 +221,8 @@ function LoadFriends()
             
             bar.css('width', percentage );
             
-            console.log('bar: ');
-            console.log(bar);
+            // console.log('bar: ');
+            // console.log(bar);
             
         });
 }
