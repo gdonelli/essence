@@ -16,6 +16,14 @@ io.sockets = null;
 
 var eventRoutes = {};
 
+io.emitUserEvent =
+    function(userIdstr, eventName, data)
+    {
+        a.assert_string(userIdstr);
+    
+        io.sockets.in(userId).emit(eventName, data);
+    }
+
 io.setup =
     function(expressServer, cookieParser, sessionStore, sessionKey)
     {
@@ -34,11 +42,11 @@ io.setup =
                 // Create Session for Socket
                 socket.session = socket.handshake.session;
                 
-                var userId = socket.session.user._id;
-                console.log('Socket connection from userId: ' + userId );
+                var userIdstr = '' + socket.session.user._id;
+                console.log('Socket connection from userId: ' + userIdstr );
                 
                 // Put all user sockets in the same room
-                socket.join(userId);
+                socket.join(userIdstr);
                 
                 _socketListen(socket);
             });
