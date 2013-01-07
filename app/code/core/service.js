@@ -6,7 +6,8 @@
 var		authentication  = use('authentication')
     ,	database        = use('database')
     ,   twitter         = use('twitter')
-    ,	a				= use('a');
+    ,	a				= use('a')
+    ,	io				= use('io')
     ;
 
 
@@ -105,9 +106,16 @@ service.socket.addFriend =
                             return callback(err);
                         }
                         
+                        io.emitUserEvent(
+                            userEntry._id,
+                            service.vipListDidChangeEvent,
+                            userEntry );
+                        
                         callback(err, vipEntry);
                     });
             });
     };
 
+// TODO: Constant using use module
+service.vipListDidChangeEvent = 'service.vipListDidChange';
 

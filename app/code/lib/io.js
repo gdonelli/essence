@@ -19,9 +19,9 @@ var eventRoutes = {};
 io.emitUserEvent =
     function(userIdstr, eventName, data)
     {
-        a.assert_string(userIdstr);
+        userIdstr = userIdstr + '';
     
-        io.sockets.in(userId).emit(eventName, data);
+        io.sockets.in(userIdstr).emit(eventName, data);
     }
 
 io.setup =

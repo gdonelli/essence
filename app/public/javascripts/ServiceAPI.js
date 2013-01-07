@@ -72,3 +72,11 @@ ServiceAPI.prototype.addFriend =
         return this._peformService( 'service.addFriend', input, callback);
     };
 
+ServiceAPI.vipListDidChangeEvent = 'service.vipListDidChange';
+
+ServiceAPI.prototype.on =
+    function(event, callback)
+    {
+        this.socket.on(event, callback);
+    };
+

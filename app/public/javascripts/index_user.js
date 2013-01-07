@@ -2,6 +2,10 @@
 
 var serviceAPI = new ServiceAPI();
 
+
+
+// Internal
+
 function test()
 {
     $('#user-menu').dropdown();
@@ -37,32 +41,6 @@ function _loadingFriendsProgressBar()
 function _friendSearchField()
 {
     return $('#friend-search');
-}
-
-function AddFriend(id, screenName, element)
-{
-    console.log('Add friend with id: ' + id);
-    
-    serviceAPI.addFriend(id, screenName,
-        function(err, ponse) {
-            if (err) {
-                console.log('addFriend error:');
-            	console.log(err);
-                $(element).addClass('btn-danger');
-                $(element).removeClass('disabled');
-                $(element).removeAttr('disabled');
-                return;
-            }
-            
-            $(element).addClass('btn-success');
-            $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-ok"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
-        });
-    
-    $(element).addClass('disabled');
-    $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-refresh"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
-    $(element).attr('disabled', 'disabled');
-    
-    console.log(element);
 }
 
 function _HTMLRowForFriend(friendEntry)
@@ -178,11 +156,42 @@ function _matchEntry(friendEntry, seachString)
     return -1;
 }
 
+
+
+function AddFriend(id, screenName, element)
+{
+    console.log('Add friend with id: ' + id);
+    
+    serviceAPI.addFriend(id, screenName,
+        function(err, ponse) {
+            if (err) {
+                console.log('addFriend error:');
+            	console.log(err);
+                $(element).addClass('btn-danger');
+                $(element).removeClass('disabled');
+                $(element).removeAttr('disabled');
+                return;
+            }
+            
+            $(element).addClass('btn-success');
+            $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-ok"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
+        });
+    
+    $(element).addClass('disabled');
+    $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-refresh"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
+    $(element).attr('disabled', 'disabled');
+    
+    console.log(element);
+}
+
 function LoadFriends()
 {
     $('#error-header').css(   'display', 'none');
     $('#search-header').css(  'display', 'none');
     $('#loading-header').css( 'display', 'block');
+
+    console.log('serviceAPI:');
+    console.log( serviceAPI );
 
     var getFriends = serviceAPI.getFriends(
         function(err, friends)
@@ -224,6 +233,16 @@ function LoadFriends()
             // console.log('bar: ');
             // console.log(bar);
             
+        });
+}
+
+function LoadVipList()
+{
+    serviceAPI.on(ServiceAPI.vipListDidChangeEvent,
+        function(userEntry)
+        {
+            console.log('ServiceAPI.vipListDidChangeEvent:');
+            console.log(userEntry);
         });
 }
 
