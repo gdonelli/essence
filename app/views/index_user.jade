@@ -6,8 +6,7 @@ block extra-script
     script
         $('body').ready(
             function() {
-                LoadFriends();
-                LoadVipList();
+                SetupUI();
             });
 
 block last-section
@@ -22,36 +21,56 @@ block last-section
                 a(href="/logout") Logout
 
 block content
-    .jumbotron
-        h2 Pick your friends
-        p.muted Select the people you would like to collect tweets from
+    .user-content
+        h1 Setup
 
+        #pick-friends.user-section
+            h3 Pick your VIP friends
+            p.muted Select the people you would like to collect tweets from
 
-        #friends-table
-            #friends-table-header
-                #search-header
-                    span Name:
-                    input#friend-search.input-medium.search-query(
-                        type="text", 
-                        placeholder="Search...")
+            #friends-table.peopleTable.pull-left
+                #friends-table-header.peopleTableHeader
+                    #search-header
+                        span Name:
+                        input#friend-search.input-medium.search-query(
+                            type="text", 
+                            placeholder="Search...")
 
-                #loading-header
-                    p._label Loading your friends...
-                    #friends-progress.progress.active
-                        .bar
+                    #loading-header
+                        p._label Loading your friends...
+                        #friends-progress.progress.active
+                            .bar
 
-                #error-header
-                    p._label Oops... Twitter error!
-                        span#error-header-code
-                    a(onclick='LoadFriends()') Try again
+                    #error-header
+                        p._label Oops... Twitter error!
+                            span#error-header-code
+                        a(onclick='LoadTwitterFriends()') Try again
 
-            ._rows
+                .peopleTableRows
 
+            #vip-table.peopleTable.pull-right
+                .peopleTableHeader
+                    h4 Your VIP list
+                    
+                .peopleTableRows
+                    #vip-placeholder.muted To add friends to your VIP list use the table on the left
+                    
+            #your-email.user-section
+                h3 Your email
+                p.muted The email address where you would like to receive your Essence
+                input#email(type="text", placeholder="Email")
+                button#save-email.btn.disabled(onclick='SaveEmail()') Save
 
-        hr
+block other
+    #disconnectModal.modal.hide.fade
+        .modal-header
+            h3 Oops, cannot talk to Essence…
+        .modal-body
+            p We got disconnected from the Essence, you might try to reload the page
+        .modal-footer
+            a.btn(onClick="$('#disconnectModal').modal('hide')") Close
+            a.btn.btn-primary(onClick="window.location.reload()") Reload Page
 
-        h2 Your email
-        p.muted The email address where you would like to receive your Essence
 
     #content
         button(onclick='test()') test button

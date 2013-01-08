@@ -40,3 +40,42 @@ function _userPage(quest, ponse)
             user: user
         } );
 }
+
+
+var database = use('database');
+var io = use('io');
+var service = use('service');
+
+index.path.confirmEmail = '/confirm/:userId';
+
+index.route.confirmEmail = function(quest, ponse)
+    {
+        var userId = a.assert_string(quest.params.userId);
+        
+        database.getUserEntryById(userId,
+            function(err, userEntry)
+            {
+                if (err)
+                    return ponse.send('Invalid User');
+                    
+                if (userEntry.email)
+                    return ponse.send( userEntry.email + ' is already confirmed' );
+                    
+                database.confirmUserEmail(userEntry, 
+                    function(err, userEntry)
+                    {
+                        if (err)
+                            return ponse.send('Failed to confirm user');
+                        else
+                        {
+                            io.emitUserEvent(
+                            		userEntry._id,
+                                    service.userDidChangeEvent,
+                					userEntry );
+
+                            return ponse.send('Great just confirmed: ' + userEntry.email);
+                        }
+                            
+                    });
+            });
+    }

@@ -13,13 +13,18 @@ var		authentication  = use('authentication')
 
 var service = exports;
 
+function _userIdFromSocket(socket)
+{
+    return authentication.userFromSocket(socket)._id;
+}
+
 service.event   = {};
 service.socket  = {};
 
 
-service.event.getFriends = 'service.getFriends';
+service.event.getTwitterFriends = 'service.getTwitterFriends';
 
-service.socket.getFriends =
+service.socket.getTwitterFriends =
     function(socket, inputData /* { } */, callback /* (err, data) */ )
     {
         var oauth = authentication.oauthFromSocket(socket);
@@ -52,21 +57,15 @@ service.socket.getFriends =
 
     };
 
-service.event.addFriend = 'service.addFriend';
 
-service.socket.addFriend =
-    function(socket, inputData /* { friend_id: <string>, friend_screen_name: <string> } */, callback /* (err, vipEntry) */ )
+service.event.removeVip = 'service.removeVip';
+
+service.socket.removeVip =
+    function(socket, inputData /* { id: <string> } */, callback /* (err, vipEntry) */ )
     {
-        var oauth  = authentication.oauthFromSocket(socket);
-        var userId = authentication.userFromSocket(socket)._id;
+        var userId = _userIdFromSocket(socket);
         
-        var friendId = inputData.friend_id;
-        var friendScreenName = inputData.friend_screen_name;
-        
-        a.assert_def('friendId', 'friend_id');
-        a.assert_def('friendScreenName', 'friend_screen_name');
-        
-        console.log('ADD: ' + friendId + ', ' + friendScreenName);
+        var idToRemove = inputData.id;
         
         database.getUserEntryById(userId,
             function(err, userEntry)
@@ -74,6 +73,48 @@ service.socket.addFriend =
                 if (err)
                     return callback(err);
                 
+                if ( !userEntry.vipList || userEntry.vipList.length == 0)
+                    return callback(new Error('user vipList.length == 0'));
+                
+                var newList = [];
+                
+                userEntry.vipList.forEach(
+                    function(entry) {
+                        if (entry.id != idToRemove)
+                            newList.push(entry);
+                    });
+
+                userEntry.vipList = newList;
+                
+                _updateUserVipList(userEntry, callback);
+            });
+    }
+
+
+service.event.addVip = 'service.addVip';
+
+service.socket.addVip =
+    function(socket, inputData /* { friend_id: <string>, friend_screen_name: <string> } */, callback /* (err, vipEntry) */ )
+    {
+        var userId = _userIdFromSocket(socket);
+
+        var properties = [ 'id', 'name', 'screen_name', 'profile_image_url', 'profile_image_url_https' ];
+        properties.forEach(
+            function(key) {
+                a.assert_def(inputData[key], key);
+            });
+        
+        var friendEntry = _.pick(inputData, properties);
+        var friendId = friendEntry.id;
+        
+        console.log('ADD: ' + friendEntry.screen_name );
+        
+        database.getUserEntryById(userId,
+            function(err, userEntry)
+            {
+                if (err)
+                    return callback(err);
+
                 var vipList = [];
                 if (userEntry.vipList)
                     vipList = userEntry.vipList;
@@ -81,41 +122,90 @@ service.socket.addFriend =
                 // Make sure we don't have it already
                 var vipEntry = _.find(vipList,
                                     function(vip) {
-                                        return (vip.id_str == friendId);
+                                        return (vip.id == friendId);
                                     });
-                                  
-                console.log('already vipEntry:');
-                console.log(vipEntry);
-                                
+
                 // Already there, we have nothing to do
-                if (vipEntry)
+                if (vipEntry) {
+                    console.log('Already vipEntry:');
+                    console.log(vipEntry);
                     return callback(null, vipEntry);
+                }
+                vipEntry = friendEntry;
                 
-                vipEntry = database.makeTwitterVIPEntry(friendId, friendScreenName);
-                vipList.push(vipEntry);
+                vipList.splice(0, 0, vipEntry);
                 userEntry.vipList = vipList;
                 
                 console.log('userEntry.vipList:');
                 console.log(userEntry.vipList);
                 
+                _updateUserVipList(userEntry, callback);
+            });
+    };
+    
+
+function _updateUserVipList(userEntry, callback)
+{
+    database.saveUserEntry(userEntry,
+        function(err, userEntry)
+        {
+            if (err) {
+                console.error('failed to save userEntry');
+                return callback(err);
+            }
+            
+            io.emitUserEvent(
+                userEntry._id,
+                service.vipListDidChangeEvent,
+                userEntry );
+            
+            callback(err, true);
+        });
+    
+}
+
+
+service.event.getUserEntry = 'service.getUserEntry';
+
+service.socket.getUserEntry =
+    function(socket, inputData /* {} */, callback /* (err, userEntry) */ )
+    {
+        var userId = _userIdFromSocket(socket);
+
+        database.getUserEntryById(userId, callback);
+    };
+
+
+service.event.confirmEmail = 'service.confirmEmail';
+
+service.socket.confirmEmail =
+    function(socket, inputData /* { email: ... } */, callback /* (err, true ) */ )
+    {
+        var userId    = _userIdFromSocket(socket);
+        var userEmail = a.assert_string(inputData.email);
+        
+        database.getUserEntryById(userId,
+            function(err, userEntry)
+            {
+                if (err)
+                    return callback(err);
+                
+                //FIXME: more secure verification
+                
+                userEntry.email_to_confirm = userEmail;
+                
+                //TODO: Send email to confirm...
+                
                 database.saveUserEntry(userEntry,
                     function(err, userEntry)
                     {
-                        if (err) {
-                            console.error('failed to save userEntry');
-                            return callback(err);
-                        }
-                        
-                        io.emitUserEvent(
-                            userEntry._id,
-                            service.vipListDidChangeEvent,
-                            userEntry );
-                        
-                        callback(err, vipEntry);
+                        callback(err, true);
                     });
             });
     };
 
+
 // TODO: Constant using use module
 service.vipListDidChangeEvent = 'service.vipListDidChange';
+service.userDidChangeEvent    = 'service.userDidChangeEvent';
 

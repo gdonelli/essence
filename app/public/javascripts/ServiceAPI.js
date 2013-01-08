@@ -6,6 +6,27 @@
 function ServiceAPI()
 {
     this.socket = io.connect();
+
+    this.initSuccess = false;
+
+    var timeout = setTimeout(
+        function() {
+            var errStr = 'Failed to connect to server. (#socke.io init failed)';
+            alert(errStr);
+            console.error(errStr);
+        }, 5000);
+    
+    this.socket.emit('__init__', {},
+        function(data) {
+            this.initSuccess = true;
+            clearTimeout(timeout);
+        });
+    
+    this.socket.on('disconnect',
+        function() {
+            console.error('!!! Server disconnect !!!');
+        });
+    
     this.identifier = 0;
 }
 
@@ -23,14 +44,22 @@ ServiceAPI.prototype._peformService =
           
         var progressEvent   = this._createProgressEvent();
         data.progressEvent  = progressEvent;
-               
+        
+        var didTimeout = false;
+        var timeout = setTimeout(
+            function()
+            {
+                didTimeout = true;
+                callback( new Error('Timeout') );
+            }, 15000);
+
         // Actual RPC
         this.socket.emit(name, data,
             function(ponse)
             {
                 this.socket.removeAllListeners(progressEvent);
                 
-                if (ponse.hasOwnProperty('error')) {
+                if (ponse && ponse.hasOwnProperty('error')) {
                     var ponseError = ponse.error;
                     var err = new Error();
                     
@@ -43,7 +72,10 @@ ServiceAPI.prototype._peformService =
                     callback(err);
                 }
                 else
-                    callback(null, ponse);
+                    if (!didTimeout)
+                        callback(null, ponse);
+                        
+                clearTimeout(timeout);
             });
 
         this.socket.on(progressEvent,
@@ -51,26 +83,42 @@ ServiceAPI.prototype._peformService =
                 progressEmitter.emit('progress', progressData);
             });
         
+        
         return progressEmitter;
     };
 
-ServiceAPI.prototype.getFriends =
+ServiceAPI.prototype.getTwitterFriends =
     function(callback /* (err, ponse) */)
     {
-        return this._peformService( 'service.getFriends', { }, callback );
+        return this._peformService( 'service.getTwitterFriends', { }, callback );
     };
 
-
-ServiceAPI.prototype.addFriend =
-    function(friend_id, friend_screen_name, callback /* (err, ponse) */)
+ServiceAPI.prototype.getUserEntry =
+    function(callback /* (err, ponse) */)
     {
-        var input = {
-                friend_id:          friend_id
-            ,	friend_screen_name: friend_screen_name
-            };
-        
-        return this._peformService( 'service.addFriend', input, callback);
+        return this._peformService( 'service.getUserEntry', { }, callback );
     };
+
+
+ServiceAPI.prototype.addVip =
+    function(friendEntry, callback /* (err, ponse) */)
+    {
+        return this._peformService( 'service.addVip', friendEntry, callback);
+    };
+
+ServiceAPI.prototype.addVip =
+    function(friendEntry, callback /* (err, ponse) */)
+    {
+        return this._peformService( 'service.addVip', friendEntry, callback);
+    };
+
+ServiceAPI.prototype.confirmEmail =
+    function(email, callback /* (err, ponse) */)
+    {
+        return this._peformService( 'service.confirmEmail', { email: email }, callback);
+    };
+
+// Events
 
 ServiceAPI.vipListDidChangeEvent = 'service.vipListDidChange';
 

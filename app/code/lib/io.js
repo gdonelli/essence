@@ -92,12 +92,36 @@ io.setup =
 
                     });
             });
+        
+        io.event(io_event_init, io_socket_init);
+    };
+
+io.event  = {};
+io.socket = {};
+
+var io_event_init  = '__init__';
+
+var io_socket_init =
+    function(socket, inputData, callback /* (err, data) */)
+    {
+        /*
+        console.log('socket:');
+        console.log(socket);
+        
+        console.log('inputData:');
+        console.log(inputData);
+        
+        console.log('callback:');
+        console.log(callback);
+        */
+        
+        callback( null, {} );
     };
 
 // Socket.io add single event route
 
 io.event =
-    function(name, callback /* (data) */)
+    function(name, callback /* (socket, inputData, callback(err, data) ) */)
     {
         if (eventRoutes[name])
             throw new Error('Event name `' + name + '` has already been set');

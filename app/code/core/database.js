@@ -67,8 +67,11 @@ database.userLogin =
                     if (userEntry)
                     {
                         // Make sure we propagate freshUserEntry
-                        freshUserEntry._id = userEntry._id;
-                        return callback(null, freshUserEntry);
+                        userEntry.twitter = freshUserEntry.twitter;
+                        
+                        // freshUserEntry._id = userEntry._id;
+                        
+                        return callback(null, userEntry);
                     }
              
                     // First user login ever ...
@@ -83,8 +86,14 @@ database.getUserEntryById =
     function(idstr, callback /* (err, userEntry) */ )
     {
         a.assert_string(idstr);
+        var momgoId;
         
-        var momgoId = mongodb.ObjectID(idstr);
+        try {
+            momgoId = mongodb.ObjectID(idstr);
+        }
+        catch(err) {
+            return callback(err);
+        }
         
         _findUser( { _id: momgoId },
             function(err, userEntry) {
@@ -118,6 +127,23 @@ database.saveUserEntry =
                     });
             });
     };
+
+database.confirmUserEmail =
+    function(userEntry, callback /* (err, userEntry) */ )
+    {
+        if (!userEntry.email_to_confirm)
+            return callback(new Error('Nothing to confirm'));
+    
+        var email = userEntry.email_to_confirm;
+        
+        //TODO: better confirm procedure
+        
+        userEntry.email = userEntry.email_to_confirm;
+        
+        delete userEntry.email_to_confirm;
+        
+    	database.saveUserEntry(userEntry, callback);
+    }
 
 function _addUser(userInfo, callback /* (err, userEntry) */)
 {

@@ -21,6 +21,16 @@ body
     font-size: 72px
     line-height: 1
 
+.user-content
+    h1
+        margin: 40px 0 40px 0;
+        text-align: center
+
+    .user-section
+        margin: 40px 0 40px 0;
+        overflow: auto;
+        width: 100%
+
 
 #jumbo-signup-button
     position: relative;
@@ -74,33 +84,79 @@ body
     top: 2px;
 
 
-#friends-table
+.peopleTable
     position: relative
-
     padding 1px
-
     display: inline-block
     border-radius: 8px
     background-color: #fbfbfb
     width: 300px
+    margin: 8px 24px;
 
+.peopleTableHeader
+    position: relative;
+    padding-top: 8px
+    padding-bottom: 16px
+    height: 40px;
+
+tableHeaderItem()
+    position: absolute;
+    display: none;
+    width: 200px
+    left: -100px;
+    top: 0px;
+    margin-left: 50%;
+    text-align: center;
+
+.peopleTableRows
+    margin:0
+    padding:0
+
+    :nth-child(even)
+        background-color: white
+
+    overflow-x: hidden
+    overflow-y: auto
+    height: 200px
+    // background-color: yellow
+
+._row
+    position: relative
+
+    height: 48px
+    text-align: center;
+
+    img
+        position: absolute
+        top: 8px;
+        left: 8px;
+        width: 32px;
+        height: 32px;
+        border-radius: 4px
+
+    .user-name
+        background-color: transparent;
+        position: absolute
+        top: -4px;
+        left: 48px;
+
+    .user-screenname
+        background-color: transparent;
+        position: absolute
+        font-size: 11px;
+        top: 20px;
+        left: 48px;
+
+    button
+        position: absolute
+        top:   12px;
+        right: 16px;
+
+
+#friends-table
     #friends-table-header
-        position: relative;
-        padding-top: 8px
-        padding-bottom: 16px
-        height: 40px;
-        // background-color: orange;
-
-        headerTabItem()
-            position: absolute;
-            display: none;
-            width: 200px
-            left: -100px;
-            top: 0px;
-            margin-left: 50%;
-
         #search-header
-            headerTabItem()
+            tableHeaderItem()
             top: 16px
             width: 260px
             left: -130px
@@ -112,9 +168,8 @@ body
                 width: 150px
 
         #loading-header
-            headerTabItem()
+            tableHeaderItem()
             top: 8px
-            // background-color: yellow;
 
             #friends-progress
                 margin-top: 8px
@@ -123,55 +178,41 @@ body
                     width: 0
 
         #error-header
-            headerTabItem()
+            tableHeaderItem()
             display: none;
             top: 8px
 
         ._label
             margin-top: 2px
 
-    ._rows
-        margin:0
-        padding:0
 
-        :nth-child(even)
-            background-color: white;
+#vip-table
+    .peopleTableHeader
+        h4
+            margin: 8px 0 0 0
+            text-align: center
 
-        overflow-x: hidden;
-        overflow-y: auto;
-        height: 200px
+    .peopleTableRows
+        #vip-placeholder
+            position: relative;
 
-    ._row
-        position: relative
-
-        height: 48px
-        text-align: center;
-
-        img
-            position: absolute
-            top: 8px;
-            left: 8px;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px
-
-        .user-name
-            background-color: transparent;
-            position: absolute
-            top: -4px;
-            left: 48px;
-
-        .user-screenname
-            background-color: transparent;
-            position: absolute
-            font-size: 11px;
-            top: 20px;
-            left: 48px;
-
-        button
-            position: absolute
-            top:   12px;
-            right: 16px;
+            // background-color: red
+            text-align: center
+            margin-top: 10px;
+            margin-left: 50%;
+            left: -75px;
+            width: 150px;
+            height: 150px;
 
 
+#your-email
+    input
+        margin: 0
+        margin-left: 24px
+        
+    button
+        margin-left: 8px
+        
 
+
+    

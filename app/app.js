@@ -85,6 +85,8 @@ catch (e) {
 
 var routes = {};
 routes[ index.path.index                    ] = index.route.index;
+routes[ index.path.confirmEmail             ] = index.route.confirmEmail;
+
 routes[ authentication.path.login           ] = authentication.route.login;
 routes[ authentication.path.loginResponse   ] = authentication.route.loginResponse;
 routes[ authentication.path.logout          ] = authentication.route.logout;

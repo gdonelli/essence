@@ -146,9 +146,9 @@ authentication.route.loginResponse =
                         console.log('Twitter User:');
                         console.log(user);
                         
-                        var entry = database.makeTwitterUserEntry( user, oauth );
+                        var freshEntry = database.makeTwitterUserEntry( user, oauth );
                         
-                        database.userLogin( entry,
+                        database.userLogin( freshEntry,
                             function(err, userEntry) {
                                 if (err) {
                                 	console.error('database.userLogin err:');
@@ -158,7 +158,6 @@ authentication.route.loginResponse =
                                 
                                 quest.session.user._id = userEntry._id;
                                 quest.session.version = authentication.version;
-                                
                                 
                                 /*
                                 console.log('perm_token:');

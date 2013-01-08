@@ -1,36 +1,37 @@
 
+function ________init________(){}
 
 var serviceAPI = new ServiceAPI();
 
+serviceAPI.on('disconnect',
+    function()
+    {
+        $('#disconnectModal').modal('show');
+    });
+
+serviceAPI.on('connect',
+    function()
+    {
+        $('#disconnectModal').modal('hide');
+    });
 
 
 // Internal
 
 function test()
 {
-    $('#user-menu').dropdown();
+    console.log('test');
 }
 
-function test_2()
-{
-    console.log('test');
-    
-    var getFriends = serviceAPI.getFriends(
-        function(err, ponse)
-        {
-            console.log('-getFriends ponse:');
-            console.log(ponse);
-        });
-    
-    getFriends.on('progress',
-        function(value) {
-            console.log('getFriends -progress: ' + value);
-        });
-}
 
 function _friendTableRows()
 {
-    return $('#friends-table div[class="_rows"]');
+    return $('#friends-table div[class="peopleTableRows"]');
+}
+
+function _vipTableRows()
+{
+    return $('#vip-table div[class="peopleTableRows"]');
 }
 
 function _loadingFriendsProgressBar()
@@ -38,22 +39,21 @@ function _loadingFriendsProgressBar()
     return $('#friends-progress div[class="bar"]');
 }
 
+function _emailField()
+{
+    return $('#email');
+}
+
 function _friendSearchField()
 {
     return $('#friend-search');
 }
 
-function _HTMLRowForFriend(friendEntry)
+function _HTMLRowForPerson(friendEntry, buttonCode)
 {
     var row = '<div class="_row">';
     
-    row += '<button type="button" class="btn btn-small" ';
-    row += 'onclick="AddFriend(\''  + friendEntry.id + '\', \'' + friendEntry.screen_name +'\', this)"';
-    row += '>';
-    
-    row += 'Add';
-    row += '&nbsp;<i class="icon-arrow-right"></i>';
-    row += '</button>';
+    row += buttonCode;
     
     row += '<img src="' + friendEntry.profile_image_url + '"></img>';
     row += '<h5 class="user-name">' + friendEntry.name + '</h5>';
@@ -61,6 +61,59 @@ function _HTMLRowForFriend(friendEntry)
     row += '</div>';
     
     return row;
+
+}
+
+function _HTMLRowForTwitterFriend(friendEntry)
+{
+    var buttonCode = '';
+    
+    buttonCode += '<button type="button" class="btn btn-small" ';
+    buttonCode += 'onclick="AddVip(\''  + friendEntry.id + '\', this)"';
+    buttonCode += '>';
+    buttonCode += 'Add';
+    buttonCode += '&nbsp;<i class="icon-arrow-right"></i>';
+    buttonCode += '</button>';
+    
+    return _HTMLRowForPerson(friendEntry, buttonCode);
+}
+
+function _HTMLRowForVipFriend(friendEntry)
+{
+    var buttonCode = '';
+    
+    buttonCode += '<button type="button" class="btn btn-small btn-danger" ';
+    buttonCode += 'onclick="RemoveVip(\''  + friendEntry.id + '\', this)"';
+    buttonCode += '>';
+    buttonCode += '<i class="icon-remove icon-white"></i>';
+    buttonCode += '</button>';
+    
+    return _HTMLRowForPerson(friendEntry, buttonCode);
+}
+
+function _showVipList(array)
+{
+    var vipTableRows =  _vipTableRows();
+
+    if (!array || array.length == 0)
+    {
+        vipTableRows.html('<div id="vip-placeholder" class="muted">To add friends to your VIP list use the table on the left</div>');
+        return;
+    }
+
+    vipTableRows.html('');
+    
+    array.forEach(
+        function(vipEntry) {
+            if (vipEntry.screen_name) {
+                var row = _HTMLRowForVipFriend(vipEntry);
+                vipTableRows.append(row);
+            }
+            else {
+                console.error('vipEntry is not valid:');
+                console.error(vipEntry);
+            }
+        });
 }
 
 function _showFriends(array)
@@ -70,28 +123,20 @@ function _showFriends(array)
 
     array.forEach(
         function(friendEntry) {
-            if (friendEntry.screen_name)
-            {
-                var row = _HTMLRowForFriend(friendEntry);
+            if (friendEntry.screen_name) {
+                var row = _HTMLRowForTwitterFriend(friendEntry);
                 friendTableRows.append( row );
             }
-            else
-            {
+            else {
                 console.error('friendEntry is not valid:');
                 console.error(friendEntry);
             }
         });
-    
-    // Register callback
-    var searchField =  _friendSearchField();
-    
-    searchField.bind("input propertychange", _seachFriendCallback);
-	searchField.keyup(_seachFriendCallback);
 }
 
 var _seachFriendEventTimer;
 
-function _seachFriendCallback()
+function _searchFriendCallback()
 {
     if (_seachFriendEventTimer) {
         clearTimeout(_seachFriendEventTimer);
@@ -103,6 +148,40 @@ function _seachFriendCallback()
             _searchFriend(_friendSearchField().val());
         }, 100);
 }
+
+function _saveEmailButton()
+{
+    return $('#save-email');
+}
+
+var _emailEventTimer;
+
+function _emailCallback()
+{
+    if (_emailEventTimer) {
+        clearTimeout(_emailEventTimer);
+        _emailEventTimer = null;
+    }
+    
+    _emailEventTimer = setTimeout(
+        function() {
+            var emailValue = _emailField().val();
+            
+            console.log( 'emailValue: ' + emailValue);
+            
+            if ( _isEmailValid(emailValue) ) {
+                _saveEmailButton().removeClass('disabled');
+                _saveEmailButton().addClass('btn-primary');
+            }
+            else {
+                _saveEmailButton().addClass('disabled');
+                _saveEmailButton().removeClass('btn-primary');
+            }
+                
+        }, 100);
+}
+
+
 
 var _friends;
 
@@ -156,16 +235,18 @@ function _matchEntry(friendEntry, seachString)
     return -1;
 }
 
+function ________________(){}
 
-
-function AddFriend(id, screenName, element)
+function AddVip(id, element)
 {
     console.log('Add friend with id: ' + id);
     
-    serviceAPI.addFriend(id, screenName,
+    var friendEntry = _.find(_friends, function(entry) { return entry.id == id; } );
+    
+    serviceAPI.addVip(friendEntry,
         function(err, ponse) {
             if (err) {
-                console.log('addFriend error:');
+                console.log('addVip error:');
             	console.log(err);
                 $(element).addClass('btn-danger');
                 $(element).removeClass('disabled');
@@ -184,7 +265,28 @@ function AddFriend(id, screenName, element)
     console.log(element);
 }
 
-function LoadFriends()
+
+function _emptySearchField()
+{
+    _searchFriend('');
+}
+
+function RemoveVip(id, element)
+{
+    serviceAPI.removeVip( { id: id },
+        function(err, ponse) {
+            if (err) {
+                console.error('serviceAPI.removeVip failed:');
+                console.error(err);
+                return;
+            }
+            
+            _emptySearchField();
+            $('#friend-search').val('');
+        });
+}
+
+function LoadTwitterFriends()
 {
     $('#error-header').css(   'display', 'none');
     $('#search-header').css(  'display', 'none');
@@ -193,7 +295,7 @@ function LoadFriends()
     console.log('serviceAPI:');
     console.log( serviceAPI );
 
-    var getFriends = serviceAPI.getFriends(
+    var getFriends = serviceAPI.getTwitterFriends(
         function(err, friends)
         {
             console.log('-getFriends:');
@@ -204,7 +306,6 @@ function LoadFriends()
                 console.error(err);
                 
                 $('#error-header-code').text(' (#' + err.code + ')' );
-                
                 $('#friends-table').css( 'background-color', 'red');
 
                 $('#error-header').css(   'display', 'block');
@@ -214,7 +315,7 @@ function LoadFriends()
             else
             {
                 _friends = friends;
-                _searchFriend('');
+                _emptySearchField();
 
                 $('#error-header').css(   'display', 'none');
                 $('#search-header').css(  'display', 'block');
@@ -225,25 +326,70 @@ function LoadFriends()
     getFriends.on('progress',
         function(value) {
             var percentage = Math.round(value*100) + '%';
-            
             var bar = _loadingFriendsProgressBar();
-            
             bar.css('width', percentage );
-            
-            // console.log('bar: ');
-            // console.log(bar);
-            
         });
 }
 
-function LoadVipList()
+function SaveEmail()
 {
+    serviceAPI.confirmEmail( _emailField().val(), 
+        function(err, success)
+        {
+            if (err)
+            {
+                console.error('serviceAPI.confirmEmail failed:');
+                console.error(err);
+                return;
+            }
+            else
+            {
+                console.log('serviceAPI.confirmEmail OK!');
+            }
+        });
+}
+
+function SetupUI()
+{
+    LoadTwitterFriends();
+    
+    serviceAPI.getUserEntry(
+        function(err, userEntry)
+        {
+            if (err) {
+                console.error('serviceAPI.getUserEntr failed:');
+                console.error(err);
+                return;
+            }
+            
+            _showVipList(userEntry.vipList);
+        });
+    
     serviceAPI.on(ServiceAPI.vipListDidChangeEvent,
         function(userEntry)
         {
             console.log('ServiceAPI.vipListDidChangeEvent:');
-            console.log(userEntry);
+            console.log(userEntry.vipList);
+            
+            _showVipList(userEntry.vipList);
         });
+    
+    // Register UI callback
+    var searchField =  _friendSearchField();
+    searchField.bind("input propertychange", _searchFriendCallback);
+	searchField.keyup(_searchFriendCallback);
+
+    var emailField =  _emailField();
+    emailField.bind("input propertychange", _emailCallback);
+	emailField.keyup(_emailCallback);
+
 }
 
+
+function _isEmailValid(email)
+{ 
+	var regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    
+    return email.match(regex);
+} 
 
