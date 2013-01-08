@@ -96,7 +96,7 @@ console.log('Routes:');
 Object.keys(routes).forEach(
     function(path)
     {
-        app.get(path, routes[path]);
+        app.get(path, authentication.middleware, routes[path]);
         console.log('   ' + path);
     });
 

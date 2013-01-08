@@ -42,40 +42,33 @@ function _userPage(quest, ponse)
 }
 
 
-var database = use('database');
-var io = use('io');
+
 var service = use('service');
 
-index.path.confirmEmail = '/confirm/:userId';
+index.path.confirmEmail = '/confirm/:userId?/:ticket?';
 
 index.route.confirmEmail = function(quest, ponse)
     {
-        var userId = a.assert_string(quest.params.userId);
+        var userId;
+        var ticket;
         
-        database.getUserEntryById(userId,
-            function(err, userEntry)
+        try {
+            userId = a.assert_string(quest.params.userId);
+            ticket = a.assert_string(quest.params.ticket);
+        }
+        catch (err) {
+            return ponse.send('Wrong input');
+        }
+        
+        console.log('userId: ' + userId);
+        console.log('ticket: ' + ticket);
+        
+        service.verifyEmail(userId, ticket, 
+            function(err, email )
             {
                 if (err)
-                    return ponse.send('Invalid User');
+                    return ponse.send(err.message);
                     
-                if (userEntry.email)
-                    return ponse.send( userEntry.email + ' is already confirmed' );
-                    
-                database.confirmUserEmail(userEntry, 
-                    function(err, userEntry)
-                    {
-                        if (err)
-                            return ponse.send('Failed to confirm user');
-                        else
-                        {
-                            io.emitUserEvent(
-                            		userEntry._id,
-                                    service.userDidChangeEvent,
-                					userEntry );
-
-                            return ponse.send('Great just confirmed: ' + userEntry.email);
-                        }
-                            
-                    });
+                ponse.send('Email confirmed: ' + email );
             });
     }

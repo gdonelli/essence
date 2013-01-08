@@ -106,10 +106,10 @@ ServiceAPI.prototype.addVip =
         return this._peformService( 'service.addVip', friendEntry, callback);
     };
 
-ServiceAPI.prototype.addVip =
+ServiceAPI.prototype.removeVip =
     function(friendEntry, callback /* (err, ponse) */)
     {
-        return this._peformService( 'service.addVip', friendEntry, callback);
+        return this._peformService( 'service.removeVip', friendEntry, callback);
     };
 
 ServiceAPI.prototype.confirmEmail =
@@ -120,7 +120,9 @@ ServiceAPI.prototype.confirmEmail =
 
 // Events
 
-ServiceAPI.vipListDidChangeEvent = 'service.vipListDidChange';
+ServiceAPI.vipListDidChangeEvent        = 'service.vipListDidChange';
+
+ServiceAPI.emailDidChangeEvent = 'service.emailDidChange';
 
 ServiceAPI.prototype.on =
     function(event, callback)

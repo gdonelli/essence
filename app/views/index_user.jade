@@ -53,13 +53,22 @@ block content
                     h4 Your VIP list
                     
                 .peopleTableRows
-                    #vip-placeholder.muted To add friends to your VIP list use the table on the left
+                    // #vip-placeholder.muted To add friends to your VIP list use the table on the left
                     
             #your-email.user-section
                 h3 Your email
                 p.muted The email address where you would like to receive your Essence
+                i#email-check.icon-ok
                 input#email(type="text", placeholder="Email")
                 button#save-email.btn.disabled(onclick='SaveEmail()') Save
+                
+                #confirm-alert.alert.alert-error.alert-block
+                    h4 Please confirm your email
+                    | We just sent you a message, please follow the steps to confirm that your email is correct.
+                    br
+                    | (You haven&apos;t received it? 
+                    a(onclick='SaveEmail()') We can send it again...
+                    | )
 
 block other
     #disconnectModal.modal.hide.fade

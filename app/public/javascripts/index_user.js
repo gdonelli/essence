@@ -1,5 +1,5 @@
 
-function ________init________(){}
+function ________private________(){}
 
 var serviceAPI = new ServiceAPI();
 
@@ -177,7 +177,9 @@ function _emailCallback()
                 _saveEmailButton().addClass('disabled');
                 _saveEmailButton().removeClass('btn-primary');
             }
-                
+            
+            _email_check().css('visibility', 'hidden');
+            
         }, 100);
 }
 
@@ -235,6 +237,65 @@ function _matchEntry(friendEntry, seachString)
     return -1;
 }
 
+function _emptySearchField()
+{
+    _searchFriend('');
+}
+
+function _listenForEvents()
+{
+    serviceAPI.on(ServiceAPI.vipListDidChangeEvent,
+        function(userEntry) {
+            console.log('ServiceAPI.vipListDidChangeEvent:');
+            console.log(userEntry.vipList);
+            _showVipList(userEntry.vipList);
+        });
+
+    serviceAPI.on(ServiceAPI.emailDidChangeEvent,
+        function(userEntry) {
+            console.log('ServiceAPI.emailDidChangeEvent:');
+            console.log(userEntry.email);
+            _updateEmail(userEntry);
+        });
+    
+    // Register UI callback
+    var searchField =  _friendSearchField();
+    searchField.bind("input propertychange", _searchFriendCallback);
+	searchField.keyup(_searchFriendCallback);
+    
+    var emailField = _emailField();
+    emailField.bind("input propertychange", _emailCallback);
+	emailField.keyup(_emailCallback);
+
+}
+
+function _email_check()
+{
+    return $('#email-check');
+}
+
+function _updateEmail(userEntry)
+{
+    var emailField = _emailField();
+    var emailCheck = _email_check();
+    
+    if (userEntry.email) {
+        emailField.val(userEntry.email);
+        emailCheck.css('visibility', 'visible' );
+        $('#confirm-alert').hide();
+    }
+    else if (userEntry.email_to_confirm) {
+        emailField.val(userEntry.email_to_confirm);
+        emailCheck.css('visibility', 'hidden' );
+        
+        //TODO: Show Confirm message
+        
+        $('#confirm-alert').show();
+    }
+    
+    _saveEmailButton().addClass('disabled');
+}
+
 function ________________(){}
 
 function AddVip(id, element)
@@ -266,10 +327,6 @@ function AddVip(id, element)
 }
 
 
-function _emptySearchField()
-{
-    _searchFriend('');
-}
 
 function RemoveVip(id, element)
 {
@@ -351,38 +408,22 @@ function SaveEmail()
 
 function SetupUI()
 {
-    LoadTwitterFriends();
-    
+    // Load User Entry
     serviceAPI.getUserEntry(
-        function(err, userEntry)
-        {
+        function(err, userEntry) {
             if (err) {
                 console.error('serviceAPI.getUserEntr failed:');
                 console.error(err);
                 return;
             }
             
+            _updateEmail(userEntry);
             _showVipList(userEntry.vipList);
         });
     
-    serviceAPI.on(ServiceAPI.vipListDidChangeEvent,
-        function(userEntry)
-        {
-            console.log('ServiceAPI.vipListDidChangeEvent:');
-            console.log(userEntry.vipList);
-            
-            _showVipList(userEntry.vipList);
-        });
+    LoadTwitterFriends();
     
-    // Register UI callback
-    var searchField =  _friendSearchField();
-    searchField.bind("input propertychange", _searchFriendCallback);
-	searchField.keyup(_searchFriendCallback);
-
-    var emailField =  _emailField();
-    emailField.bind("input propertychange", _emailCallback);
-	emailField.keyup(_emailCallback);
-
+    _listenForEvents();
 }
 
 

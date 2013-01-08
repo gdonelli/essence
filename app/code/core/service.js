@@ -6,6 +6,7 @@
 var		authentication  = use('authentication')
     ,	database        = use('database')
     ,   twitter         = use('twitter')
+    ,	email           = use('email')
     ,	a				= use('a')
     ,	io				= use('io')
     ;
@@ -157,7 +158,7 @@ function _updateUserVipList(userEntry, callback)
             io.emitUserEvent(
                 userEntry._id,
                 service.vipListDidChangeEvent,
-                userEntry );
+                _safeUserEntry(userEntry) );
             
             callback(err, true);
         });
@@ -172,15 +173,18 @@ service.socket.getUserEntry =
     {
         var userId = _userIdFromSocket(socket);
 
-        database.getUserEntryById(userId, callback);
+        database.getUserEntryById(userId, 
+            function(err, userEntry) {
+                callback( err, _safeUserEntry(userEntry) );
+            });
     };
 
 
 service.event.confirmEmail = 'service.confirmEmail';
 
 service.socket.confirmEmail =
-    function(socket, inputData /* { email: ... } */, callback /* (err, true ) */ )
-    {
+    function(socket, inputData /* { email: ... } */, callback /* (err, true) */ )
+    {   
         var userId    = _userIdFromSocket(socket);
         var userEmail = a.assert_string(inputData.email);
         
@@ -190,22 +194,99 @@ service.socket.confirmEmail =
                 if (err)
                     return callback(err);
                 
-                //FIXME: more secure verification
+                delete userEntry.email;
                 
-                userEntry.email_to_confirm = userEmail;
+                // Make sure we send the same verification email all the time to the same address...
                 
-                //TODO: Send email to confirm...
+                if (userEntry.email_to_confirm != userEmail) {
+                	userEntry.email_to_confirm = userEmail;
+                
+                    if (!userEntry.secret)
+                        userEntry.secret = {};
+
+                    var emailTicket = Math.round( Math.random() * 1000000000 );
+                    userEntry.secret.email_ticket = emailTicket;
+                }
                 
                 database.saveUserEntry(userEntry,
                     function(err, userEntry)
                     {
-                        callback(err, true);
+                        var questHost = socket.session.host;
+                		var confirmURL = 'http://' + questHost + '/confirm/' + userEntry._id + '/' + userEntry.secret.email_ticket;
+                        
+                		email.sendConfirmationMessage(userEntry, confirmURL, 
+                            function(err) {
+                                io.emitUserEvent(
+                                    userEntry._id
+                                ,	service.emailDidChange
+                                ,	_safeUserEntry(userEntry) );
+
+                                callback(err, true);
+                            });
+                    });
+            });
+    };
+
+service.verifyEmail = 
+    function(userId, emailTicket, callback /*( err, email ) */)
+    {
+        database.getUserEntryById(userId,
+            function(err, userEntry)
+            {
+                if (err)
+                    return callback( new Error('Invalid User') );
+                    
+                if (userEntry.email)
+                    return callback( new Error(userEntry.email + ' is already confirmed') );
+                
+                if (!userEntry.hasOwnProperty('secret'))
+                    return callback( new Error('no ticket found') );
+                
+                if (userEntry.secret.email_ticket != emailTicket)
+                    return callback( new Error('Cannot confirm email' ) );
+                
+                if (!userEntry.email_to_confirm || userEntry.email_to_confirm.length < 4)
+                    return callback( new Error('Invalid email in user entry' ) );
+                    
+                // Make email official
+                userEntry.email = userEntry.email_to_confirm;
+                
+                // Clean up
+                delete userEntry.email_to_confirm;
+                delete userEntry.secret.email_ticket;
+                
+                database.saveUserEntry(userEntry, 
+                    function(err, userEntry)
+                    {
+                        if (err)
+                            return callback( new Error('Failed to confirm user') );
+                        else
+                        {
+                            io.emitUserEvent(
+                                    userEntry._id
+                                ,	service.emailDidChange
+                                ,	_safeUserEntry(userEntry) );
+
+                            return callback(null, userEntry.email);
+                        }
                     });
             });
     };
 
 
+// Removes the private property
+function _safeUserEntry(userEntry)
+{
+    if (userEntry) {
+        delete userEntry.secret;
+        delete userEntry.twitter.oauth;
+    }
+    
+    return userEntry;
+}
+
 // TODO: Constant using use module
 service.vipListDidChangeEvent = 'service.vipListDidChange';
-service.userDidChangeEvent    = 'service.userDidChangeEvent';
+service.emailDidChange        = 'service.emailDidChange';
+
 

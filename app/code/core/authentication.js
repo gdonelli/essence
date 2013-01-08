@@ -189,6 +189,14 @@ authentication.route.logout =
         ponse.redirect('/');
     };
 
+authentication.middleware =
+    function(quest, ponse, next)
+    {
+        var questHeaders = quest.headers;
+        var questHost    = questHeaders.host;
+        quest.session.host = questHost;
+        next();
+    };
 
 function _dialogRedirectURL(quest)
 {

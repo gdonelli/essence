@@ -128,23 +128,6 @@ database.saveUserEntry =
             });
     };
 
-database.confirmUserEmail =
-    function(userEntry, callback /* (err, userEntry) */ )
-    {
-        if (!userEntry.email_to_confirm)
-            return callback(new Error('Nothing to confirm'));
-    
-        var email = userEntry.email_to_confirm;
-        
-        //TODO: better confirm procedure
-        
-        userEntry.email = userEntry.email_to_confirm;
-        
-        delete userEntry.email_to_confirm;
-        
-    	database.saveUserEntry(userEntry, callback);
-    }
-
 function _addUser(userInfo, callback /* (err, userEntry) */)
 {
     _getUserCollection(
@@ -167,8 +150,6 @@ function _addUser(userInfo, callback /* (err, userEntry) */)
         });
 };
 
-
-
 function _findUserWithTwitterId(id, callback)
 {
     var longId;
@@ -182,7 +163,6 @@ function _findUserWithTwitterId(id, callback)
 
     _findUser(findProperties, callback);
 }
-
 
 function _findUser(findProperties, callback)
 {
@@ -301,7 +281,7 @@ function _setupUserCollection(collection, callback /* (err, collection) */ )
         ,   { unique: true }
         ,   function(err, indexName)
             {
-                console.log('indexName: ' + indexName);
+                // console.log('indexName: ' + indexName);
                 callback(err, collection);
             });
 }

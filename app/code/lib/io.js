@@ -55,7 +55,7 @@ io.setup =
             function () {
                 ioserver.set('log level', 0);
             });
-
+        
         // Setup Session for socket.io
         ioserver.set('authorization',
             function(data, accept) {
