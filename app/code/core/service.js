@@ -216,12 +216,10 @@ service.socket.confirmEmail =
                         
                 		email.sendConfirmationMessage(userEntry, confirmURL, 
                             function(err) {
-                                io.emitUserEvent(
-                                    userEntry._id
-                                ,	service.emailDidChange
-                                ,	_safeUserEntry(userEntry) );
-
-                                callback(err, true);
+                                if (err)
+                                    return callback(err);
+                                
+                                callback(null, true);
                             });
                     });
             });

@@ -169,6 +169,10 @@ function _emailCallback()
             
             console.log( 'emailValue: ' + emailValue);
             
+            _saveEmailButton().html('Save');
+            _saveEmailButton().removeClass('btn-warning');
+            _saveEmailButton().removeClass('btn-success');
+            
             if ( _isEmailValid(emailValue) ) {
                 _saveEmailButton().removeClass('disabled');
                 _saveEmailButton().addClass('btn-primary');
@@ -178,7 +182,6 @@ function _emailCallback()
                 _saveEmailButton().removeClass('btn-primary');
             }
             
-            _email_check().css('visibility', 'hidden');
             
         }, 100);
 }
@@ -269,31 +272,50 @@ function _listenForEvents()
 
 }
 
-function _email_check()
+function _confirm_alert()
 {
-    return $('#email-check');
+    return $('#confirm-alert');
 }
+
 
 function _updateEmail(userEntry)
 {
     var emailField = _emailField();
-    var emailCheck = _email_check();
+    var confirmAlert = _confirm_alert();
+    var saveButton = _saveEmailButton();
     
     if (userEntry.email) {
         emailField.val(userEntry.email);
-        emailCheck.css('visibility', 'visible' );
-        $('#confirm-alert').hide();
+        
+        saveButton.removeClass('btn-warning');
+        saveButton.removeClass('btn-primary');
+        saveButton.addClass('btn-success');
+        saveButton.html('<i class="icon-ok icon-white"></i>');
+        saveButton.addClass('disabled');
+        
+        confirmAlert.hide();
     }
     else if (userEntry.email_to_confirm) {
         emailField.val(userEntry.email_to_confirm);
-        emailCheck.css('visibility', 'hidden' );
         
-        //TODO: Show Confirm message
+        saveButton.removeClass('btn-success');
+        saveButton.removeClass('btn-primary');
+        saveButton.addClass('btn-warning');
+        saveButton.html('<i class="icon-ok icon-white"></i>');
+        saveButton.addClass('disabled');
         
-        $('#confirm-alert').show();
+        confirmAlert.show();
     }
-    
-    _saveEmailButton().addClass('disabled');
+    else
+    {
+        saveButton.removeClass('btn-success');
+        saveButton.removeClass('btn-warning');
+        saveButton.addClass('btn-primary');
+        saveButton.html('Save');
+        saveButton.removeClass('disabled');
+        
+        confirmAlert.hide();
+    }    
 }
 
 function ________________(){}
@@ -390,19 +412,32 @@ function LoadTwitterFriends()
 
 function SaveEmail()
 {
+    var saveButton = _saveEmailButton();
+    
+    saveButton.html('<i class="icon-refresh"></i>');
+    saveButton.addClass('disabled');
+    saveButton.removeClass('btn-primary');
+    
+    var confirmAlert = _confirm_alert();
+    confirmAlert.hide();
+    
     serviceAPI.confirmEmail( _emailField().val(), 
         function(err, success)
         {
-            if (err)
-            {
+            if (err) {
+                saveButton.html('<i class="icon-remove icon-white"></i>');
+            	saveButton.addClass('btn-danger');
+                saveButton.removeClass('disabled');
                 console.error('serviceAPI.confirmEmail failed:');
                 console.error(err);
                 return;
             }
-            else
-            {
-                console.log('serviceAPI.confirmEmail OK!');
-            }
+
+            saveButton.html('<i class="icon-ok icon-white"></i>');
+            saveButton.addClass('btn-warning');
+            confirmAlert.show();
+            
+            console.log('serviceAPI.confirmEmail OK!');
         });
 }
 

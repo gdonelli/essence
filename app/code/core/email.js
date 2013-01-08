@@ -12,22 +12,25 @@ var email = exports;
 
 var _server;
 
-function _connectToServer()
+function _smtpServer()
 {
-    a.assert_string(process.env.EMAIL_ADDRESS);
-    a.assert_string(process.env.SMTP_USER);
-    a.assert_string(process.env.SMTP_PASSWORD);
-    a.assert_string(process.env.SMTP_HOST);
+    if (!_server) {
+        a.assert_string(process.env.EMAIL_ADDRESS);
+        a.assert_string(process.env.SMTP_USER);
+        a.assert_string(process.env.SMTP_PASSWORD);
+        a.assert_string(process.env.SMTP_HOST);
+        
+        _server = emailjs.server.connect({
+                user:       process.env.SMTP_USER
+            ,   password:   process.env.SMTP_PASSWORD
+            ,   host:       process.env.SMTP_HOST
+            ,   ssl:        true
+            });
+    }
     
-    _server = emailjs.server.connect({
-            user:       process.env.SMTP_USER
-        ,   password:   process.env.SMTP_PASSWORD
-        ,   host:       process.env.SMTP_HOST
-        ,   ssl:        true
-        });
+    return _server;
 }
 
-_connectToServer();
 
 email.sendConfirmationMessage = 
     function(userEntry, confirmationURL, callback /* (err, message) */ )
@@ -62,6 +65,19 @@ email.sendConfirmationMessage =
         msg.text += '\n';
         msg.text += 'Thank you!\n';
         msg.text += 'The Essence team';
+        
+        var server = _smtpServer();
 
-        _server.send(msg, callback);
+        server.send(msg, 
+            function(err, message)
+            {
+                if (err) {
+                    console.error('Failed sending confirmation email err:');
+                    console.error(err.stack);
+                    console.error('message:');
+                    console.error(msg);
+                }
+                
+                callback(err, message);
+            });
     };
