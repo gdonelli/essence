@@ -3,12 +3,15 @@
  * Service
  */
 
-var		authentication  = use('authentication')
+var		async			= require('async')
+
+	,	authentication  = use('authentication')
     ,	database        = use('database')
     ,   twitter         = use('twitter')
     ,	email           = use('email')
     ,	a				= use('a')
     ,	io				= use('io')
+    ,   essence         = use('essence')
     ;
 
 
@@ -22,7 +25,6 @@ function _userIdFromSocket(socket)
 service.event   = {};
 service.socket  = {};
 
-
 service.event.getTwitterFriends = 'service.getTwitterFriends';
 
 service.socket.getTwitterFriends =
@@ -30,6 +32,9 @@ service.socket.getTwitterFriends =
     {
         var oauth = authentication.oauthFromSocket(socket);
         var user  = authentication.userFromSocket(socket);
+        
+        console.log('oauthFromSocket:');
+        console.log(oauth);
         
         var getFriends =
             twitter.cache.getFriends(oauth, user.id,
@@ -269,6 +274,77 @@ service.verifyEmail =
                         }
                     });
             });
+    };
+
+service.getEssence = 
+    function(userId, options, callback /* (err, userEntry, essence) */) 
+    {
+        database.getUserEntryById(userId,
+            function(err, userEntry) {
+                if (err)
+                    return callback(err);
+
+                var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
+                
+                essence.get(oauth, userEntry, options,
+                    function(err, tweets)
+                    {
+                        callback(err, userEntry, tweets);
+                    });
+            });
+    };
+
+service.destroyEssenceList =
+    function(userId, callback /* (err) */) 
+    {
+        database.getUserEntryById(userId,
+            function(err, userEntry) {
+                if (err)
+                    return callback(err);
+
+                var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
+                
+                essence.destroyList(oauth, callback);
+            });
+    };
+    
+service.generateEssence_off = 
+    function(userId, callback /* (err, essence) */) 
+    {
+        database.getUserEntryById(userId,
+            function(err, userEntry) {
+                if (err)
+                    return callback(err);
+                
+                var vipList = userEntry.vipList;
+                var vipDictionary = {};
+                vipList.forEach( 
+                    function(friendEntry) {
+                        vipDictionary[friendEntry.id] = friendEntry;     
+                    });
+                
+                var oauth         = authentication.makeOAuth(userEntry.twitter.oauth);
+                var userTwitterId = userEntry.twitter.user.id;
+                
+                // console.log('oauth:');
+                // console.log(oauth);
+
+                // console.log('userTwitterId:');
+                // console.log(userTwitterId);
+                
+                twitter.getRelevantUserTimeline(oauth, userTwitterId,
+                    function(err, tweets) {
+                    
+                      /*  var relevantTweets = _.filter(tweets, 
+                            function(tweet) {
+                                return vipDictionary[tweet.user.id];
+                            })
+                        */
+                        
+                        callback(err, tweets);
+                    });
+            });
+
     };
 
 

@@ -13,6 +13,14 @@ var     request = require('request')
 var twitter = exports;
 
 
+twitter.statuses	= {};
+twitter.users		= {};
+twitter.friends		= {};
+twitter.cache		= {};
+twitter.lists		= {};
+twitter.lists.members = {};
+
+
 twitter.get =
     function(oauth, apiURL, params, callback /* (err, data) */)
     {
@@ -64,7 +72,35 @@ twitter.post =
 
 // ---
 
-twitter.users = {};
+twitter.statuses.home_timeline =
+    function(oauth, user_id, max_id, callback /* (err, tweets) */ )
+    {
+        var apiURL = 'https://api.twitter.com/1.1/statuses/home_timeline.json';
+        var params = {
+                user_id: user_id
+            ,	count: 200
+            };
+        
+        if (max_id)
+            params.max_id = max_id;
+            
+        twitter.get(oauth, apiURL, params, callback);        
+    };
+
+
+twitter.statuses.user_timeline =
+    function(oauth, user_id, callback /* (err, tweets) */ )
+    {
+        var apiURL = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
+        var params = {
+                	user_id: user_id
+                ,	count: 100
+            };
+        
+        twitter.get(oauth, apiURL, params, callback);        
+    };
+    
+    
 
 twitter.users.show =
     function(oauth, user_id, screen_name, callback /* (err, userInfo) */)
@@ -141,9 +177,103 @@ twitter.users.search =
         twitter.get(oauth, apiURL, params, callback);
     };
 
+
 // ---
 
-twitter.friends = {};
+twitter.lists.list =
+    function(oauth, callback /* (err, lists) */)
+    {
+        var apiURL = 'https://api.twitter.com/1.1/lists/list.json';
+        
+        twitter.get(oauth, apiURL, {}, callback);
+    };
+
+twitter.lists.destroy =
+    function(oauth, list_id, slug, callback /* (err, data) */)
+    {
+        var apiURL = 'https://api.twitter.com/1.1/lists/destroy.json';
+        var params = { 
+                list_id: list_id
+            ,   slug: slug
+            };
+        
+        twitter.post(oauth, apiURL, params, callback);
+    };
+
+twitter.lists.create =
+    function(oauth, name, description, callback /* (err, data) */)
+    {
+        var apiURL = 'https://api.twitter.com/1.1/lists/create.json';
+        var params = { 
+                name: name
+            ,   description: description
+            ,   mode: 'private'
+            };
+        
+        twitter.post(oauth, apiURL, params, callback);
+    };
+
+twitter.lists.members =
+    function(oauth, list_id, callback /* (err, users) */)
+    {
+        var apiURL = 'https://api.twitter.com/1.1/lists/members.json';
+        var params = {
+                list_id : list_id
+            };
+
+        twitter.get(oauth, apiURL, params, callback);
+    };
+
+twitter.lists.statuses =
+    function(oauth, list_id, callback /* (err, tweets) */)
+    {
+        var apiURL = 'https://api.twitter.com/1.1/lists/statuses.json';
+        var params = {
+                	list_id : list_id
+                ,	count: 100
+            };
+
+        twitter.get(oauth, apiURL, params, callback);
+    };
+
+
+function _commaSeparatedStringFromArray(array)
+{
+    var result = '';
+    
+    array.forEach(
+        function(item) {
+            result += item + ',';
+        });
+    
+    result.substring(0, result.length-1);
+    
+    return result;
+}
+
+function _lists_members_operation(oauth, apiEndPoint, list_id, arrayOfUserIds, callback)
+{
+    var apiURL = 'https://api.twitter.com/1.1/lists/members/' + apiEndPoint + '.json';
+    var params = { 
+            list_id: list_id
+    	,	user_id: _commaSeparatedStringFromArray(arrayOfUserIds)
+        };
+    
+    twitter.post(oauth, apiURL, params, callback);
+}
+
+twitter.lists.members.create_all =
+    function(oauth, list_id, arrayOfUserIds, callback)
+    {
+        _lists_members_operation(oauth, 'create_all', list_id, arrayOfUserIds, callback);
+    };
+
+twitter.lists.members.destroy_all =
+    function(oauth, list_id, arrayOfUserIds, callback)
+    {
+        _lists_members_operation(oauth, 'destroy_all', list_id, arrayOfUserIds, callback);
+    };
+    
 
 twitter.friends.ids =
     function(oauth, user_id, callback /* (err, data) */ ) {
@@ -153,6 +283,7 @@ twitter.friends.ids =
         twitter.get(oauth, apiURL, params, callback);
     };
 
+    
 // ---
 
 twitter.getFriends =
@@ -206,7 +337,7 @@ twitter.getFriends =
 
 // Cache
 
-twitter.cache = {};
+
 
 function _cacheDir()
 {
@@ -245,7 +376,10 @@ twitter.cache.getFriends =
                         var cache = JSON.parse(data);
                         if (!cache.data)
                             throw Error('no cache.data');
-                   
+                            
+                        if (cache.data.length == 0)
+                            throw Error('cache is empty');
+                            
                         var timeDiff = new Date() - new Date(cache.created);
                         if (timeDiff > 60 * 1000)
                             throw Error('cache is not fresh');

@@ -84,22 +84,37 @@ catch (e) {
 //  Routes
 
 var routes = {};
-routes[ index.path.index                    ] = index.route.index;
-routes[ index.path.confirmEmail             ] = index.route.confirmEmail;
 
-routes[ authentication.path.login           ] = authentication.route.login;
-routes[ authentication.path.loginResponse   ] = authentication.route.loginResponse;
-routes[ authentication.path.logout          ] = authentication.route.logout;
+function _addRoutesFromModule(module)
+{
+    Object.keys(module.path).forEach(
+        function(key)
+        {
+            var path  = module.path[key];
+            var route = module.route[key];
+            
+            routes[path] = route;
+        });
+}
+
+_addRoutesFromModule(index);
+_addRoutesFromModule(authentication);
+
+
+var routesKeys = Object.keys(routes);
+routesKeys = routesKeys.sort( 
+    function(a, b) {
+        return a.length > b.length;
+    } );
 
 console.log('Routes:');
 
-Object.keys(routes).forEach(
+routesKeys.forEach(
     function(path)
     {
         app.get(path, authentication.middleware, routes[path]);
         console.log('   ' + path);
     });
-
 
 // ---------------------
 // Http Server

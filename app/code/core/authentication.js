@@ -167,8 +167,8 @@ authentication.route.loginResponse =
                                 console.log(userEntry);
                                 */
                                 
-                                console.log('quest.session.user:');
-                                console.log(quest.session.user);
+                                console.log('quest.session:');
+                                console.log(quest.session);
                                 
                                 ponse.redirect('/');
                             });
@@ -260,5 +260,7 @@ function _makeOAuth(options)
     
     return result;
 }
+
+authentication.makeOAuth = _makeOAuth;
 
 

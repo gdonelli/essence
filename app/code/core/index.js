@@ -3,7 +3,13 @@
  * GET home page.
  */
 
-var authentication = use('authentication');
+var     path    = require('path')
+    ,   fs      = require('fs')
+    
+    ,   authentication  = use('authentication')
+    ,	message         = use('message')
+    ,	database		= use('database')
+    ;
 
 var index = exports;
 
@@ -42,12 +48,12 @@ function _userPage(quest, ponse)
 }
 
 
-
 var service = use('service');
 
 index.path.confirmEmail = '/confirm/:userId?/:ticket?';
 
-index.route.confirmEmail = function(quest, ponse)
+index.route.confirmEmail = 
+    function(quest, ponse)
     {
         var userId;
         var ticket;
@@ -71,4 +77,90 @@ index.route.confirmEmail = function(quest, ponse)
                     
                 ponse.send('Email confirmed: ' + email );
             });
-    }
+    };
+
+
+function _userIdFromRequest(quest)
+{
+    if (quest.params.essenceUserId)
+        return quest.params.essenceUserId;
+    else
+        return authentication.userFromRequest(quest)._id;
+}
+
+
+
+index.path.destroyList = '/destroyList/:essenceUserId?';
+
+index.route.destroyList = 
+    function(quest, ponse)
+    {
+        var userId = _userIdFromRequest(quest);
+
+        service.destroyEssenceList(userId,
+            function(err)
+            {
+                ponse.send( { error: err } );
+            });
+    };
+
+    
+index.path.preview = '/preview/:essenceUserId?';
+
+index.route.preview = 
+    function(quest, ponse)
+    {
+        var userId = _userIdFromRequest(quest);
+
+        service.getEssence(userId, { preview: true },
+            function(err, userEntry, vipList)
+            {
+                if (err) {
+                    // TODO: deal with too many request error
+                    return ponse.send( JSON.stringify(err) );
+                }
+
+                message.make(userEntry, vipList,
+                    function(err, html)
+                    {
+                        ponse.writeHead(200, {'Content-Type': 'text/html'});
+                        ponse.end(html);
+                    });
+            });
+    };
+
+
+index.path.allusers = '/admin/users';
+
+index.route.allusers = 
+    function(quest, ponse)
+    {
+        database.allUsers(
+            function(err, users)
+            {
+                ponse.writeHead(200, {'Content-Type': 'text/html'});
+                
+                ponse.write('<html>');
+                
+                users.forEach(
+                    function(user) {
+                        var row = '';
+                        
+                        row += '<div>';
+                        
+                        row += '<span>' + user.twitter.user.name + ': </span>';
+                        
+                        row += '<span>vip#:' + (user.vipList ? user.vipList.length : 0) + ' </span>';
+                        row += '<a target="_blank" href="/preview/' + user._id + '">preview</a>';
+                        
+                        row += '</div>';
+                        
+                        ponse.write(row);
+
+                    });
+                    
+                ponse.end('</html>');
+            });
+    };
+
+

@@ -127,7 +127,21 @@ database.saveUserEntry =
                     });
             });
     };
+    
+database.allUsers =
+    function(callback /* (err, allUsers) */ )
+    {
+        _getUserCollection(
+            function(err, userCollection)
+            {
+                if (err)
+                    return callback(err);
+                
+                userCollection.find().toArray(callback);
+            });
+    }
 
+    
 function _addUser(userInfo, callback /* (err, userEntry) */)
 {
     _getUserCollection(
