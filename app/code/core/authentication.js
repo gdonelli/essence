@@ -167,8 +167,8 @@ authentication.route.loginResponse =
                                 console.log(userEntry);
                                 */
                                 
-                                console.log('quest.session:');
-                                console.log(quest.session);
+                                // console.log('quest.session:');
+                                // console.log(quest.session);
                                 
                                 ponse.redirect('/');
                             });

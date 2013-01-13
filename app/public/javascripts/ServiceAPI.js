@@ -11,10 +11,10 @@ function ServiceAPI()
 
     var timeout = setTimeout(
         function() {
-            var errStr = 'Failed to connect to server. (#socke.io init failed)';
+            var errStr = 'Connection to server timed out. Try to reload the page';
             alert(errStr);
             console.error(errStr);
-        }, 5000);
+        }, 10000);
     
     this.socket.emit('__init__', {},
         function(data) {

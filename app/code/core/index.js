@@ -9,6 +9,7 @@ var     path    = require('path')
     ,   authentication  = use('authentication')
     ,	message         = use('message')
     ,	database		= use('database')
+    ,	engine			= use('engine')
     ;
 
 var index = exports;
@@ -112,7 +113,7 @@ index.route.preview =
     {
         var userId = _userIdFromRequest(quest);
 
-        service.getEssence(userId, { preview: true },
+        service.getAugmentedVipList(userId, { preview: true },
             function(err, userEntry, vipList)
             {
                 if (err) {
@@ -120,7 +121,27 @@ index.route.preview =
                     return ponse.send( JSON.stringify(err) );
                 }
 
-                message.make(userEntry, vipList,
+                message.make(userEntry, vipList, { subtitle: 'Preview' },
+                    function(err, html)
+                    {
+                        ponse.writeHead(200, {'Content-Type': 'text/html'});
+                        ponse.end(html);
+                    });
+            });
+    };
+
+
+index.path.actual = '/actual/:essenceUserId?';
+
+index.route.actual = 
+    function(quest, ponse)
+    {
+        var userId = _userIdFromRequest(quest);
+        
+        database.getUserEntryById(userId,
+            function(err, userEntry)
+            {
+                engine.getEssenceMessageForUser(userEntry, 
                     function(err, html)
                     {
                         ponse.writeHead(200, {'Content-Type': 'text/html'});
@@ -135,32 +156,55 @@ index.path.allusers = '/admin/users';
 index.route.allusers = 
     function(quest, ponse)
     {
-        database.allUsers(
-            function(err, users)
-            {
-                ponse.writeHead(200, {'Content-Type': 'text/html'});
-                
-                ponse.write('<html>');
-                
-                users.forEach(
-                    function(user) {
-                        var row = '';
-                        
-                        row += '<div>';
-                        
-                        row += '<span>' + user.twitter.user.name + ': </span>';
-                        
-                        row += '<span>vip#:' + (user.vipList ? user.vipList.length : 0) + ' </span>';
-                        row += '<a target="_blank" href="/preview/' + user._id + '">preview</a>';
-                        
-                        row += '</div>';
-                        
-                        ponse.write(row);
+        ponse.writeHead(200, {'Content-Type': 'text/html'});
+        ponse.write('<!DOCTYPE html><html>');
 
-                    });
+        ponse.write('<table cellpadding="10px">');
+
+        database.forEachUser(
+            function(err, user) {
+                if (err)
+                    ponse.write('<td>Error: ' + err.message + '</td>');
+            
+                if (err || user == null)
+                    return ponse.end('</table></html>');
                     
-                ponse.end('</html>');
+                var row = '';
+                
+                row += '<tr>';
+                
+                row += '<td><strong>' + message.stringToHTML(user.twitter.user.name) + '</strong></td>';
+                row += '<td>' + message.stringToHTML(user.email) + '</td>';
+                row += '<td>#' + (user.vipList ? user.vipList.length : 0) + ' </td>';
+                row += '<td><a target="_blank" href="/preview/' + user._id + '">preview</a></td>';
+                row += '<td><a target="_blank" href="/actual/' + user._id + '">actual</a></td>';
+                row += '<td><a target="_blank" href="/admin/send/' + user._id + '">send</a></td>';
+
+                row += '</tr>';
+                
+                ponse.write(row);
             });
     };
 
+index.path.adminSend = '/admin/send/:essenceUserId?';
 
+index.route.adminSend = 
+    function(quest, ponse)
+    {
+        var userId = _userIdFromRequest(quest);
+        
+        service.sendEssence(userId, {},
+            function(err)
+            {
+                if (err) {
+                    var obj = {};
+                    obj.message = err.message;
+                    obj.stack = err.stack;
+                    
+                    return ponse.send( obj );
+                }
+                
+                ponse.send('OK');
+            });
+    };
+    

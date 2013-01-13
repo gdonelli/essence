@@ -22,6 +22,9 @@ jitsu env set SMTP_USER $SMTP_USER
 jitsu env set SMTP_PASSWORD $SMTP_PASSWORD
 jitsu env set SMTP_HOST $SMTP_HOST
 
+jitsu env set ADMIN_EMAIL_ADDRESS $ADMIN_EMAIL_ADDRESS
+jitsu env set ADMIN_TWITTER_ID $ADMIN_TWITTER_ID
+
 # Database
 
 jitsu env set DB_HOST $DB_HOST

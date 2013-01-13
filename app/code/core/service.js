@@ -12,6 +12,7 @@ var		async			= require('async')
     ,	a				= use('a')
     ,	io				= use('io')
     ,   essence         = use('essence')
+    ,	message         = use('message')
     ;
 
 
@@ -276,24 +277,6 @@ service.verifyEmail =
             });
     };
 
-service.getEssence = 
-    function(userId, options, callback /* (err, userEntry, essence) */) 
-    {
-        database.getUserEntryById(userId,
-            function(err, userEntry) {
-                if (err)
-                    return callback(err);
-
-                var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
-                
-                essence.get(oauth, userEntry, options,
-                    function(err, tweets)
-                    {
-                        callback(err, userEntry, tweets);
-                    });
-            });
-    };
-
 service.destroyEssenceList =
     function(userId, callback /* (err) */) 
     {
@@ -307,45 +290,46 @@ service.destroyEssenceList =
                 essence.destroyList(oauth, callback);
             });
     };
-    
-service.generateEssence_off = 
-    function(userId, callback /* (err, essence) */) 
+
+
+service.getAugmentedVipList = 
+    function(userId, options, callback /* (err, userEntry, list) */) 
     {
         database.getUserEntryById(userId,
             function(err, userEntry) {
                 if (err)
                     return callback(err);
-                
-                var vipList = userEntry.vipList;
-                var vipDictionary = {};
-                vipList.forEach( 
-                    function(friendEntry) {
-                        vipDictionary[friendEntry.id] = friendEntry;     
-                    });
-                
-                var oauth         = authentication.makeOAuth(userEntry.twitter.oauth);
-                var userTwitterId = userEntry.twitter.user.id;
-                
-                // console.log('oauth:');
-                // console.log(oauth);
 
-                // console.log('userTwitterId:');
-                // console.log(userTwitterId);
+                var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
                 
-                twitter.getRelevantUserTimeline(oauth, userTwitterId,
-                    function(err, tweets) {
-                    
-                      /*  var relevantTweets = _.filter(tweets, 
-                            function(tweet) {
-                                return vipDictionary[tweet.user.id];
-                            })
-                        */
-                        
-                        callback(err, tweets);
+                essence.getAugmentedVipList(oauth, userEntry, options,
+                    function(err, list)
+                    {
+                        callback(err, userEntry, list);
                     });
             });
-
     };
+
+service.sendEssence =
+    function(userId, options, callback /* (err) */) 
+    {
+        service.getAugmentedVipList(userId, options,
+            function(err, userEntry, vipList)
+            {
+                if (err)
+                    return callback(err);
+                
+                message.make(userEntry, vipList, {},
+                    function(err, htmlMessage)
+                    {
+                        if (err)
+                            return callback(err);
+                       
+                        email.sendEssence(userEntry, htmlMessage, callback);
+                    });
+            });
+    };
+
 
 
 // Removes the private property

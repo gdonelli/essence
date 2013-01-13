@@ -127,21 +127,35 @@ database.saveUserEntry =
                     });
             });
     };
-    
-database.allUsers =
-    function(callback /* (err, allUsers) */ )
+
+database.getCursorOnUsers =
+    function(callback /* (err, cursor) */ )
     {
         _getUserCollection(
             function(err, userCollection)
             {
                 if (err)
                     return callback(err);
-                
-                userCollection.find().toArray(callback);
-            });
-    }
+                    
+                var cursor = userCollection.find();
 
-    
+                callback(null, cursor);
+            });
+    };
+
+database.forEachUser =
+    function(callback /* (err, user) */)
+    {
+        database.getCursorOnUsers(
+            function(err, cursor)
+            {
+                if (err)
+                    return callback(err);
+                
+                cursor.each(callback);
+            });
+    };
+
 function _addUser(userInfo, callback /* (err, userEntry) */)
 {
     _getUserCollection(

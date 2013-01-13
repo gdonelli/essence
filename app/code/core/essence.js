@@ -55,8 +55,6 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
     a.assert_obj(vipEntry);
     a.assert_f(callback);
     a.assert_def(vipEntry.id);
-    
-    var sinceDate = _yesterday();
 
     twitter.statuses.user_timeline(oauth, vipEntry.id, 
         function(err, tweets) {
@@ -65,10 +63,10 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
                 
             var relevantTweets;
             
-            if (options && options.preview == true)
-                relevantTweets = _.first(tweets, 10);
+            if (options && options.sinceDate)
+                relevantTweets = _getTweetsSinceDate(tweets, options.sinceDate);
             else
-                relevantTweets = _getTweetsSinceDate(tweets, sinceDate);
+                relevantTweets = _.first(tweets, 10);
             
             vipEntry.essence = relevantTweets;
             
@@ -76,10 +74,10 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
         } );
 }
 
-essence.get =
-    function(oauth, userEntry, options, callback /* (err, vipList) */ )
+essence.getAugmentedVipList =
+    function(oauth, userEntry, options, callback /* (err, augmentedVipList) */ )
     {
-        var vipList = userEntry.vipList;
+        var vipList = _.map( userEntry.vipList, _.clone );
         
         async.map(vipList
             ,	function(vipEntry, callback) { 
@@ -91,50 +89,6 @@ essence.get =
                         
                     callback(err, vipList);
                 });
-    }
-
-essence.__get =
-    function(oauth, vipList, callback /* (err, tweets) */ )
-    {
-        a.assert_obj(oauth);
-        a.assert_array(vipList);
-        a.assert_f(callback);
-        
-        var referenceDate = new Date();
-        referenceDate.setDate(referenceDate.getDate() - 1);
-
-        essence.setupList(oauth, vipList,
-            function(err, list) {
-                if (err)
-                    return callback(err);
-                
-                console.log('essence.getListTweets- list:');
-                console.log(list);
-
-                twitter.lists.statuses(oauth, list.id, 
-                    function(err, tweets)
-                    {
-                        if (err)
-                            return callback(err);
-                        
-                        var lastIndex = tweets.length;
-                        
-                        for (var i=0; i<tweets.length; i++) {
-                            var tweet_i = tweets[i];
-                            
-                            var tweetCreated = new Date(tweet_i.created_at);
-                            var timeDiff = tweetCreated - referenceDate;
-                            lastIndex = i;
-                            
-                            if (timeDiff<0)
-                                break;
-                        }
-                        
-                        var relevantTweets = tweets.slice(0, lastIndex);
-                        
-                        callback(null, relevantTweets);
-                    });
-            });
     }
 
 

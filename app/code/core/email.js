@@ -31,6 +31,42 @@ function _smtpServer()
     return _server;
 }
 
+email.sendEssenceTo =
+    function(userName, userEmail, htmlMessage, callback /* (err) */ )
+    {
+        if (!userEmail)
+            return callback(new Error('No valid email given'));
+            
+        var msg = {};
+        msg.subject = 'Essence';
+        msg.from    = _from();
+        msg.to      = userName + ' <' + userEmail + '>';
+        msg.attachment  = [{ 
+                data: htmlMessage 
+            ,	alternative:true
+            }];
+            
+        msg.text = 'Essence is delivered as rich HTML attached to this email';
+        
+        email.send(msg, callback);
+    };
+
+
+email.sendEssence =
+    function(userEntry, htmlMessage, callback /* (err) */ )
+    {
+        var userEmail = userEntry.email;
+        var userName  = userEntry.twitter.user.name;
+        
+        email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
+    };
+
+function _from()
+{
+    a.assert_string(process.env.EMAIL_ADDRESS);
+    
+    return 'Essence <' + process.env.EMAIL_ADDRESS + '>';
+}
 
 email.sendConfirmationMessage = 
     function(userEntry, confirmationURL, callback /* (err, message) */ )
@@ -41,7 +77,7 @@ email.sendConfirmationMessage =
         var subject = 'Please confirm Essence activation';
         var msg = {
             	subject: subject
-            ,	from:   'Essence <' + process.env.EMAIL_ADDRESS + '>'
+            ,	from:   _from()
             ,	to:     userName + ' <' + userEmail + '>'
             }
         
@@ -66,18 +102,41 @@ email.sendConfirmationMessage =
         msg.text += 'Thank you!\n';
         msg.text += 'The Essence team';
         
+        email.send(msg, callback);
+    };
+    
+email.send =
+    function(msg, callback)
+    {
         var server = _smtpServer();
 
         server.send(msg, 
             function(err, message)
             {
                 if (err) {
-                    console.error('Failed sending confirmation email err:');
+                    console.error('Failed to Send Email with error:');
                     console.error(err.stack);
                     console.error('message:');
                     console.error(msg);
+                    
+                    return callback(err);
                 }
                 
                 callback(err, message);
-            });
+            });    
     };
+    
+email.sendErrorMessage = 
+    function(err, callback)
+    {
+        var subject = 'Essence error: ' + err.message;
+        var msg = {
+            	subject: subject
+            ,	from:   _from()
+            ,	to:     'Daddy <' + process.env.ADMIN_EMAIL_ADDRESS + '>'
+            }
+        msg.text = err.stack;
+        
+        email.send(msg, callback);
+    };
+    

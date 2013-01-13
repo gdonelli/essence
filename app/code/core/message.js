@@ -5,34 +5,42 @@
 
 var     path    = require('path')
     ,   fs      = require('fs')
+    ,   request = require('request')
+    ,	stylus  = require('stylus')
+    ,	HTMLEncoder = require('node-html-encoder').Encoder
     ;
+
 
 var message = exports;
 
+
 message.make =
-    function(userEntry, vipList, callback /* (err, html) */ )
+    function(userEntry, vipList, options, callback /* (err, html) */ )
     {
-        _getStylesheet( 
-            function(err, stylesheetData)
+        _getMessageCSS( 
+            function(err, css)
             {
                 if (err)
                     return callback(err);
                 
                 var result = '';
         
-                result += '<html>';
+                result += '<!DOCTYPE html><html>';
                 result += '<head>';
-                
+                result += '<meta charset="utf-8">';
                 result += '<style type="text/css">';
-                result += stylesheetData;
+                result += css;
                 result += '</style>';
-
                 result += '</head>';
 
                 result += '<body>';
 
                 result += '<div class="header">';
                 result += '<h1>Essence</h1>';
+                
+                if (options && options.subtitle)
+                    result += '<h2>(' + options.subtitle + ')</h2>';
+                
                 result += '</div>';
                         
                 vipList.forEach(
@@ -40,18 +48,80 @@ message.make =
                         result += _htmlEssenceForFriend(friendEntry);
                     });
 
-                result += '<div class="footer">(' + userEntry.twitter.user.name + ')</div>';
-                    
+                result += '<div class="footer">';
+                result += '<p>That&rsquo;s it ' + _toHTML(userEntry.twitter.user.name) + '</p>'
+                result += '<p>What do you think about Essence?</p>';
+                result += '</div>';
+                
                 result += '</body>';
-
                 result += '</html>';
                 
                 callback(null, result);
             });
     };
+    
+var _encoder;
+
+function _htmlEncoder()
+{
+    if (!_encoder)
+        _encoder = new HTMLEncoder('numerical');
+        
+    return _encoder;
+}
+
+function _toHTML(string)
+{
+    return _htmlEncoder().htmlEncode(string);
+}
+
+message.stringToHTML = 
+    function(string)
+    {
+        return _toHTML(string);
+    }
 
 
-function _getStylesheet( callback /* (err, data) */ )
+
+var _messageCSS;
+
+function _getMessageCSS(callback /* (err, css) */ )
+{
+    if (!_messageCSS)
+    {
+        _getStylesheet( 'message', 
+            function(err, css) {
+                _messageCSS = css;
+                callback(null, _messageCSS);
+            } );
+    }
+    else
+        callback(null, _messageCSS);
+
+}
+
+function _getStylesheet( filename, callback /* (err, css) */ )
+{
+    var stylPath = global.appPublicPath + '/stylesheets/' + filename + '.styl';
+    var cssPath  = global.appPublicPath + '/stylesheets/' + filename + '.css';
+    
+    // console.log('stylPath:' + stylPath);
+    // console.log('cssPath:' + cssPath);
+
+    fs.readFile( stylPath, 
+        function(err, data) {
+            var styl = data.toString(); 
+            stylus.render(styl, { filename: stylPath },
+                function(err, css){
+                    if (err) 
+                        return callback(err);
+
+                    callback(null, css);
+                });
+        });
+}
+
+function _file_getStylesheet( callback /* (err, data) */ )
 {
     var stylePath = __dirname + '/../../public/stylesheets/preview.css';
     
@@ -64,8 +134,11 @@ function _htmlEssenceForFriend(friend)
         console.error('friend.essence not defined');
         console.error('for friend:');
         console.error(friend);
-        return;
+        return '';
     }
+    
+    if (friend.essence.length == 0)
+        return '';
         
     var result = '';
     var sampleTweet = _.first(friend.essence);
@@ -75,7 +148,7 @@ function _htmlEssenceForFriend(friend)
 
     // Badge
     result += '<div class="badge" style="' + _styleForUserBadge(twitterUser) +'">';
-    result += '<p class="name">' + twitterUser.name + '</p>';
+    result += '<p class="name">' + _toHTML(twitterUser.name) + '</p>';
     result +=  _imgAvatarForUser(twitterUser) ;
     result += '</div>';
     
@@ -157,7 +230,7 @@ function _retweetToHTML(tweet)
     var extra = '';
 
     extra += _imgAvatarForUser(user, 'retweet-avatar');
-    extra += '<span class="retweet-name">' + user.name;
+    extra += '<span class="retweet-name">' + _toHTML(user.name);
     extra += ':&nbsp;</span>';
     
     return _tweetToHTML(srcTweet, extra);
@@ -181,7 +254,7 @@ function _tweetToHTML(tweet, extra)
     if (extra)
         result += extra;
     
-    result += tweet.text;
+    result += _toHTML(tweet.text);
     result += '</a>'
     
     result += '</div>'
@@ -207,26 +280,3 @@ function _writeTweets(tweets)
     
     return result;
 }
-
-
-    
-if (typeof String.prototype.toHTMLString != 'function') {
-String.prototype.toHTMLString =
-    function (){
-        var result = '';
-
-        for (var i=0; i<this.length; i++)
-        {
-            switch ( this.charCodeAt(i) )
-            {
-                case 10:    result += '<br>';   break;          
-                case 32:    result += '&nbsp;'; break;
-                default:    result += this.charAt(i);
-            }
-        }
-
-        return result;
-
-    };
-}
-

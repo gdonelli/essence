@@ -27,6 +27,7 @@ var 	authentication  = use('authentication')
     ,   twitter         = use('twitter')
     ,   index           = use('index')
     ,   io              = use('io')
+    ,	engine          = use('engine')
     ;
 
 // Startup
@@ -126,6 +127,7 @@ expressServer.listen(app.get('port'),
         console.log("Essence server listening on port " + app.get('port'));
     });
 
+global.appPublicPath = __dirname + '/public';
 
 // ---------------------
 // Socket.io
@@ -154,5 +156,29 @@ app.get( '/friends',
         
     });
 
+engine.start();
 
+var envVars = [
+        'CONSUMER_KEY'
+    ,   'CONSUMER_SECRET'
+    ,   'NODEFLY_ID'
+    ,   'SESSION_SECRET'
+    ,   'SESSION_DB_URL'
+    ,   'EMAIL_ADDRESS'
+    ,   'SMTP_USER'
+    ,   'SMTP_PASSWORD'
+    ,   'SMTP_HOST'
+    ,   'ADMIN_EMAIL_ADDRESS'
+    ,   'ADMIN_TWITTER_ID'
+    ,   'DB_HOST'
+    ,   'DB_PORT'
+    ,   'DB_NAME'
+    ,   'DB_USERNAME'
+    ,   'DB_PASSWORD'
+];
 
+envVars.forEach( 
+    function(name) {
+        assert(process.env[name] != undefined, name + ' not defined' );
+    });
+    
