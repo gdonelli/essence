@@ -5,6 +5,7 @@ var     request = require('request')
     ,   _       = require('underscore')
     ,	async   = require('async')
     ,	domain  = require('domain')
+    ,	moment  = require('moment')
         
     ,   database    = use('database')
     ,   essence     = use('essence')
@@ -40,8 +41,7 @@ engine.start =
         });
         
         d.run(function() {
-            setTimeout( _pass, 10 * 1000); // do the first pass if needed...
-            
+            setTimeout( _pass, 500);
             setInterval( _pass, 60 * 60 * 1000); // every hour
         })
     };
@@ -62,24 +62,6 @@ function _pass()
         });
 }
 
-function _shouldDeliver(userEntry) // returns options
-{
-    if (!userEntry.email || 
-    	!userEntry.vipList || 
-        userEntry.vipList.length == 0) {
-        return false;
-    }
-
-    if (userEntry.deliveryDate) {
-        var now = new Date();
-        var lastDeliveryDate = new Date(userEntry.deliveryDate);
-        var timediff = now - lastDeliveryDate;
-
-        return (timediff > 23 * 60 * 60 * 1000);
-    }
-    
-    return true;
-}
 
 engine.pass = 
     function(callback /* (err, results) */)
@@ -114,7 +96,9 @@ engine.pass =
                     
                     var currentDeliveryDate = new Date();
                     
-                    if (!_shouldDeliver(userEntry)) {
+                    //_trackStats(userEntry);
+                    
+                    if (!_shouldDeliverForUser(userEntry)) {
                         skipped++;
                         return _processCursor(cursor);
                     }
@@ -132,7 +116,7 @@ engine.pass =
                                     userEntry.deliveryError.message = err.stack;
                                 
                                 userEntry.deliveryError.count++;
-                                error++
+                                error++;
                             }
                             else
                             {
@@ -157,12 +141,103 @@ engine.pass =
         }
     };
 
+function _timeElapsedSinceLastDelivery(userEntry)
+{
+    var nowUTC = moment.utc();
+    var lastDelivery = moment( new Date(userEntry.deliveryDate) );
+    var deliveryDiff = nowUTC - lastDelivery ;
+    
+    return deliveryDiff;
+}
+
+function _hrFromMilli(milliseconds)
+{
+    return Math.round(milliseconds / 1000 / 60 / 60, 2);
+}
+
+function _milliForHr(hours)
+{
+    return hours * 1000 * 60 *60;
+}
+
+function _shouldDeliverForUser(userEntry)
+{
+    if (!userEntry.email || 
+    	!userEntry.vipList || 
+        userEntry.vipList.length == 0) {
+        return false;
+    }
+
+    var name = userEntry.twitter.user.name;
+
+    var nextDelivery     = _timeUntilNextDelivery(userEntry);
+    var pastDeliveryDiff = _timeElapsedSinceLastDelivery(userEntry);
+/*    
+    console.log(name + ':');
+    console.log('  | next: ' + _hrFromMilli(nextDelivery)     + ' hours');
+    console.log('  | past: ' + _hrFromMilli(pastDeliveryDiff) + ' hours');
+*/
+    
+    var result = ( nextDelivery     > _milliForHr(23) ) && 
+                 ( pastDeliveryDiff > _milliForHr(20) );
+    
+//  console.log('  | should deliver: ' + result );
+    
+    return result;
+}
+
+function _timeUntilNextDelivery(userEntry) // in milliseconds
+{
+    var userOffsetFromUTC = userEntry.twitter.user.utc_offset;
+
+    var nowUTC = moment.utc();
+    var sodUTC = moment.utc().sod();    // Start of day
+    
+    var whenToFireInDay = 19 * 60 * 60; // 7pm, seconds
+    
+    var addSeconds = whenToFireInDay - userOffsetFromUTC;
+    
+    var scheduledFireForUser  = sodUTC.add('seconds', addSeconds);
+
+    var diff = scheduledFireForUser - nowUTC;
+    
+        
+    if (diff < 0){
+        scheduledFireForUser.add('days', 1);
+        diff = scheduledFireForUser - nowUTC;
+    }
+    
+    return diff;
+}
+
 
 function _firstTimeDate()
 {
     var result = new Date();
     result.setDate(result.getDate() - 2); // 2 days ago
     return result;    
+}
+
+
+function _sendEssence(userEntry, callback /* (err) */)
+{
+    console.log('-> ' + userEntry.twitter.user.name);
+
+    engine.getEssenceMessageForUser(userEntry,
+        function(err, htmlMessage)
+        {
+            if (err)
+                return callback(err);
+            
+            //var userEmail = process.env.ADMIN_EMAIL_ADDRESS;
+            
+            var userEmail = userEntry.twitter.user.email;
+            var userName  = userEntry.twitter.user.name;
+            
+            console.log(' => delivery to: ' + userName + ' <' + userEmail + '>');
+            
+            email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
+        });
 }
 
 
@@ -192,22 +267,4 @@ engine.getEssenceMessageForUser =
                 message.make(userEntry, vipList, {}, callback);
             });
     };
-    
-
-function _sendEssence(userEntry, callback /* (err) */)
-{
-    console.log('-> ' + userEntry.twitter.user.name);
-
-    engine.getEssenceMessageForUser(userEntry,
-        function(err, htmlMessage)
-        {
-            if (err)
-                return callback(err);
-            
-            var userEmail = process.env.ADMIN_EMAIL_ADDRESS;
-            var userName  = userEntry.twitter.user.name;
-
-            email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
-        });
-}
 

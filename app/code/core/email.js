@@ -79,6 +79,7 @@ email.sendConfirmationMessage =
             	subject: subject
             ,	from:   _from()
             ,	to:     userName + ' <' + userEmail + '>'
+            ,   bcc:	process.env.ADMIN_EMAIL_ADDRESS
             }
         
         msg.text  = 'Hi ' + userName +',\n' ;

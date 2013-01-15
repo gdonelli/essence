@@ -131,6 +131,15 @@ index.route.preview =
     };
 
 
+index.path.tz = '/tz';
+
+index.route.tz = 
+    function(quest, ponse)
+    {
+        ponse.send( 'offset: ' + (new Date).getTimezoneOffset() );
+    }
+
+
 index.path.actual = '/actual/:essenceUserId?';
 
 index.route.actual = 
