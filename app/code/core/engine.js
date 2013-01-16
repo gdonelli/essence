@@ -12,6 +12,9 @@ var     request = require('request')
     ,	authentication = use('authentication')
     ,	message = use('message')
     ,	email   = use('email')
+    
+    ,   package = require('./../../package.json')
+
 
     ;
 
@@ -56,8 +59,8 @@ function _pass()
                 console.error(err);
             }
             else {
-                console.log('engine.pass results:');
-                console.log(results);
+                console.log('engine.pass v' + package.version + ' results:');
+                console.log(results );
             }
         });
 }
@@ -172,6 +175,7 @@ function _shouldDeliverForUser(userEntry)
 
     var nextDelivery     = _timeUntilNextDelivery(userEntry);
     var pastDeliveryDiff = _timeElapsedSinceLastDelivery(userEntry);
+    
 /*    
     console.log(name + ':');
     console.log('  | next: ' + _hrFromMilli(nextDelivery)     + ' hours');
@@ -185,6 +189,8 @@ function _shouldDeliverForUser(userEntry)
     
     return result;
 }
+
+
 
 function _timeUntilNextDelivery(userEntry) // in milliseconds
 {
@@ -201,7 +207,6 @@ function _timeUntilNextDelivery(userEntry) // in milliseconds
 
     var diff = scheduledFireForUser - nowUTC;
     
-        
     if (diff < 0){
         scheduledFireForUser.add('days', 1);
         diff = scheduledFireForUser - nowUTC;
@@ -231,7 +236,7 @@ function _sendEssence(userEntry, callback /* (err) */)
             
             //var userEmail = process.env.ADMIN_EMAIL_ADDRESS;
             
-            var userEmail = userEntry.twitter.user.email;
+            var userEmail = userEntry.email;
             var userName  = userEntry.twitter.user.name;
             
             console.log(' => delivery to: ' + userName + ' <' + userEmail + '>');

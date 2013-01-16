@@ -28,29 +28,22 @@ message.make =
                 result += '<!DOCTYPE html><html>';
                 result += '<head>';
                 result += '<meta charset="utf-8">';
-                result += '<style type="text/css">';
-                result += css;
-                result += '</style>';
+
                 result += '</head>';
 
                 result += '<body>';
+                
+                result += _tag('body', '<div>'); // div container
 
-                result += '<div class="header">';
-                result += '<h1>Essence</h1>';
+                result += _header(options);
                 
-                if (options && options.subtitle)
-                    result += '<h2>(' + options.subtitle + ')</h2>';
-                
-                result += '</div>';
-                        
                 vipList.forEach(
                     function(friendEntry) {
                         result += _htmlEssenceForFriend(friendEntry);
                     });
+                
+                result += _footer(userEntry);
 
-                result += '<div class="footer">';
-                result += '<p>That&rsquo;s it ' + _toHTML(userEntry.twitter.user.name) + '</p>'
-                result += '<p>What do you think about Essence?</p>';
                 result += '</div>';
                 
                 result += '</body>';
@@ -59,7 +52,34 @@ message.make =
                 callback(null, result);
             });
     };
+
+function _header(options)
+{
+    var result = '';
     
+    result += '<div>';
+    result += _tag('h1', '<h1>Essence</h1>');
+    
+    if (options && options.subtitle)
+        result += _tag('h2', '<h2>(' + options.subtitle + ')</h2>');
+    
+    result += '</div>';
+    
+    return result;
+}
+
+function _footer(userEntry)
+{
+    var result = '';
+
+    result += _tag('.footer', '<div>');
+    result += '<p>That&rsquo;s it ' + _toHTML(userEntry.twitter.user.name) + '</p>'
+    result += '<p>What do you think about Essence?</p>';
+    result += '</div>';
+
+    return result;
+}
+
 var _encoder;
 
 function _htmlEncoder()
@@ -81,6 +101,75 @@ message.stringToHTML =
         return _toHTML(string);
     }
 
+
+function _tag(styleKey, htmlCode)
+{
+    var closeTagIndex = htmlCode.indexOf('>');
+    var fstSpaceIndex = htmlCode.indexOf(' ');
+    var breakIndex;
+    
+    if (fstSpaceIndex < 0)
+    {
+        if (closeTagIndex >= 0)
+            breakIndex = closeTagIndex;
+    }
+    else
+    {
+        if (fstSpaceIndex < closeTagIndex)
+            breakIndex = fstSpaceIndex;
+        else
+            breakIndex = closeTagIndex;
+    }
+    
+    if (!breakIndex)
+        throw new Error('cannot find where to insert style in: ' + htmlCode);
+    
+       
+    var fstPart = htmlCode.substring(0, breakIndex);
+    var sndPart = htmlCode.substring(breakIndex, htmlCode.length);
+    
+//    console.log('htmlCode: ' + htmlCode);
+//    console.log('fstPart: ' + fstPart);
+//    console.log('sndPart: ' + sndPart);
+    
+    return fstPart + ' style=\'' + _getStyle(styleKey) + '\'' + sndPart;
+}
+
+//TODO: caching
+function _getStyle(key) // works for css file rendered by styl
+{
+    var indexOfKey = -1;
+    var augmentedKey = key + ' {';
+
+    if (!_messageCSS)
+        throw new Error('_messageCSS is undefined');
+    
+    if ( _messageCSS.indexOf(augmentedKey) == 0)
+        indexOfKey = 0;
+    else
+    {
+        augmentedKey = '}\n' + key + ' {';
+        indexOfKey = _messageCSS.indexOf(augmentedKey);
+    }
+    
+    if (indexOfKey < 0)
+        throw new Error('cannot find style for: ' + key);
+    
+    var endOfStyle = _messageCSS.indexOf('}', indexOfKey + 1);
+
+    if (endOfStyle < 0)
+        throw new Error('cannot endOfStyle for: ' + indexOfKey);
+
+    var css = _messageCSS.substring(indexOfKey + augmentedKey.length, endOfStyle);
+
+    var lines = css.split('\n');
+    var lines = _.map(lines, function(str) { return str.trim(); } );
+    
+    var result = '';
+    lines.forEach( function(str) { result += str + ' '; } );
+    
+    return result.trim();
+}
 
 
 var _messageCSS;
@@ -115,8 +204,12 @@ function _getStylesheet( filename, callback /* (err, css) */ )
                 function(err, css){
                     if (err) 
                         return callback(err);
-
-                    callback(null, css);
+                    
+                    process.nextTick(
+                            function() {
+                                callback(null, css);
+                            }
+                        );
                 });
         });
 }
@@ -144,15 +237,19 @@ function _htmlEssenceForFriend(friend)
     var sampleTweet = _.first(friend.essence);
     var twitterUser = sampleTweet.user;
     
-    result += '<div class="user-essence" style="' + _styleForUser(twitterUser) +'">' ;
+    // class="user-essence"
+    result += '<div style="' + _styleForUser(twitterUser) +'">' ;
 
     // Badge
     result += '<div class="badge" style="' + _styleForUserBadge(twitterUser) +'">';
-    result += '<p class="name">' + _toHTML(twitterUser.name) + '</p>';
+    
+    result += _tag('.user-essence .badge .name', '<p>' + _toHTML(twitterUser.name) + '</p>');
     result +=  _imgAvatarForUser(twitterUser) ;
+    
     result += '</div>';
     
-    result += '<div class="tweets">';
+    // class="tweets"
+    result += '<div>';
     
     result += _writeTweets(friend.essence);
     
@@ -165,14 +262,14 @@ function _htmlEssenceForFriend(friend)
 
 function _imgAvatarForUser(user, className)
 {
-    var userAvatar = user.profile_image_url; 
-    
-    if (!className)
-        className = 'avatar';
+    var userAvatarURL = user.profile_image_url; 
         
-    var result = '<img class="' + className + '" src="' + userAvatar + '"></img>';
-    
-    return result;
+    if (!className)
+        className = '.user-essence .badge .avatar';
+    else
+        className = '.user-essence .tweets .retweet-avatar';
+        
+    return _tag(className, '<img src="' + userAvatarURL + '"></img>');  
 }
 
 function _styleForUserBadge(user)
@@ -183,16 +280,14 @@ function _styleForUserBadge(user)
     var result = '';
     
     result += 'background-color: #' + backgroundColor + '; ';
-    // result += 'border: 3px solid #' + borderColor + '; ';
-    
+
+    result += _getStyle('.user-essence .badge');
+       
     return result;
 }
 
 function _styleForUser(user)
 {
-    // console.log('_styleForUser user:')
-    // console.log(user);
-
     var backgroundImageURL  = user.profile_background_image_url;
     var backgroundColor     = user.profile_background_color;
     
@@ -210,7 +305,7 @@ function _styleForUser(user)
     
     result += 'color: ' + user.profile_text_color + ';';
     
-    
+    result += _getStyle('.user-essence');
     
     return result; 
 }
@@ -248,8 +343,9 @@ function _tweetToHTML(tweet, extra)
       
     var result = '';
     
-    result += '<div class="tweet">';
-    result += '<a target="_blank" href="' + _tweetLink(tweet) + '" style="' + style + '">';
+    result += _tag('.user-essence .tweets .tweet', '<div>');
+    
+    result += _tag('.user-essence .tweets .tweet a', '<a target="_blank" href="' + _tweetLink(tweet) + '">');
     
     if (extra)
         result += extra;

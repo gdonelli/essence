@@ -2,6 +2,8 @@
 //  Essence
 //
 
+global.appPublicPath = __dirname + '/public';
+
 // Nodefly
 var isApp = ( require.main.filename.indexOf('app.js') > 0 );
 if ( isApp ) { // enable profiling
@@ -27,7 +29,6 @@ var 	authentication  = use('authentication')
     ,   twitter         = use('twitter')
     ,   index           = use('index')
     ,   io              = use('io')
-    ,	engine          = use('engine')
     ;
 
 // Startup
@@ -127,8 +128,6 @@ expressServer.listen(app.get('port'),
         console.log("Essence server listening on port " + app.get('port'));
     });
 
-global.appPublicPath = __dirname + '/public';
-
 // ---------------------
 // Socket.io
 
@@ -156,7 +155,16 @@ app.get( '/friends',
         
     });
 
-engine.start();
+// console.log('SUBDOMAIN: ' + process.env.SUBDOMAIN);
+// console.log('NODE_ENV: '  + process.env.NODE_ENV);
+
+if (process.env.SUBDOMAIN != undefined)
+{
+    var engine  = use('engine');
+    engine.start();
+}
+else
+    console.log('**** Essence\'s engine module was not started. We are not in production enviroment');
 
 var envVars = [
         'CONSUMER_KEY'
@@ -181,4 +189,5 @@ envVars.forEach(
     function(name) {
         assert(process.env[name] != undefined, name + ' not defined' );
     });
+
 

@@ -9,7 +9,6 @@ var     path    = require('path')
     ,   authentication  = use('authentication')
     ,	message         = use('message')
     ,	database		= use('database')
-    ,	engine			= use('engine')
     ;
 
 var index = exports;
@@ -145,6 +144,7 @@ index.path.actual = '/actual/:essenceUserId?';
 index.route.actual = 
     function(quest, ponse)
     {
+        var engine = use('engine');
         var userId = _userIdFromRequest(quest);
         
         database.getUserEntryById(userId,
