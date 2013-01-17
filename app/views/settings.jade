@@ -2,7 +2,7 @@ extends layout
 
 block extra-script
     script(src='/javascripts/ServiceAPI.js')
-    script(src='/javascripts/index_user.js')
+    script(src='/javascripts/settings.js')
     script
         $('body').ready(
             function() {
@@ -18,11 +18,16 @@ block last-section
             b.caret.muted
         ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
             li
+                a(href="/") Home
+            li.disabled
+                a(href="/settings") Settings
+            li.divider
+            li
                 a(href="/logout") Logout
 
 block content
     .user-content
-        h1 Setup
+        h1 Settings
 
         #pick-friends.user-section
             h3 1. Who are your VIPs?
@@ -47,7 +52,7 @@ block content
                         a(onclick='LoadTwitterFriends()') Try again
 
                 .peopleTableRows
-
+            
             #vip-table.peopleTable.pull-right
                 .peopleTableHeader
                     h4 Your VIP list
@@ -68,31 +73,6 @@ block content
                     | (You haven&apos;t received it? 
                     a(onclick='SaveEmail()') We can send it again...
                     | )
-
-
-            // #end.user-section
-                .btn.btn-large.btn-primary Enable Essence
-                
-            // #feedback.user-section
-                h3 3. Problems? Ideas?
-                p.muted We would love to hear from you, talk to us: essence-feedback@gmail.com
             
-            // #preview
-                h3
-                    a(href='/preview') Preview
-                    
-                    
-block other
-    #disconnectModal.modal.hide.fade
-        .modal-header
-            h3 Oops, cannot talk to Essence…
-        .modal-body
-            p We got disconnected from the Essence, you might try to reload the page
-        .modal-footer
-            a.btn(onClick="$('#disconnectModal').modal('hide')") Close
-            a.btn.btn-primary(onClick="window.location.reload()") Reload Page
-
-
-    // #content
-        button(onclick='test()') test button
-
+            #done
+                a.btn.btn-large(href='/') Done

@@ -12,6 +12,8 @@ var querystring = require('querystring')
 
     ,   twitter = use('twitter')
     ,   database= use('database')
+    ,   service = use('service')
+    ,   pages   = use('pages')
     ;
 
 
@@ -21,7 +23,6 @@ authentication.version = package.version;
 
 authentication.path = {};
 authentication.route= {};
-
 
 authentication.path.login = '/login';
 
@@ -169,8 +170,17 @@ authentication.route.loginResponse =
                                 
                                 // console.log('quest.session:');
                                 // console.log(quest.session);
+
+
+                                // if (userEntry.email || )
                                 
-                                ponse.redirect('/');
+                                if ( service.stateForUser(userEntry) == 'NO-EMAIL' ||
+                                     service.stateForUser(userEntry) == 'NO-VIP' )
+                                {
+                                    ponse.redirect(pages.path.settings);
+                                }
+                                else
+                                    ponse.redirect('/');
                             });
                         
                     });
@@ -195,6 +205,7 @@ authentication.middleware =
         var questHeaders = quest.headers;
         var questHost    = questHeaders.host;
         quest.session.host = questHost;
+        
         next();
     };
 

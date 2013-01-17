@@ -143,6 +143,35 @@ database.getCursorOnUsers =
             });
     };
 
+database.removeUserUserWithId =
+    function(idstr, callback /* (err) */)
+    {
+        _getUserCollection(
+            function(err, userCollection)
+            {
+                if (err)
+                    return callback(err);
+                
+                var momgoId;
+                
+                try {
+                    momgoId = mongodb.ObjectID(idstr);
+                }
+                catch(err) {
+                    return callback(err);
+                }
+                
+                userCollection.remove( { _id: momgoId }, { single: true } , 
+                    function(err, numberOfRemovedDocs)
+                    {
+                        if (numberOfRemovedDocs == 0)
+                            return callback(new Error('numberOfRemovedDocs == 0') );
+                            
+                        callback(err);
+                    } );
+            });
+    };
+
 database.forEachUser =
     function(callback /* (err, user) */)
     {

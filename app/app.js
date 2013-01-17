@@ -29,6 +29,7 @@ var 	authentication  = use('authentication')
     ,   twitter         = use('twitter')
     ,   index           = use('index')
     ,   io              = use('io')
+    ,   pages           = use('pages')
     ;
 
 // Startup
@@ -101,6 +102,7 @@ function _addRoutesFromModule(module)
 
 _addRoutesFromModule(index);
 _addRoutesFromModule(authentication);
+_addRoutesFromModule(pages);
 
 
 var routesKeys = Object.keys(routes);
@@ -158,10 +160,12 @@ app.get( '/friends',
 // console.log('SUBDOMAIN: ' + process.env.SUBDOMAIN);
 // console.log('NODE_ENV: '  + process.env.NODE_ENV);
 
+
+var engine  = use('engine');
+engine.start();
+
 if (process.env.SUBDOMAIN != undefined)
 {
-    var engine  = use('engine');
-    engine.start();
 }
 else
     console.log('**** Essence\'s engine module was not started. We are not in production enviroment');

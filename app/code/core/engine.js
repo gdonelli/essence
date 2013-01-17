@@ -105,7 +105,13 @@ engine.pass =
                         skipped++;
                         return _processCursor(cursor);
                     }
-
+                    
+                    if (process.env.SUBDOMAIN == undefined)
+                    {
+                        console.log('will deliver to ' + userEntry.email);
+                        return _processCursor(cursor);
+                    }
+                    
                     _sendEssence(userEntry, 
                         function(err) {
                             if (err) {
@@ -165,25 +171,38 @@ function _milliForHr(hours)
 
 function _shouldDeliverForUser(userEntry)
 {
+    var name = userEntry.twitter.user.name;
+
+    console.log(name + ':');
+
     if (!userEntry.email || 
     	!userEntry.vipList || 
         userEntry.vipList.length == 0) {
+        console.log('  | not setup');
         return false;
     }
 
-    var name = userEntry.twitter.user.name;
 
     var nextDelivery     = _timeUntilNextDelivery(userEntry);
     var pastDeliveryDiff = _timeElapsedSinceLastDelivery(userEntry);
     
-/*    
-    console.log(name + ':');
+    if (userEntry.disabled)
+    {
+        console.log('  | disabled');
+        return false;
+    }
+                    
+
+   
     console.log('  | next: ' + _hrFromMilli(nextDelivery)     + ' hours');
     console.log('  | past: ' + _hrFromMilli(pastDeliveryDiff) + ' hours');
-*/
     
-    var result = ( nextDelivery     > _milliForHr(23) ) && 
-                 ( pastDeliveryDiff > _milliForHr(20) );
+    var result = (  ( nextDelivery     > _milliForHr(23) ) && 
+                    ( pastDeliveryDiff > _milliForHr(20) )) 
+                    
+                    || 
+                    
+                    ( pastDeliveryDiff > _milliForHr(24) );
     
 //  console.log('  | should deliver: ' + result );
     

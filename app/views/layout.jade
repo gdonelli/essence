@@ -24,16 +24,25 @@ html(lang='en')
                 block others-section
                 block last-section
 
-            h3.muted Essence
-                span#beta &nbsp;&alpha;lpha
+            h3.brand
+                a(href='/') Essence
+                    span#beta &nbsp;&alpha;lpha
                 
             hr
         
         block content
-        
-        block other
 
         hr
         
         .footer
             &copy; Bamb Production 2013
+
+        
+        #disconnectModal.modal.hide.fade
+            .modal-header
+                h3 Oops, cannot talk to Essence…
+            .modal-body
+                p We got disconnected from the Essence, you might try to reload the page
+            .modal-footer
+                a.btn(onClick="$('#disconnectModal').modal('hide')") Close
+                a.btn.btn-primary(onClick="window.location.reload()") Reload Page

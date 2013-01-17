@@ -61,14 +61,16 @@ ServiceAPI.prototype._peformService =
                 
                 if (ponse && ponse.hasOwnProperty('error')) {
                     var ponseError = ponse.error;
-                    var err = new Error();
-                    
-                    if ( ponseError && ponseError.message )
-                        err.message = ponseError.message;
+                                       
+                    var err;
+                    if (ponseError)
+                        err = new Error(ponseError);
+                    else
+                        err = new Error();
                         
                     if ( ponseError && ponseError.code )
                         err.code = ponseError.code;
-
+                    
                     callback(err);
                 }
                 else
@@ -118,11 +120,25 @@ ServiceAPI.prototype.confirmEmail =
         return this._peformService( 'service.confirmEmail', { email: email }, callback);
     };
 
+ServiceAPI.prototype.serviceState =
+    function(callback /* (err, ponse) */)
+    {
+        return this._peformService( 'service.serviceState', {}, callback);
+    };
+
+ServiceAPI.prototype.setServiceEnabled =
+    function(value, callback /* (err, ponse) */)
+    {
+        return this._peformService( 'service.setServiceEnabled', { enabled: value }, callback);
+    };
+
+
+
 // Events
 
-ServiceAPI.vipListDidChangeEvent        = 'service.vipListDidChange';
-
-ServiceAPI.emailDidChangeEvent = 'service.emailDidChange';
+ServiceAPI.vipListDidChangeEvent = 'service.vipListDidChange';
+ServiceAPI.emailDidChangeEvent   = 'service.emailDidChange';
+ServiceAPI.stateDidChangeEvent   = 'service.stateDidChange';
 
 ServiceAPI.prototype.on =
     function(event, callback)

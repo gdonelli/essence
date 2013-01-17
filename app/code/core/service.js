@@ -161,15 +161,15 @@ function _updateUserVipList(userEntry, callback)
                 return callback(err);
             }
             
-            io.emitUserEvent(
-                userEntry._id,
-                service.vipListDidChangeEvent,
-                _safeUserEntry(userEntry) );
+            io.emitUserEvent( userEntry._id, service.vipListDidChangeEvent, _safeUserEntry(userEntry) );
+            
+            _emitServiceDidChangeForUser(userEntry);
             
             callback(err, true);
         });
     
 }
+
 
 
 service.event.getUserEntry = 'service.getUserEntry';
@@ -225,6 +225,8 @@ service.socket.confirmEmail =
                                 if (err)
                                     return callback(err);
                                 
+                                _emitServiceDidChangeForUser(userEntry);
+                                
                                 callback(null, true);
                             });
                     });
@@ -266,11 +268,10 @@ service.verifyEmail =
                             return callback( new Error('Failed to confirm user') );
                         else
                         {
-                            io.emitUserEvent(
-                                    userEntry._id
-                                ,	service.emailDidChange
-                                ,	_safeUserEntry(userEntry) );
-
+                            io.emitUserEvent( userEntry._id, service.emailDidChange, _safeUserEntry(userEntry) );
+                            
+                            _emitServiceDidChangeForUser(userEntry);
+                            
                             return callback(null, userEntry.email);
                         }
                     });
@@ -310,6 +311,98 @@ service.getAugmentedVipList =
             });
     };
 
+/*
+    The possible service states:
+        'GOOD'
+        'DISABLED'
+        'NO-EMAIL'
+        'NO-VIP'
+*/
+
+
+service.event.setServiceEnabled = 'service.setServiceEnabled';
+
+service.socket.setServiceEnabled =
+    function(socket, inputData /* { enabled:... } */, callback /* (err) */ )
+    {   
+        var userId = _userIdFromSocket(socket);
+
+        database.getUserEntryById(userId,
+            function(err, userEntry) {
+                if (err)
+                    return callback(err);
+                
+                if (!inputData.hasOwnProperty('enabled'))
+                    return callback( new Error('Expected to have inputData.enabled defined') );
+                    
+                if (inputData.enabled)
+                    delete userEntry.disabled;
+                else
+                    userEntry.disabled = true;
+                    
+                database.saveUserEntry(userEntry, 
+                    function(err, userEntry)
+                    {
+                        callback(err)
+                        
+                        if (!err)
+                            _emitServiceDidChangeForUser(userEntry);
+                    });
+                
+                
+            });
+    };
+
+
+service.event.serviceState = 'service.serviceState';
+
+service.socket.serviceState =
+    function(socket, inputData /* { } */, callback /* (err, state) */ )
+    {   
+        var userId    = _userIdFromSocket(socket);
+        
+        service.serviceState(userId, callback);
+    };
+
+service.stateForUser = _serviceStateFromUser;
+
+function _serviceStateFromUser(userEntry)
+{
+    var state = 'GOOD';
+    
+    if (userEntry.disabled == true)
+        state = 'DISABLED';
+    
+    if (userEntry.email == undefined) 
+        state = 'NO-EMAIL';
+       
+    if (userEntry.vipList == undefined ||
+        userEntry.vipList.length  == 0 )
+        state = 'NO-VIP';
+    
+    return state;
+}
+
+function _emitServiceDidChangeForUser(userEntry)
+{
+    io.emitUserEvent( userEntry._id, service.stateDidChange, _serviceStateFromUser(userEntry) );
+}
+
+service.serviceState =
+    function(userId, callback /* (err, state) */)
+    {
+        database.getUserEntryById(userId,
+            function(err, userEntry) {
+                if (err)
+                    return callback(err);
+                
+                var state = _serviceStateFromUser(userEntry);
+                
+                callback(null, state);
+            });
+    };
+
+
 service.sendEssence =
     function(userId, options, callback /* (err) */) 
     {
@@ -331,7 +424,6 @@ service.sendEssence =
     };
 
 
-
 // Removes the private property
 function _safeUserEntry(userEntry)
 {
@@ -344,7 +436,9 @@ function _safeUserEntry(userEntry)
 }
 
 // TODO: Constant using use module
+
 service.vipListDidChangeEvent = 'service.vipListDidChange';
 service.emailDidChange        = 'service.emailDidChange';
+service.stateDidChange        = 'service.stateDidChange';
 
 

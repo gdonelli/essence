@@ -153,6 +153,9 @@ function _socketListen(socket)
                                     if (err.code)
                                         errObject.errorCode = err.code;
                                     
+                                    // console.error('errObject:');
+                                    // console.error(errObject);
+
                                     return callback(errObject);
                                 }
                                 

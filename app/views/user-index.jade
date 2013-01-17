@@ -1,0 +1,44 @@
+extends layout
+
+block extra-script
+    script(src='/javascripts/ServiceAPI.js')
+    script(src='/javascripts/user-index.js')
+    script(src='/javascripts/spin.min.js')
+    script
+        $('body').ready(
+            function() {
+                SetupUI();
+            });
+
+block last-section
+    li.dropdown
+        a.dropdown-toggle.muted(data-toggle="dropdown", href="#")
+            img#avatar(src=user.profile_image_url_https)
+            = user.screen_name
+            &nbsp;
+            b.caret.muted
+        ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
+            li.disabled
+                a(href="/") Home
+            li
+                a(href="/settings") Settings
+            li.divider
+            li
+                a(href="/logout") Logout
+
+block content
+    .user-content
+        
+        #home-spinner
+        
+        #home-dashboard
+            h1#home-title Essence is up and running
+            
+            #home-controls
+                p#home-subtitle Your Essence will be delivered in the evening daily
+
+                a#enable.btn.btn-large.btn-primary(onclick='enable()')  Enable
+                a#disable.btn.btn-large(onclick='disable()')            Disable
+                
+                a#settings.btn.btn-large(href='/settings') Settings...
+                // a#deactivate(href='/deactivate') Delete your account

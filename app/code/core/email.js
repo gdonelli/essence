@@ -41,6 +41,7 @@ email.sendEssenceTo =
         msg.subject = 'Essence';
         msg.from    = _from();
         msg.to      = userName + ' <' + userEmail + '>';
+        msg.bcc     = process.env.ADMIN_EMAIL_ADDRESS;
         msg.attachment  = [{ 
                 data: htmlMessage 
             ,	alternative:true
