@@ -164,11 +164,14 @@ app.get( '/friends',
 var engine  = use('engine');
 engine.start();
 
+/*
 if (process.env.SUBDOMAIN != undefined)
 {
 }
 else
     console.log('**** Essence\'s engine module was not started. We are not in production enviroment');
+*/
+
 
 var envVars = [
         'CONSUMER_KEY'

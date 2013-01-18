@@ -94,8 +94,8 @@ essence.getAugmentedVipList =
                             return a.essence.length > b.essence.length;
                         });
                     
-                    console.log('Sorted vipList:');
-                    console.log(vipList);
+                    // console.log('Sorted vipList:');
+                    // console.log(vipList);
                     
                     callback(err, vipList);
                 });

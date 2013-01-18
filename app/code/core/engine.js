@@ -1,5 +1,4 @@
 
-
 var     request = require('request')
     ,   assert  = require('assert')
     ,   _       = require('underscore')
@@ -14,15 +13,16 @@ var     request = require('request')
     ,	email   = use('email')
     
     ,   package = require('./../../package.json')
-
-
     ;
+
 
 var engine = exports;
 
-var _queue;
-
-var _concurrency = 2;
+if (process.env.SUBDOMAIN == undefined)
+{
+    engine.debugModeEmail        = true; // send email all to admin, 
+    engine.debugModeDeliveryDate = true; // don't change deliveryDate if set to true
+}
 
 engine.start = 
     function()
@@ -69,9 +69,10 @@ function _pass()
 engine.pass = 
     function(callback /* (err, results) */)
     {
-        var error       = 0;
-        var skipped     = 0;
-        var delivered   = 0;
+        var error           = 0;
+        var skipped         = 0;
+        var delivered       = 0;
+        var deliveredTest   = 0;
 
         database.getCursorOnUsers(
             function(err, cursor)
@@ -91,64 +92,102 @@ engine.pass =
                 {
                     if (err || userEntry == null) {
                         return callback(null, { 
-                                    error:      error
-                                ,   skipped:    skipped
-                                ,   delivered:  delivered
+                                    error:      	error
+                                ,   skipped:        skipped
+                                ,   delivered:      delivered
+                                ,   deliveredTest:  deliveredTest
                                 } );
                     }
                     
-                    var currentDeliveryDate = new Date();
-                    
-                    //_trackStats(userEntry);
-                    
-                    if (!_shouldDeliverForUser(userEntry)) {
-                        skipped++;
-                        return _processCursor(cursor);
-                    }
-                    
-                    if (process.env.SUBDOMAIN == undefined)
-                    {
-                        console.log('will deliver to ' + userEntry.email);
-                        return _processCursor(cursor);
-                    }
-                    
-                    _sendEssence(userEntry, 
-                        function(err) {
-                            if (err) {
-                                if (!userEntry.deliveryError)
-                                    userEntry.deliveryError = { count: 0 };
-                                    
-                                if (err.message)
-                                    userEntry.deliveryError.message = err.message;
-                                    
-                                if (err.stack)
-                                    userEntry.deliveryError.message = err.stack;
-                                
-                                userEntry.deliveryError.count++;
-                                error++;
-                            }
-                            else
-                            {
-                                userEntry.deliveryDate = currentDeliveryDate;
+                    _processUserEntry(userEntry, 
+                        function(state){
+                            if (state == kDeliveryState)
                                 delivered++;
-                            }
-                            
-                            console.log('OK ' + userEntry.twitter.user.name );
-                            
-                            database.saveUserEntry(userEntry, 
-                                function(err, userEntry)
-                                {
-                                    if (err) {
-                                        console.error('Failed to save user entry:');
-                                        console.error(err.stack);
-                                    }
-                                    
-                                    _processCursor(cursor);
-                                });
+                            else if (state == kTestDeliveryState)
+                                deliveredTest++;
+                            else if (state == kSkipState)
+                                skipped++;
+                            else if (state == kErrorState)
+                                error++;
+                            else
+                                console.error('Unknown state retured: ' + state);
+                                
+                            _processCursor(cursor);
                         });
                 });
         }
     };
+
+
+var kDeliveryState      = 'DELIVERY';
+var kTestDeliveryState  = 'TEST-DELIVERY';
+var kSkipState      = 'SKIP';
+var kErrorState     = 'ERROR';
+
+function _processUserEntry(userEntry, callback /* ( state ) */ )
+{
+    var currentDeliveryDate = new Date();
+
+    if (!_shouldDeliverForUser(userEntry))
+        return callback( kSkipState );
+
+/*
+    if (process.env.SUBDOMAIN == undefined) {
+        console.log('will deliver to ' + userEntry.email);
+        return callback(kDeliveryState);
+    }
+*/
+
+    var deliveryOptions = {};
+
+    var state = kDeliveryState;
+
+    if (engine.debugModeEmail){
+        deliveryOptions.email = process.env.ADMIN_EMAIL_ADDRESS;
+        state = kTestDeliveryState;
+    }
+
+    engine.deliverEssenceToUser(userEntry, deliveryOptions,
+        function(err)
+        {
+            if (err) {
+                state = kErrorState;
+            
+                if (!userEntry.deliveryError)
+                    userEntry.deliveryError = { count: 0 };
+                    
+                if (err.message)
+                    userEntry.deliveryError.message = err.message;
+                    
+                if (err.stack)
+                    userEntry.deliveryError.message = err.stack;
+                
+                userEntry.deliveryError.count++;
+            }
+            else {
+                if (!engine.debugModeDeliveryDate) {
+                    userEntry.deliveryDate = currentDeliveryDate;
+                    state = kTestDeliveryState;
+                }
+                    
+                delete userEntry.deliveryError;
+            }
+            
+            console.log('Delivered to: ' + userEntry.email );
+            
+            database.saveUserEntry(userEntry, 
+                function(err, userEntry)
+                {
+                    if (err) {
+                        console.error('Failed to save user entry:');
+                        console.error(err.stack);
+                    }
+                    
+                    callback(state);
+                });
+        });
+}
+
 
 function _timeElapsedSinceLastDelivery(userEntry)
 {
@@ -159,15 +198,60 @@ function _timeElapsedSinceLastDelivery(userEntry)
     return deliveryDiff;
 }
 
+
+function _isTheRightTime(userEntry)
+{
+    var name = userEntry.twitter.user.name;
+
+    var nowUTC = moment.utc();
+    
+    var userOffsetFromUTC = userEntry.twitter.user.utc_offset;
+
+    var nowInUserTime = moment.utc();
+    nowInUserTime.add('seconds', userOffsetFromUTC);
+    
+    var hoursInUserTime = nowInUserTime.hours();
+    
+    var dateFormat = 'HH:mm (D MMM)';
+    // Correct delivery time
+    if ( hoursInUserTime >= 19 && hoursInUserTime <= 20 )
+    {
+        console.log('  | Right time: ' + nowInUserTime.format(dateFormat) );
+        
+        if (!userEntry.deliveryDate){ // we have no delivery date... let's go for it...
+            console.log('  | no delivery date');
+            return true;
+        }
+        
+        var lastDelivery = moment( new Date(userEntry.deliveryDate) );
+        var deliveryDiff = nowUTC - lastDelivery ;
+        
+        var hoursFromLastDelivery = _hrFromMilli(deliveryDiff);
+        
+        console.log('  | last delivery was ' + hoursFromLastDelivery + ' hours ago');
+        
+        // And we haven't just sent it
+        return ( hoursFromLastDelivery > 3)
+    }
+    else
+        console.log('  | Not right time: ' + nowInUserTime.format(dateFormat) );
+
+    
+    return false;
+}
+
+
 function _hrFromMilli(milliseconds)
 {
     return Math.round(milliseconds / 1000 / 60 / 60, 2);
 }
 
+
 function _milliForHr(hours)
 {
     return hours * 1000 * 60 *60;
 }
+
 
 function _shouldDeliverForUser(userEntry)
 {
@@ -182,36 +266,13 @@ function _shouldDeliverForUser(userEntry)
         return false;
     }
 
-    // return true;
-
-    var pastDeliveryDiff = _timeElapsedSinceLastDelivery(userEntry);
-    var nextDelivery     = _timeUntilNextDelivery(userEntry);
-    
-    if (!userEntry.deliveryDate)
-    {
-    	console.log('  | next: ' + _hrFromMilli(nextDelivery)     + ' hours');
-        return nextDelivery > _milliForHr(23);
-    }
-        
-
     if (userEntry.disabled) {
         console.log('  | disabled');
         return false;
     }
-
-    console.log('  | next: ' + _hrFromMilli(nextDelivery)     + ' hours');
-    console.log('  | past: ' + _hrFromMilli(pastDeliveryDiff) + ' hours');
     
-    var result = (  ( nextDelivery     > _milliForHr(23) ) && 
-                    ( pastDeliveryDiff > _milliForHr(20) )) 
-                    
-                    || 
-                    
-                    ( pastDeliveryDiff > _milliForHr(24) );
-    
-    return result;
+    return _isTheRightTime(userEntry);
 }
-
 
 
 function _timeUntilNextDelivery(userEntry) // in milliseconds
@@ -246,27 +307,29 @@ function _firstTimeDate()
 }
 
 
-function _sendEssence(userEntry, callback /* (err) */)
-{
-    console.log('-> ' + userEntry.twitter.user.name);
+engine.deliverEssenceToUser =
+    function(userEntry, options, callback /* (err) */)
+    {
+        console.log('Delivering Essence to: ' + userEntry.twitter.user.name);
 
-    engine.getEssenceMessageForUser(userEntry,
-        function(err, htmlMessage)
-        {
-            if (err)
-                return callback(err);
+        engine.getEssenceMessageForUser(userEntry,
+            function(err, htmlMessage)
+            {
+                if (err)
+                    return callback(err);
+                
+                var userEmail = userEntry.email;
+                var userName  = userEntry.twitter.user.name;
 
-            var userEmail = userEntry.email;
-            
-            // var userEmail = process.env.ADMIN_EMAIL_ADDRESS;
-            
-            var userName  = userEntry.twitter.user.name;
-            
-            console.log(' => delivery to: ' + userName + ' <' + userEmail + '>');
-            
-            email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
-        });
-}
+                // Override user email for debugging and test purposes
+                if (options && options.email)
+                    userEmail = options.email;
+
+                console.log(' => delivery to: ' + userName + ' <' + userEmail + '>');
+                
+                email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
+            });
+    };
 
 
 engine.getEssenceMessageForUser =

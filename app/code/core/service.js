@@ -406,20 +406,12 @@ service.serviceState =
 service.sendEssence =
     function(userId, options, callback /* (err) */) 
     {
-        service.getAugmentedVipList(userId, options,
-            function(err, userEntry, vipList)
-            {
+        database.getUserEntryById(userId,
+            function(err, userEntry) {
                 if (err)
                     return callback(err);
                 
-                message.make(userEntry, vipList, {},
-                    function(err, htmlMessage)
-                    {
-                        if (err)
-                            return callback(err);
-                       
-                        email.sendEssence(userEntry, htmlMessage, callback);
-                    });
+                engine.deliverEssenceToUser(userEntry, {}, callback);
             });
     };
 
