@@ -138,6 +138,32 @@ pages.route.destroyList =
             });
     };
 
+pages.path.cleanDeliveryDate = '/admin/cleanDeliveryDate/:essenceUserId?';
+
+pages.route.cleanDeliveryDate = 
+    function(quest, ponse)
+    {
+        var userId = _userIdFromRequest(quest);
+        
+        database.getUserEntryById(userId,
+            function(err, userEntry)
+            {
+                if (err)
+                    return ponse.send(err.message);
+                
+                delete userEntry.deliveryDate;
+                
+                database.saveUserEntry(userEntry,
+                    function(err, userEntry) 
+                    {
+                        if (err)
+                            return ponse.send(err.message);
+                            
+                        ponse.send('OK');
+                    });
+            });
+    };
+
     
 pages.path.preview = '/preview/:essenceUserId?';
 
@@ -222,6 +248,7 @@ pages.route.allusers =
                 row += '<td><a target="_blank" href="/preview/' + user._id + '">preview</a></td>';
                 row += '<td><a target="_blank" href="/actual/' + user._id + '">actual</a></td>';
                 row += '<td><a target="_blank" href="/admin/send/' + user._id + '">send</a></td>';
+                row += '<td><a target="_blank" href="/admin/cleanDeliveryDate/' + user._id + '">clean deliveryDate</a></td>';
 
                 row += '</tr>';
                 

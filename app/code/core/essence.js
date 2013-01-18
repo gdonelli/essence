@@ -45,7 +45,7 @@ function _getTweetsSinceDate(tweets, sinceDate)
 function _yesterday()
 {
     var result = new Date();
-    result.setDate(result.getDate() - 2);
+    result.setDate(result.getDate() - 1);
     return result;    
 }
 
@@ -74,6 +74,8 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
         } );
 }
 
+// Adds tweets to vipList
+
 essence.getAugmentedVipList =
     function(oauth, userEntry, options, callback /* (err, augmentedVipList) */ )
     {
@@ -86,7 +88,15 @@ essence.getAugmentedVipList =
             ,	function(err, results) {
                     if (err)
                         return callback(err);
-                        
+                    
+                    vipList = vipList.sort(
+                        function(a, b){
+                            return a.essence.length > b.essence.length;
+                        });
+                    
+                    console.log('Sorted vipList:');
+                    console.log(vipList);
+                    
                     callback(err, vipList);
                 });
     }

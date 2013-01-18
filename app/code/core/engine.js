@@ -45,7 +45,7 @@ engine.start =
         
         d.run(function() {
             setTimeout( _pass, 500);
-            setInterval( _pass, 60 * 60 * 1000); // every hour
+            setInterval( _pass, 30 * 60 * 1000); // every 1/2 hour
         })
     };
     
@@ -182,18 +182,23 @@ function _shouldDeliverForUser(userEntry)
         return false;
     }
 
+    // return true;
 
-    var nextDelivery     = _timeUntilNextDelivery(userEntry);
     var pastDeliveryDiff = _timeElapsedSinceLastDelivery(userEntry);
+    var nextDelivery     = _timeUntilNextDelivery(userEntry);
     
-    if (userEntry.disabled)
+    if (!userEntry.deliveryDate)
     {
+    	console.log('  | next: ' + _hrFromMilli(nextDelivery)     + ' hours');
+        return nextDelivery > _milliForHr(23);
+    }
+        
+
+    if (userEntry.disabled) {
         console.log('  | disabled');
         return false;
     }
-                    
 
-   
     console.log('  | next: ' + _hrFromMilli(nextDelivery)     + ' hours');
     console.log('  | past: ' + _hrFromMilli(pastDeliveryDiff) + ' hours');
     
@@ -203,8 +208,6 @@ function _shouldDeliverForUser(userEntry)
                     || 
                     
                     ( pastDeliveryDiff > _milliForHr(24) );
-    
-//  console.log('  | should deliver: ' + result );
     
     return result;
 }
@@ -252,10 +255,11 @@ function _sendEssence(userEntry, callback /* (err) */)
         {
             if (err)
                 return callback(err);
-            
-            //var userEmail = process.env.ADMIN_EMAIL_ADDRESS;
-            
+
             var userEmail = userEntry.email;
+            
+            // var userEmail = process.env.ADMIN_EMAIL_ADDRESS;
+            
             var userName  = userEntry.twitter.user.name;
             
             console.log(' => delivery to: ' + userName + ' <' + userEmail + '>');

@@ -34,6 +34,8 @@ function _smtpServer()
 email.sendEssenceTo =
     function(userName, userEmail, htmlMessage, callback /* (err) */ )
     {
+        // console.log('email.sendEssenceTo: ' + userEmail );
+
         if (!userEmail)
             return callback(new Error('No valid email given'));
             
@@ -48,6 +50,8 @@ email.sendEssenceTo =
             }];
             
         msg.text = 'Essence is delivered as rich HTML attached to this email';
+        
+        console.log('msg.to: ' + msg.to );
         
         email.send(msg, callback);
     };
