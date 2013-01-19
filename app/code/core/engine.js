@@ -169,10 +169,10 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
                 userEntry.deliveryError.count++;
             }
             else {
-                if (engine.debugModeDeliveryDate) {
-                    userEntry.deliveryDate = currentDeliveryDate;
+                if (engine.debugModeDeliveryDate)
                     state = kTestDeliveryState;
-                }
+                else
+                    userEntry.deliveryDate = currentDeliveryDate;
                     
                 delete userEntry.deliveryError;
             }
