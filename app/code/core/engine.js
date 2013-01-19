@@ -27,6 +27,9 @@ if (process.env.SUBDOMAIN == undefined)
     engine.debugModeDeliveryDate = true; // don't change deliveryDate if set to true
 }
 
+console.log('engine.debugModeEmail: '        + engine.debugModeEmail);
+console.log('engine.debugModeDeliveryDate: ' + engine.debugModeDeliveryDate);
+
 engine.start = 
     function()
     {

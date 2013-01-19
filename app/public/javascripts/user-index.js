@@ -1,20 +1,6 @@
 
 function ________private________(){}
 
-var serviceAPI = new ServiceAPI();
-
-serviceAPI.on('disconnect',
-    function()
-    {
-        $('#disconnectModal').modal('show');
-    });
-
-serviceAPI.on('connect',
-    function()
-    {
-        $('#disconnectModal').modal('hide');
-    });
-
 function _showSpinner()
 {
     var opts = {
@@ -83,17 +69,39 @@ function _updateState(state)
     $('#home-dashboard').css('visibility', 'visible');
 }
 
+
+var serviceAPI = new ServiceAPI();
+
+serviceAPI.on('disconnect',
+    function()
+    {
+        $('#disconnectModal').modal('show');
+    });
+
+serviceAPI.on('connect',
+    function()
+    {
+        $('#disconnectModal').modal('hide');
+    });
+
 function SetupUI()
 {
     _showSpinner();
-
+        
     serviceAPI.on(ServiceAPI.stateDidChangeEvent, _updateState);
-    
+            
     serviceAPI.serviceState(
-        function(err, state) {
-            _updateState(state);
+        function(err, state)
+        {
+            if (err) {
+                console.error('Error getting state:');
+                console.error(err);
+            }
+            else
+                _updateState(state);
         });
 }
+
 
 function _serviceSwitch(button_jq, enabled)
 {

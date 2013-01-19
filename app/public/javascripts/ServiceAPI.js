@@ -3,7 +3,7 @@
 // serviceAPI.js
 //
 
-function ServiceAPI()
+function ServiceAPI(didConnectCallback /* (err) */)
 {
     this.socket = io.connect();
 
@@ -40,6 +40,8 @@ ServiceAPI.prototype._createProgressEvent =
 ServiceAPI.prototype._peformService =
     function(name, data, callback, progress)
     {
+        // console.log('ServiceAPI.prototype._peformService');
+
         var progressEmitter = new io.EventEmitter();
           
         var progressEvent   = this._createProgressEvent();
@@ -54,9 +56,14 @@ ServiceAPI.prototype._peformService =
             }, 15000);
 
         // Actual RPC
+        
+        // console.log('socket.emit: ' + name);
+        
         this.socket.emit(name, data,
             function(ponse)
             {
+                // console.log('socket.emit back: ' + name);
+                 
                 this.socket.removeAllListeners(progressEvent);
                 
                 if (ponse && ponse.hasOwnProperty('error')) {

@@ -14,6 +14,8 @@ var ioserver;
 
 io.sockets = null;
 
+io.debug = true;
+
 var eventRoutes = {};
 
 io.emitUserEvent =
@@ -43,7 +45,9 @@ io.setup =
                 socket.session = socket.handshake.session;
                 
                 var userIdstr = '' + socket.session.user._id;
-                console.log('Socket connection from userId: ' + userIdstr );
+                
+                if (io.debug)
+                    console.log('Socket connection from userId: ' + userIdstr );
                 
                 // Put all user sockets in the same room
                 socket.join(userIdstr);
@@ -141,6 +145,9 @@ function _socketListen(socket)
                         ioroute(socket, data,
                             function(err, data)
                             {
+                                if (io.debug)
+                                    console.log('socket route for event: ' + key);
+                                    
                                 if (err) {
                                     console.error('Socket.io Route Error:');
                                 	console.error(err);
