@@ -18,6 +18,9 @@ var     request = require('request')
 
 var engine = exports;
 
+engine.debugModeEmail        = false;
+engine.debugModeDeliveryDate = false;
+
 if (process.env.SUBDOMAIN == undefined)
 {
     engine.debugModeEmail        = true; // send email all to admin, 
@@ -137,11 +140,9 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
         return callback(kDeliveryState);
     }
 */
-
-    var deliveryOptions = {};
-
     var state = kDeliveryState;
-
+    var deliveryOptions = {};
+    
     if (engine.debugModeEmail){
         deliveryOptions.email = process.env.ADMIN_EMAIL_ADDRESS;
         state = kTestDeliveryState;
@@ -165,7 +166,7 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
                 userEntry.deliveryError.count++;
             }
             else {
-                if (!engine.debugModeDeliveryDate) {
+                if (engine.debugModeDeliveryDate) {
                     userEntry.deliveryDate = currentDeliveryDate;
                     state = kTestDeliveryState;
                 }
