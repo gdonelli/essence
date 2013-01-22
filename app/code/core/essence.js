@@ -39,6 +39,35 @@ function _getTweetsSinceDate(tweets, sinceDate)
     
     var result = tweets.slice(0, lastIndex);
     
+    
+    return result;
+}
+
+/*  Options:
+        includeResponses
+        maxCount
+        sinceDate
+*/
+
+function _filterTweets(tweets, options)
+{
+    var result = tweets;
+    
+    if (options.sinceDate)
+        result = _getTweetsSinceDate(tweets, options.sinceDate);
+    
+    if (!options.includeResponses)
+        result = _.filter(result, 
+            function(tweet) {
+                if (tweet.in_reply_to_status_id)
+                    return options.includeResponses;
+                
+                return true;
+            });
+    
+    if (options.maxCount)
+        result = _.first(result, options.maxCount);
+    
     return result;
 }
 
@@ -56,17 +85,23 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
     a.assert_f(callback);
     a.assert_def(vipEntry.id);
 
+    // console.log('about to twitter.statuses.user_timeline');
+    
     twitter.statuses.user_timeline(oauth, vipEntry.id, 
         function(err, tweets) {
             if (err)
                 return callback(err);
                 
-            var relevantTweets;
+            var filterOptions = {};
+            
+            filterOptions.includeResponses = false;
             
             if (options && options.sinceDate)
-                relevantTweets = _getTweetsSinceDate(tweets, options.sinceDate);
+                filterOptions.sinceDate = options.sinceDate;
             else
-                relevantTweets = _.first(tweets, 10);
+                filterOptions.maxCount = 5;
+                
+            var relevantTweets = _filterTweets(tweets, filterOptions);
             
             vipEntry.essence = relevantTweets;
             
@@ -86,6 +121,9 @@ essence.getAugmentedVipList =
                     _fillUpEssenceForVip(oauth, vipEntry, options, callback); 
                 }
             ,	function(err, results) {
+                    // console.log('->essence.getAugmentedVipList err:');
+                    // console.error(err);
+                    
                     if (err)
                         return callback(err);
                     
@@ -93,10 +131,7 @@ essence.getAugmentedVipList =
                         function(a, b){
                             return a.essence.length > b.essence.length;
                         });
-                    
-                    // console.log('Sorted vipList:');
-                    // console.log(vipList);
-                    
+                                       
                     callback(err, vipList);
                 });
     }

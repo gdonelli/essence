@@ -26,8 +26,10 @@ index.route.index =
             !quest.session.version )
         {
             // Outside page
-
-            ponse.render('index', { title: 'Essence' });
+            ponse.render('index', { 
+                	title:   'Essence', 
+                    options: {}
+                });
         }
         else if (quest.session.version == authentication.version)
         {
@@ -51,8 +53,8 @@ function _userIndex(quest, ponse)
     var title = 'Essence (@' + user.screen_name + ')';
     
     ponse.render('user-index', {
-            title: title,
-            user: user
+            title:      title,
+            user:       user,
         } );        
 }
 

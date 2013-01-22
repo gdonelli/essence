@@ -15,58 +15,86 @@ h2
     font-weight: normal
             
 .user-essence
-    padding: 8px;
+    padding: 1px;
     margin: 8px 0;
+    border-radius: 6px
+    text-align: left
+
+.badge
+    text-align: left
+    position:   relative
+    display:    inline-block
+    padding:    8px 32px 8px 8px
+    border-radius: 3px
+    
+.name
+    display: inline-block
+    padding: 0
+    margin:  0
+    position:   relative
+    margin-top: 24px
+    
+    font-size: 18px
+    font-weight: bold
+    background-color:yellow;
+    
+.avatar
+    margin: 8px
+    width:  48px;
+    height: 48px;
+    float:  left;
     border-radius: 5px
+
+
+.tweets
     text-align: left
     
-    .badge
-        text-align: left
-        position:   relative
-        display:    inline-block
-        padding:    8px 32px 8px 8px
-        border-radius: 3px
-        
-        .name
-            display: inline-block
-            padding: 0
-            margin:  0
-            position:   relative
-            margin-top: 24px
-            
-            font-size: 18px
-            font-weight: bold
-            
-        .avatar
-            margin: 8px
-            width:  48px;
-            height: 48px;
-            float:  left;
-            border-radius: 5px
+    margin:  8px
+    padding: 0px
 
-    .tweets
-        text-align: left
-        
-        .tweet
-            margin:   6px 0px 
-            border-radius: 3px
-            padding: 10px
-            background-color: rgba(250, 250, 250, 0.94)
-            
-            a
-                text-decoration: none
-                color: black
-        
-        .retweet-name
-            font-weight: bold
-            
-        .retweet-avatar
-            width:  20px
-            height: 20px
-            border-radius: 3px
-            margin: 0 4px
-            position: relative
-            top:    2px
+    border-radius: 4px
+    //overflow: hidden
+    background-color: rgba(255, 255, 255, 0.25)
+    border: 1px solid white
+
+tweet()
+    padding: 8px
+    margin-bottom: 1px
+    background-color: rgba(250, 250, 250, 0.95)
+    
+    border-top:  1px solid white
+    border-bottom:     1px solid rgb(230, 230, 230)
+    text-shadow:    0px 1px 0px white
+
+.tweet
+    tweet()   
+
+.last-tweet
+    tweet()
+    // background-color: red
+    border-bottom: none
+    margin-bottom: 0
+    
+.first-tweet
+    tweet()
+    border-top: none
+    // background-color: red
+
+a
+    text-decoration: none
+    color: black
+
+   
+.retweet-name
+    font-weight: bold
+    
+.retweet-avatar
+    width:  20px
+    height: 20px
+    border-radius: 3px
+    margin: 0 4px
+    position: relative
+    top:    2px
 
 
 .footer

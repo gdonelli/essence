@@ -296,13 +296,17 @@ service.destroyEssenceList =
 service.getAugmentedVipList = 
     function(userId, options, callback /* (err, userEntry, list) */) 
     {
+        // console.log('about to service.getAugmentedVipList');
+        
         database.getUserEntryById(userId,
             function(err, userEntry) {
                 if (err)
                     return callback(err);
 
                 var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
-                
+
+                // console.log('about to essence.getAugmentedVipList');
+
                 essence.getAugmentedVipList(oauth, userEntry, options,
                     function(err, list)
                     {

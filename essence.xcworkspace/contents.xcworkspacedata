@@ -20,6 +20,9 @@
       location = "group:secret">
    </FileRef>
    <FileRef
+      location = "group:test">
+   </FileRef>
+   <FileRef
       location = "group:tools">
    </FileRef>
 </Workspace>

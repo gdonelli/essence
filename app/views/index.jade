@@ -28,7 +28,7 @@ block extra-script
             var spinner = new Spinner( opts ).spin();
             $('#signup-spinner').append(spinner.el);
             
-            setTimeout( RenableLogin, 5000 );
+            setTimeout( RenableLogin, 11000 );
         }
 
         function RenableLogin()
@@ -53,3 +53,15 @@ block content
             img#white-bird(src='/images/twitter-white.png')
             | Sign in with Twitter
             #signup-spinner
+        
+        - if (options.err) {
+
+        #login-failed.alert.alert-error.alert-block
+            h4 Login failed, you may try again
+            p If this issue persist please 
+                a(href='javascript:SendEmailToFeedback()') contact us 
+                | and report this error:
+                p= options.err.stack
+
+        - }
+                

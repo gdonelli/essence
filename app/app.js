@@ -6,7 +6,8 @@ global.appPublicPath = __dirname + '/public';
 
 // Nodefly
 var isApp = ( require.main.filename.indexOf('app.js') > 0 );
-if ( isApp ) { // enable profiling
+
+if ( isApp && process.env.SUBDOMAIN != undefined ) { // enable profiling
     console.log(' [ nodefly running... ] ');
     require('nodefly').profile(
             process.env.NODEFLY_ID
@@ -161,8 +162,8 @@ app.get( '/friends',
 // console.log('NODE_ENV: '  + process.env.NODE_ENV);
 
 
-var engine  = use('engine');
-engine.start();
+// var engine  = use('engine');
+// engine.start();
 
 /*
 if (process.env.SUBDOMAIN != undefined)

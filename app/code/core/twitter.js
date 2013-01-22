@@ -8,11 +8,14 @@ var     request = require('request')
     ,	path    = require('path')
     ,	fs      = require('fs')
     ,	EventEmitter = require('events').EventEmitter
+    ,   crypto  = require('crypto')
+    
+    ,	cache   =  use('cache')
     ;
 
 var twitter = exports;
 
-
+twitter.api         = {};
 twitter.statuses	= {};
 twitter.users		= {};
 twitter.friends		= {};
@@ -21,54 +24,162 @@ twitter.lists		= {};
 twitter.lists.members = {};
 
 
-twitter.get =
+var TWITTER_TIMEOUT = 15000;
+
+function _cleanJSONStr(string)
+{
+    return string.replace('{', '').replace('}', '').replace(' ', '');
+}
+
+
+function _twitterAPIHash(method, oauth, apiURL, params)
+{
+    var oauthStr  = oauth.token + '-' + oauth.token_secret;
+    var paramsStr = _cleanJSONStr( JSON.stringify(params) );
+    var apiURLStr = apiURL.replace('https://', '').replace('api.twitter.com/1.1/', '');
+    
+    var sha1 = crypto.createHash('sha1');
+
+    sha1.update(method);    
+    sha1.update(oauthStr);
+    sha1.update(paramsStr);
+    sha1.update(apiURLStr);
+    
+    return sha1.digest("hex");
+}
+
+
+function _twitter_api(method, oauth, options, callback)
+{
+    options.timeout = TWITTER_TIMEOUT;
+    options.oauth   = oauth;
+    options.json    = true;
+    
+    request[method](options, 
+        function(err, ponse, payload)
+        {
+            if (err) {
+                console.error('twitter.get failed for API:');
+                console.error(options.url);
+                console.error('error:');
+                console.error(err);
+                
+                return callback(err);
+            }
+            else if (ponse.statusCode != 200)
+            {
+                var err;
+                if (ponse.statusCode == 429)
+                    err = new Error('Too Many Requests - Rate Limit');
+                else
+                    err = new Error('Twitter API GET status: ' + ponse.statusCode);
+                
+                err.code = ponse.statusCode;
+                
+                return callback(err);
+            }
+
+            callback(null, payload);
+        });
+}
+
+
+twitter.api.get =
     function(oauth, apiURL, params, callback /* (err, data) */)
     {
         var theURL = apiURL;
         theURL += '?';
         theURL += querystring.stringify(params);
+        
+        _twitter_api('get', oauth, { url:theURL }, callback);
+    };
+
+
+twitter.api.post =
+    function(oauth, apiURL, params, callback /* (err, data) */)
+    {
+        var body = querystring.stringify(params);
+
+        _twitter_api('post', oauth, { url:apiURL, body:body }, callback);
+    };
+
+
+function _twitter_cache_api(method, oauth, apiURL, params, callback )
+{
+    var hash        = _twitterAPIHash(method, oauth, apiURL, params);
+    var cacheValue  = cache.valueForKey(hash);
     
-        request.get( { url:theURL, oauth:oauth, json:true },
-            function(err, ponse, payload)
-            {
-                if (err) {
-                    console.error('twitter.get failed for API:');
-                    console.error(theURL);
-                    console.error('error:');
-                    console.error(err);
-                    return callback(err);
-                }
-                else if (ponse.statusCode != 200)
-                {
-                    var err;
-                    if (ponse.statusCode == 429)
-                        err = new Error('Too Many Requests - Rate Limit');
-                    else
-                        err = new Error('Twitter API GET status: ' + ponse.statusCode);
-                    
-                    err.code = ponse.statusCode;
-                    return callback(err);
-                }
-                
-                callback(null, payload);
+    if (cacheValue) {
+        process.nextTick(
+            function() {
+                // console.log( method + ': ' + apiURL +' cached');
+                callback(null, cacheValue);
             });
+    }
+    else {
+        twitter.api[method](oauth, apiURL, params,
+            function(err, data) {
+                if (err)
+                    return callback(err);
+                
+                // set cache
+                cache.valueForKey(hash, data);
+                // console.log( method + ': ' + apiURL +' will cache');
+                
+                callback(null, data);
+            });
+    }
+}
+
+twitter.get =
+    function(oauth, apiURL, params, callback /* (err, data) */, nocache)
+    {
+        // console.log('twitter.get: ' + apiURL);
+        
+        if (nocache === true)
+            twitter.api.get(oauth, apiURL, params, callback);
+        else
+            _twitter_cache_api('get', oauth, apiURL, params, callback);
     };
 
 
 twitter.post =
-    function(oauth, apiURL, params, callback /* (err, data) */)
+    function(oauth, apiURL, params, callback /* (err, data) */, nocache)
     {
-        var body = querystring.stringify(params);
-        
-        request.post( { url:apiURL, oauth:oauth, json:true, body:body },
-            function(err, ponse, payload)
-            {
-                if (err)
-                    return callback(err);
-                
-                callback(null, payload);
-            });
+        // console.log('twitter.post: ' + apiURL);
+
+        if (nocache === true)
+            twitter.api.post(oauth, apiURL, params, callback);
+        else
+        	_twitter_cache_api('post', oauth, apiURL, params, callback, nocache);
     };
+
+
+function _twitterResponseHandler(err, ponse, payload, theURL, callback)
+{
+    if (err) {
+        console.error('twitter.get failed for API:');
+        console.error(theURL);
+        console.error('error:');
+        console.error(err);
+        
+        return callback(err);
+    }
+    else if (ponse.statusCode != 200)
+    {
+        var err;
+        if (ponse.statusCode == 429)
+            err = new Error('Too Many Requests - Rate Limit');
+        else
+            err = new Error('Twitter API GET status: ' + ponse.statusCode);
+        
+        err.code = ponse.statusCode;
+        
+        return callback(err);
+    }
+    
+    callback(null, payload);
+}
 
 // ---
 
@@ -91,6 +202,8 @@ twitter.statuses.home_timeline =
 twitter.statuses.user_timeline =
     function(oauth, user_id, callback /* (err, tweets) */ )
     {
+        // console.log('twitter.statuses.user_timeline');
+        
         var apiURL = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
         var params = {
                 	user_id: user_id

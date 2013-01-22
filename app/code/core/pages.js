@@ -172,14 +172,18 @@ pages.route.preview =
     {
         var userId = _userIdFromRequest(quest);
 
+        // console.log('About to get service.getAugmentedVipList');
+
         service.getAugmentedVipList(userId, { preview: true },
             function(err, userEntry, vipList)
             {
                 if (err) {
                     // TODO: deal with too many request error
-                    return ponse.send( JSON.stringify(err) );
+                    return ponse.send( err.message );
                 }
-
+                
+                // console.log('About to message.make');
+                
                 message.make(userEntry, vipList, { subtitle: 'Preview' },
                     function(err, html)
                     {

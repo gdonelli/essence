@@ -172,11 +172,13 @@ function _getStyle(key) // works for css file rendered by styl
 }
 
 
+var cacheCSS = false;
+
 var _messageCSS;
 
 function _getMessageCSS(callback /* (err, css) */ )
 {
-    if (!_messageCSS)
+    if (!_messageCSS || !cacheCSS)
     {
         _getStylesheet( 'message', 
             function(err, css) {
@@ -243,13 +245,13 @@ function _htmlEssenceForFriend(friend)
     // Badge
     result += '<div class="badge" style="' + _styleForUserBadge(twitterUser) +'">';
     
-    result += _tag('.user-essence .badge .name', '<p>' + _toHTML(twitterUser.name) + '</p>');
+    result += _tag('.name', '<p>' + _toHTML(twitterUser.name) + '</p>');
     result +=  _imgAvatarForUser(twitterUser) ;
     
     result += '</div>';
     
     // class="tweets"
-    result += '<div>';
+    result += _tag('.tweets', '<div>');
     
     result += _writeTweets(friend.essence);
     
@@ -265,9 +267,9 @@ function _imgAvatarForUser(user, className)
     var userAvatarURL = user.profile_image_url; 
         
     if (!className)
-        className = '.user-essence .badge .avatar';
+        className = '.avatar';
     else
-        className = '.user-essence .tweets .retweet-avatar';
+        className = '.retweet-avatar';
         
     return _tag(className, '<img src="' + userAvatarURL + '"></img>');  
 }
@@ -281,7 +283,7 @@ function _styleForUserBadge(user)
     
     result += 'background-color: #' + backgroundColor + '; ';
 
-    result += _getStyle('.user-essence .badge');
+    result += _getStyle('.badge');
        
     return result;
 }
@@ -316,25 +318,25 @@ function _tweetLink(tweet)
     return 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
 }
 
-function _retweetToHTML(tweet)
+function _retweetToHTML(tweet, className)
 {
     var srcTweet   = tweet.retweeted_status;
     var user       = srcTweet.user;
     var userAvatar = user.profile_image_url; 
     
-    var extra = '';
+    var prefix = '';
 
-    extra += _imgAvatarForUser(user, 'retweet-avatar');
-    extra += '<span class="retweet-name">' + _toHTML(user.name);
-    extra += ':&nbsp;</span>';
+    prefix += _imgAvatarForUser(user, 'retweet-avatar');
+    prefix += '<span class="retweet-name">' + _toHTML(user.name);
+    prefix += ':&nbsp;</span>';
     
-    return _tweetToHTML(srcTweet, extra);
+    return _tweetToHTML(srcTweet, className, prefix);
 }
 
-function _tweetToHTML(tweet, extra)
+function _tweetToHTML( tweet, className, prefix )
 {
     if (tweet.retweeted_status) // is a re-tweet
-        return _retweetToHTML(tweet);
+        return _retweetToHTML(tweet, className);
     
     var style = '';
   
@@ -343,12 +345,12 @@ function _tweetToHTML(tweet, extra)
       
     var result = '';
     
-    result += _tag('.user-essence .tweets .tweet', '<div>');
+    result += _tag(className, '<div>');
     
-    result += _tag('.user-essence .tweets .tweet a', '<a target="_blank" href="' + _tweetLink(tweet) + '">');
+    result += _tag('a', '<a target="_blank" href="' + _tweetLink(tweet) + '">');
     
-    if (extra)
-        result += extra;
+    if (prefix)
+        result += prefix;
     
     result += _toHTML(tweet.text);
     result += '</a>'
@@ -368,11 +370,19 @@ function _writeTweets(tweets)
     
     var result = '';
     
-    tweets.forEach(
-        function(tweet) {
-            var htmlEntry = _tweetToHTML(tweet);
-            result += htmlEntry;
-        });
+    for (var i = 0; i<tweets.length; i++)
+    {
+        var tweet_i = tweets[i];
+        var className = '.tweet';
+        
+        if (i == 0)
+            className = '.first-tweet';
+        if (i == tweets.length-1)
+            className = '.last-tweet';
+        
+        var htmlEntry = _tweetToHTML(tweet_i, className);
+        result += htmlEntry;
+    }
     
     return result;
 }
