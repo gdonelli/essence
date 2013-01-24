@@ -1,6 +1,11 @@
-body
+defaultText()
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+    text-shadow: 0px 1px 0px white
     font-size: 16px
+
+
+body
+    defaultText()
     background-color: white
     
 h1
@@ -13,61 +18,83 @@ h2
     font-size: 14px
     color: #AAA
     font-weight: normal
-            
-.user-essence
-    padding: 1px;
-    margin: 8px 0;
-    border-radius: 6px
-    text-align: left
 
-.badge
-    text-align: left
-    position:   relative
-    display:    inline-block
-    padding:    8px 32px 8px 8px
-    border-radius: 3px
+.star
+    margin:0
+    padding:0
+    margin-bottom: 2px
+
+std_distance = 8px
     
-.name
-    display: inline-block
-    padding: 0
+defaultBorderRadius()
+    border-radius: 4px
+    
+defaultBox()
     margin:  0
-    position:   relative
-    margin-top: 24px
+    padding: 0
+    defaultBorderRadius()
     
-    font-size: 18px
-    font-weight: bold
-    background-color:yellow;
+darkBorder(alpha)
+    border: 1px solid rgba(100, 100, 100, alpha)
+    
+whiteBorder(alpha)
+    border: 1px solid rgba(255, 255, 255, alpha) 
+
+.user-essence
+    defaultBox()
+    padding: std_distance
+    margin-bottom: (std_distance * 2)
+    // margin-top: (std_distance * 2)
+    darkBorder(0.33)
+    
+.header
+    defaultBox()
+    height: 48px
+    margin-bottom: std_distance
+    // background-color:red
+
+.name-box
+    defaultBox()
+    display: inline-block
+    height: 48px;
+    float: left
+    background-color: rgba(255, 255, 255, 0.7)
+    whiteBorder(0.75)
+
     
 .avatar
-    margin: 8px
-    width:  48px;
-    height: 48px;
-    float:  left;
-    border-radius: 5px
-
+    defaultBorderRadius()
+    width:  48px
+    height: 48px
+    float:  right
+    whiteBorder(0.2)
+    
+.name
+    //defaultText()
+    font-size: 18px
+    font-weight: bold
+    margin: 13px 24px
 
 .tweets
+    defaultBox()
     text-align: left
-    
-    margin:  8px
-    padding: 0px
 
-    border-radius: 4px
-    //overflow: hidden
     background-color: rgba(255, 255, 255, 0.25)
-    border: 1px solid white
+    whiteBorder(1)
 
 tweet()
-    padding: 8px
+    //defaultText()
+    position: relative
+    padding: 8px 
     margin-bottom: 1px
     background-color: rgba(250, 250, 250, 0.95)
+
+    // border-top:      1px solid white
+    // border-bottom:   1px solid rgb(230, 230, 230)
     
-    border-top:  1px solid white
-    border-bottom:     1px solid rgb(230, 230, 230)
-    text-shadow:    0px 1px 0px white
 
 .tweet
-    tweet()   
+    tweet()
 
 .last-tweet
     tweet()
@@ -79,31 +106,73 @@ tweet()
     tweet()
     border-top: none
     // background-color: red
-
+       
 a
     text-decoration: none
     color: black
 
-   
+
 .retweet-name
     font-weight: bold
-    
+    defaultText()
+    font-size: 14px
+
+
 .retweet-avatar
-    width:  20px
-    height: 20px
+    border: 1px solid rgba(50, 50, 50, 1)
+    float:left
+    width:  16px
+    height: 16px
     border-radius: 3px
     margin: 0 4px
     position: relative
     top:    2px
+    
 
+footerColor()
+    color: #888
 
 .footer
     margin: 2px
     text-align: center
-    color: #888
+    footerColor()
     margin-bottom: 16px
-    p
-        margin: 8px;
-        
-        
-        
+    line-height:16px
+    font-size: 13px
+
+.footer-a
+    footerColor()
+    
+.thatsit
+    text-align: center
+    
+.unsuscribe
+    text-align: center
+    
+.feedback
+    text-align: center
+
+footer-btn()
+    defaultBox()
+    padding: 8px 16px
+    margin: 0 16px
+    line-height: 12px
+    
+    display: inline-block
+    background-color: #DDD
+    border: 1px solid #999
+    color: black
+    text-decoration: none
+
+.footer-buttons
+    text-align: center
+    margin: 16px 0
+
+.footer-btn
+    footer-btn()
+
+    
+.version
+    margin:8px
+    font-size: 10px
+    color: #DDD

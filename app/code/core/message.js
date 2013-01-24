@@ -8,11 +8,18 @@ var     path    = require('path')
     ,   request = require('request')
     ,	stylus  = require('stylus')
     ,	HTMLEncoder = require('node-html-encoder').Encoder
+    ,	package = require('../../package.json')
     ;
 
 
 var message = exports;
 
+var host;
+
+if (process.env.SUBDOMAIN)
+    host = 'essence.jit.su';
+else
+    host = 'local.essence.com:3001';
 
 message.make =
     function(userEntry, vipList, options, callback /* (err, html) */ )
@@ -57,24 +64,51 @@ function _header(options)
 {
     var result = '';
     
-    result += '<div>';
-    result += _tag('h1', '<h1>Essence</h1>');
+    result += '<center>';
+    result += _tag('.star', '<img src="http://' + host+ '/images/star256.png" width="96" height="96"></img>');
     
     if (options && options.subtitle)
         result += _tag('h2', '<h2>(' + options.subtitle + ')</h2>');
     
-    result += '</div>';
+    result += '</center>';
     
     return result;
 }
 
+function _firstName(userEntry)
+{
+    var fullname = userEntry.twitter.user.name;
+
+    var parts = fullname.split(' ');
+    
+    if (parts.length >= 1)
+        return parts[0];
+    
+    return fullname;
+}
+
 function _footer(userEntry)
 {
+    var unsuscribeLink = 'http://' + host + '/delete/' + userEntry._id;
+    var settingsLink = 'http://' + host + '/settings' ;
+
+
     var result = '';
 
     result += _tag('.footer', '<div>');
-    result += '<p>That&rsquo;s it ' + _toHTML(userEntry.twitter.user.name) + '</p>'
-    result += '<p>What do you think about Essence?</p>';
+
+    result += _tag('.thatsit', '<div>That&rsquo;s it ' + _firstName(userEntry) + ', ' + 'what do you think about Essence?</div>');
+    result += _tag('.footer-buttons', '<div>'); // Buttons
+
+    result += _tag('.footer-btn', '<a href="' + settingsLink + '" target="_blank">Settings</a>');
+    result += _tag('.footer-btn', '<a href="mailto:' + process.env.EMAIL_ADDRESS + '?subject=Feedback v' + package.version + '">Feedback</a>');
+    result += _tag('.footer-btn', '<a href="mailto:' + process.env.EMAIL_ADDRESS + '?subject=Support v'  + package.version + '">Support</a>');
+    
+    result += '</div>';
+    
+    result += _tag('.footer-a', '<a href="' + unsuscribeLink + '" target="_blank">Unsuscribe</a>');
+    result += _tag('.version', '<div>v' + package.version + '</div>');
+    
     result += '</div>';
 
     return result;
@@ -242,14 +276,21 @@ function _htmlEssenceForFriend(friend)
     // class="user-essence"
     result += '<div style="' + _styleForUser(twitterUser) +'">' ;
 
-    // Badge
-    result += '<div class="badge" style="' + _styleForUserBadge(twitterUser) +'">';
-    
+    // header
+
+    result += _tag('.header', '<div>');
+
+    result += _imgAvatarForUser(twitterUser, '.avatar');
+
+    result += _tag('.name-box', '<div>');
     result += _tag('.name', '<p>' + _toHTML(twitterUser.name) + '</p>');
-    result +=  _imgAvatarForUser(twitterUser) ;
+    result += '</div>';
+
     
     result += '</div>';
     
+
+
     // class="tweets"
     result += _tag('.tweets', '<div>');
     
@@ -262,30 +303,12 @@ function _htmlEssenceForFriend(friend)
     return result;
 }
 
+
 function _imgAvatarForUser(user, className)
 {
     var userAvatarURL = user.profile_image_url; 
         
-    if (!className)
-        className = '.avatar';
-    else
-        className = '.retweet-avatar';
-        
     return _tag(className, '<img src="' + userAvatarURL + '"></img>');  
-}
-
-function _styleForUserBadge(user)
-{
-    var backgroundColor = user.profile_sidebar_fill_color;
-    var borderColor     = user.profile_sidebar_border_color;
-    
-    var result = '';
-    
-    result += 'background-color: #' + backgroundColor + '; ';
-
-    result += _getStyle('.badge');
-       
-    return result;
 }
 
 function _styleForUser(user)
@@ -312,10 +335,69 @@ function _styleForUser(user)
     return result; 
 }
 
+function _isURL(str)
+{
+    if (str.length < 8)
+        return false;
+    
+    var prefix = str.substring(0, 4);
+
+    //	https:/
+    //	http://
+    //  0123456
+    
+    if (prefix != 'http')
+        return false;
+    
+    if (str[4] == 's') {
+        if (str[5] != ':')
+            return false;
+        
+        if (str[6] != '/')
+            return false;
+    }
+    else if (str[4] == ':') {
+        if (str[5] != '/')
+            return false;
+        
+        if (str[6] != '/')
+            return false;
+    }
+    else
+        return false;
+    
+    
+    return true;
+}
 
 function _tweetLink(tweet)
 {
-    return 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
+    // console.log(tweet);
+    
+    var text = tweet.text;
+    
+    if (!text) {
+        console.error('text is empty for tweet:');
+        console.error(tweet);
+        return '#';
+    }
+        
+    var elements = text.split(' ');
+    
+    var foundURL;
+    for (var i=0; i<elements.length; i++)
+    {
+        var element_i = elements[i];
+        
+        if (_isURL(element_i)) {
+            foundURL = element_i;
+            break;
+        }
+    }
+    if (foundURL)
+        return foundURL;
+    else
+        return 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
 }
 
 function _retweetToHTML(tweet, className)
@@ -326,9 +408,9 @@ function _retweetToHTML(tweet, className)
     
     var prefix = '';
 
-    prefix += _imgAvatarForUser(user, 'retweet-avatar');
-    prefix += '<span class="retweet-name">' + _toHTML(user.name);
-    prefix += ':&nbsp;</span>';
+    prefix += _imgAvatarForUser(user, '.retweet-avatar');
+    
+    prefix += _tag('.retweet-name', '<span>' + _toHTML(user.name) + ':&nbsp;</span>' );
     
     return _tweetToHTML(srcTweet, className, prefix);
 }

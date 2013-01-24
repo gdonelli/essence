@@ -17,7 +17,7 @@ function _setValueForKey(key, value, ttl)
     _cacheData[key] = cacheEntry;
 }
 
-var DEFAULT_TTL = 5 * 60 * 1000; // 1 minute
+var DEFAULT_TTL = 60 * 1000; // 1 minute
 
 function _getValueForKey(key) // isValueFresh
 {

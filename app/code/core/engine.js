@@ -339,11 +339,11 @@ engine.deliverEssenceToUser =
 engine.getEssenceMessageForUser =
     function(userEntry, callback /* (err, html) */)
     {
-        console.log('-> ' + userEntry.twitter.user.name);
+        // console.log('-> ' + userEntry.twitter.user.name);
         
         var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
         
-        if (!userEntry.email || !userEntry.vipList || userEntry.vipList.length == 0)
+        if (!userEntry.vipList || userEntry.vipList.length == 0)
             return callback(null);
 
         var sinceDate;
@@ -352,12 +352,17 @@ engine.getEssenceMessageForUser =
             sinceDate = userEntry.deliveryDate;
         else
             sinceDate = _firstTimeDate();
+
+        console.log('about to essence.getAugmentedVipList');
             
         essence.getAugmentedVipList(oauth, userEntry, { sinceDate: sinceDate },
             function(err, vipList)
             {
                 if (err)
                     return callback(err);
+                
+                //console.log('vipList:');
+                //console.log(vipList);
                 
                 message.make(userEntry, vipList, {}, callback);
             });

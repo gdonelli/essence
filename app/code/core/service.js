@@ -13,6 +13,7 @@ var		async			= require('async')
     ,	io				= use('io')
     ,   essence         = use('essence')
     ,	message         = use('message')
+    ,	engine			= use('engine')
     ;
 
 
@@ -38,14 +39,14 @@ service.socket.getTwitterFriends =
         console.log(oauth);
         
         var getFriends =
-            twitter.cache.getFriends(oauth, user.id,
+            twitter.getFriends(oauth, user.id,
                 function(err, data)
                 {
                     if (err)
                         return callback( err );
                     
                     callback(null, data);
-                });
+                }, true /* cache is on */);
         
         getFriends.on('progress',
             function(value) {

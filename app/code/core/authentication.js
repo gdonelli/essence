@@ -165,8 +165,7 @@ function _loginResponse(quest, ponse)
                     var user = _.pick(userInfo, userPropertiesToPick);
                     quest.session.user = user;
                     
-                    console.log('Twitter User:');
-                    console.log(user);
+                    console.log('USER LOGIN: @' + user.screen_name);
                     
                     var freshEntry = database.makeTwitterUserEntry( user, oauth );
                     
@@ -226,8 +225,16 @@ authentication.middleware =
         var questHeaders = quest.headers;
         var questHost    = questHeaders.host;
         quest.session.host = questHost;
+
+        var validSession = (quest.session && quest.session.version && quest.session.version == authentication.version)
         
-        next();
+        if (validSession)
+        {
+            next();
+        }
+        else
+            ponse.redirect('/');
+        
     };
 
 function _dialogRedirectURL(quest)

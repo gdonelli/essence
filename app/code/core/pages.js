@@ -34,7 +34,7 @@ pages.route.settings =
     }
 
 
-pages.path.deleteDelete = '/delete-delete/:essenceUserId?';
+pages.path.deleteDelete = '/delete-delete/:userId?';
 
 pages.route.deleteDelete = 
     function(quest, ponse)
@@ -54,12 +54,10 @@ pages.route.deleteDelete =
                 else
                     authentication.route.logout(quest, ponse);
             });
-        
-        
     };
 
 
-pages.path.delete = '/delete/:essenceUserId?';
+pages.path.delete = '/delete/:userId?';
 
 pages.route.delete = 
     function(quest, ponse)
@@ -116,15 +114,15 @@ pages.route.confirmEmail =
 
 function _userIdFromRequest(quest)
 {
-    if (quest.params.essenceUserId)
-        return quest.params.essenceUserId;
+    if (quest.params.userId)
+        return quest.params.userId;
     else
         return authentication.userFromRequest(quest)._id;
 }
 
 
 
-pages.path.destroyList = '/destroyList/:essenceUserId?';
+pages.path.destroyList = '/destroyList/:userId?';
 
 pages.route.destroyList = 
     function(quest, ponse)
@@ -138,7 +136,7 @@ pages.route.destroyList =
             });
     };
 
-pages.path.cleanDeliveryDate = '/admin/cleanDeliveryDate/:essenceUserId?';
+pages.path.cleanDeliveryDate = '/admin/cleanDeliveryDate/:userId?';
 
 pages.route.cleanDeliveryDate = 
     function(quest, ponse)
@@ -165,7 +163,7 @@ pages.route.cleanDeliveryDate =
     };
 
     
-pages.path.preview = '/preview/:essenceUserId?';
+pages.path.preview = '/preview/:userId?';
 
 pages.route.preview = 
     function(quest, ponse)
@@ -203,7 +201,7 @@ pages.route.tz =
     }
 
 
-pages.path.actual = '/actual/:essenceUserId?';
+pages.path.actual = '/actual/:userId?';
 
 pages.route.actual = 
     function(quest, ponse)
@@ -214,9 +212,15 @@ pages.route.actual =
         database.getUserEntryById(userId,
             function(err, userEntry)
             {
+                if (err)
+                    return ponse.send(err.message);
+            
                 engine.getEssenceMessageForUser(userEntry, 
                     function(err, html)
                     {
+                        if (err)
+                            return ponse.send(err.message);
+                        
                         ponse.writeHead(200, {'Content-Type': 'text/html'});
                         ponse.end(html);
                     });
@@ -260,7 +264,7 @@ pages.route.allusers =
             });
     };
 
-pages.path.adminSend = '/admin/send/:essenceUserId?';
+pages.path.adminSend = '/admin/send/:userId?';
 
 pages.route.adminSend = 
     function(quest, ponse)

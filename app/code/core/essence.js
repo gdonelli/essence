@@ -78,7 +78,7 @@ function _yesterday()
     return result;    
 }
 
-function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntry)*/)
+function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntry)*/, cache)
 {
     a.assert_obj(oauth);
     a.assert_obj(vipEntry);
@@ -99,14 +99,14 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
             if (options && options.sinceDate)
                 filterOptions.sinceDate = options.sinceDate;
             else
-                filterOptions.maxCount = 5;
+                filterOptions.maxCount = 3;
                 
             var relevantTweets = _filterTweets(tweets, filterOptions);
             
             vipEntry.essence = relevantTweets;
             
             callback(err, vipEntry);
-        } );
+        }, cache);
 }
 
 // Adds tweets to vipList
@@ -116,9 +116,11 @@ essence.getAugmentedVipList =
     {
         var vipList = _.map( userEntry.vipList, _.clone );
         
+        var cache = (options.preview === true)
+        
         async.map(vipList
             ,	function(vipEntry, callback) { 
-                    _fillUpEssenceForVip(oauth, vipEntry, options, callback); 
+                    _fillUpEssenceForVip(oauth, vipEntry, options, callback, cache); 
                 }
             ,	function(err, results) {
                     // console.log('->essence.getAugmentedVipList err:');
@@ -127,12 +129,14 @@ essence.getAugmentedVipList =
                     if (err)
                         return callback(err);
                     
+                    // console.log( 'sorting viplist' );
+                    
                     vipList = vipList.sort(
                         function(a, b){
-                            return a.essence.length > b.essence.length;
+                            return a.essence.length - b.essence.length;
                         });
                                        
-                    callback(err, vipList);
+                    callback(null, vipList);
                 });
     }
 

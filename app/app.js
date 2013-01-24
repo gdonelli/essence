@@ -1,6 +1,10 @@
 //
-//  Essence
+//  Global setup
 //
+
+var package = require('./package.json')
+
+console.log('Essence v' + package.version);
 
 global.appPublicPath = __dirname + '/public';
 
@@ -11,7 +15,7 @@ if ( isApp && process.env.SUBDOMAIN != undefined ) { // enable profiling
     console.log(' [ nodefly running... ] ');
     require('nodefly').profile(
             process.env.NODEFLY_ID
-        ,   ['Essence', process.env.SUBDOMAIN, process.env.NODE_ENV ] );
+        ,   ['Essence', package.version, process.env.SUBDOMAIN ] );
 }
 
 // Use setup
@@ -89,37 +93,39 @@ catch (e) {
 
 var routes = {};
 
-function _addRoutesFromModule(module)
+function _addRoutesFromModule(name, module, middleware, middlewareName)
 {
-    Object.keys(module.path).forEach(
+    console.log(name + ':');
+
+    var keys = Object.keys(module.path);
+    
+    keys = keys.sort( 
+        function(a, b) {
+            return  module.path[a].length - 
+                    module.path[b].length;
+        });
+    
+    keys.forEach(
         function(key)
         {
             var path  = module.path[key];
             var route = module.route[key];
-            
-            routes[path] = route;
-        });
+
+            if (middleware) {
+                app.get(path, middleware, route);
+                console.log('   ' + path + ' (' + middlewareName+ ')');
+            }
+            else {
+                app.get(path, route);
+                console.log('   ' + path);
+            }
+        }); 
 }
 
-_addRoutesFromModule(index);
-_addRoutesFromModule(authentication);
-_addRoutesFromModule(pages);
+_addRoutesFromModule( 'index', index );
+_addRoutesFromModule( 'authentication', authentication );
+_addRoutesFromModule( 'pages', pages, authentication.middleware, 'user' );
 
-
-var routesKeys = Object.keys(routes);
-routesKeys = routesKeys.sort( 
-    function(a, b) {
-        return a.length > b.length;
-    } );
-
-console.log('Routes:');
-
-routesKeys.forEach(
-    function(path)
-    {
-        app.get(path, authentication.middleware, routes[path]);
-        console.log('   ' + path);
-    });
 
 // ---------------------
 // Http Server
@@ -158,21 +164,11 @@ app.get( '/friends',
         
     });
 
-// console.log('SUBDOMAIN: ' + process.env.SUBDOMAIN);
-// console.log('NODE_ENV: '  + process.env.NODE_ENV);
-
-
-// var engine  = use('engine');
-// engine.start();
-
-/*
-if (process.env.SUBDOMAIN != undefined)
+if (process.env.SUBDOMAIN)
 {
+    var engine  = use('engine');
+    engine.start();
 }
-else
-    console.log('**** Essence\'s engine module was not started. We are not in production enviroment');
-*/
-
 
 var envVars = [
         'CONSUMER_KEY'
@@ -197,5 +193,3 @@ envVars.forEach(
     function(name) {
         assert(process.env[name] != undefined, name + ' not defined' );
     });
-
-
