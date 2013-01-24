@@ -106,7 +106,7 @@ function _footer(userEntry)
     
     result += '</div>';
     
-    result += _tag('.footer-a', '<a href="' + unsuscribeLink + '" target="_blank">Unsuscribe</a>');
+    result += _tag('.footer-a', '<a href="' + unsuscribeLink + '" target="_blank">Unsubscribe</a>');
     result += _tag('.version', '<div>v' + package.version + '</div>');
     
     result += '</div>';

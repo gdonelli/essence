@@ -65,8 +65,7 @@ app.configure(function() {
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     
-    
-        // Session
+    // Session
     app.use(cookieParser);
     app.use(express.session({   key:    sessionKey
                             ,   store:  sessionStore			}));
