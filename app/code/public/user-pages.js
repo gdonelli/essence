@@ -147,25 +147,14 @@ userPages.path.preview     = '/preview/:userId?';
 userPages.route.preview    = 
     function(quest, ponse)
     {
-        var userId = userPages.userIdFromRequest(quest);
+        var user = authentication.userFromRequest(quest);
 
-        // console.log('About to get service.getAugmentedVipList');
-
-        service.getAugmentedVipList(userId, { preview: true },
-            function(err, userEntry, vipList)
-            {
-                if (err) {
-                    // TODO: deal with too many request error
-                    return ponse.send( err.message );
-                }
-                                
-                presentation.makeHTML(userEntry, vipList, { subtitle: 'Preview' },
-                    function(err, html)
-                    {
-                        ponse.writeHead(200, {'Content-Type': 'text/html'});
-                        ponse.end(html);
-                    });
-            });
+        var title = 'Essence Preview (@' + user.screen_name + ')';
+        
+        ponse.render('preview', {
+                title: title,
+                user: user
+            } );
     };
 
 

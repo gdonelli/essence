@@ -322,7 +322,7 @@ function _getMessageCSS(callback /* (err, css) */ )
 {
     if (!_messageCSS || !cacheCSS)
     {
-        _getStylesheet( 'message', 
+        _getStylesheet( 'presentation', 
             function(err, css) {
                 _messageCSS = css;
                 callback(null, _messageCSS);

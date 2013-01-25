@@ -70,8 +70,10 @@ ServiceAPI.prototype._peformService =
                     var ponseError = ponse.error;
                                        
                     var err;
-                    if (ponseError)
+                    if (ponseError){
                         err = new Error(ponseError);
+                        err.message = ponseError;
+                    }
                     else
                         err = new Error();
                         
@@ -139,6 +141,11 @@ ServiceAPI.prototype.setServiceEnabled =
         return this._peformService( 'service.setServiceEnabled', { enabled: value }, callback);
     };
 
+ServiceAPI.prototype.preview =
+    function(callback /* (err, ponse) */)
+    {
+        return this._peformService( 'service.preview', {}, callback);
+    };
 
 
 // Events

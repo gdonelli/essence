@@ -27,6 +27,7 @@ if (process.env.SUBDOMAIN == undefined) {
 console.log('scheduler.debugModeEmail: '        + scheduler.debugModeEmail);
 console.log('scheduler.debugModeDeliveryDate: ' + scheduler.debugModeDeliveryDate);
 
+
 scheduler.start = 
     function()
     {
@@ -47,29 +48,30 @@ scheduler.start =
         });
         
         d.run(function() {
-            setTimeout( _pass, 500);
-            setInterval( _pass, 30 * 60 * 1000); // every 1/2 hour
+            setTimeout( _performCycle, 500);
+            setInterval( _performCycle, 30 * 60 * 1000); // every 1/2 hour
         })
     };
-    
-function _pass()
+
+
+function _performCycle()
 {
-    scheduler.pass(
+    scheduler.cycle(
         function(err, results)
         {
             if (err) {
-                console.error('scheduler.pass error:');
+                console.error('scheduler.cycle error:');
                 console.error(err);
             }
             else {
-                console.log('scheduler.pass v' + package.version + ' results:');
-                console.log(results );
+                console.log('scheduler.cycle v' + package.version + ':' );
+                console.log( results );
             }
         });
 }
 
 
-scheduler.pass = 
+scheduler.cycle = 
     function(callback /* (err, results) */)
     {
         var error           = 0;
@@ -142,7 +144,7 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
         state = kTestDeliveryState;
     }
     
-    userly.deliverEssenceToUser(userEntry, {},
+    userly.deliverEssenceToUser(userEntry, deliveryOptions,
         function(err, msg)
         {
             if (err) {

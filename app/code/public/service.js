@@ -8,6 +8,7 @@ var		async			= require('async')
 	,	authentication  = use('authentication')
     ,	database        = use('database')
     ,   twitter         = use('twitter')
+    ,	userly			= use('userly')
     ,	email           = use('email')
     ,	a				= use('a')
     ,	io				= use('io')
@@ -194,7 +195,21 @@ function _safeUserEntry(userEntry)
     return userEntry;
 }
 
-//???: Confirm Email
+
+//!!!: Preview
+
+service.event.preview = 'service.preview';
+
+service.socket.preview =
+    function(socket, inputData /* { userid: ... } */, callback /* (err, html) */ )
+    {   
+        var userId    = _userIdFromSocket(socket);
+        
+        userly.previewForUserWithId(userId, {}, callback);
+    };
+    
+
+//!!!: Confirm Email
 
 service.event.confirmEmail = 'service.confirmEmail';
 
@@ -288,7 +303,7 @@ service.verifyEmail =
             });
     };
 
-//???: Service State
+//!!!: Service State
 
 /*
     The possible service states:

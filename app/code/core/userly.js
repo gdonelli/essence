@@ -57,12 +57,47 @@ userly.deliverEssenceToUser =
                 }
             ,   function(msg, callback)
                 {
+                    if (options.email)
+                        msg.to = options.email;
+                    
                     email.send(msg, callback);
                 }
             ]
         ,   callback);
     };
 
+userly.previewForUserWithId = 
+    function(idstr, options, callback /* (err, html) */ )
+    {
+        database.getUserEntryById(idstr, 
+            function(err, userEntry) {
+                if (err)
+                    return callback(err);
+                    
+                userly.previewForUser(userEntry, options, callback);
+            });
+    }
+    
+userly.previewForUser =
+    function(userEntry, options, callback /* (err, html) */ )
+    {
+        if (!options)
+            options = {};
+        
+        options.preview = true;
+        
+    	async.waterfall(
+            [   function(callback) {
+                    _getAugmentedVipList(userEntry, options, callback);
+                }
+            ,   function(augmentedVipList, callback) {
+                    presentation.makeHTML(userEntry, augmentedVipList, options, callback);
+                }
+            ]
+        ,   callback);
+        
+    }
+    
 //!!!: Private
 
 function _getAugmentedVipList(userEntry, options, callback /* (err, augmentedVipList) */ )
