@@ -5,9 +5,13 @@
 
 var     path    = require('path')
     ,   fs      = require('fs')
-    ,   authentication  = use('authentication')
+    
     ,	database		= use('database')
     ,   service         = use('service')
+    ,	userly			= use('userly')
+    ,   authentication  = use('authentication')
+    ,   presentation    = use('presentation')
+    ,   userPages       = use('user-pages')
     ;
 
 var admin_pages = exports;
@@ -57,7 +61,7 @@ admin_pages.path.cleanDeliveryDate  = '/admin/cleanDeliveryDate/:userId?';
 admin_pages.route.cleanDeliveryDate = 
     function(quest, ponse)
     {
-        var userId = _userIdFromRequest(quest);
+        var userId = userPages.userIdFromRequest(quest);
         
         database.getUserEntryById(userId,
             function(err, userEntry)
@@ -79,8 +83,8 @@ admin_pages.route.cleanDeliveryDate =
     };
 
 
-admin_pages.path.tz     = '/tz';
-admin_pages.route.tz    = 
+admin_pages.path.tz = '/admin/tz';
+admin_pages.route.tz= 
     function(quest, ponse)
     {
         ponse.send( 'offset: ' + (new Date).getTimezoneOffset() );
@@ -91,10 +95,10 @@ admin_pages.path.adminSend  = '/admin/send/:userId?';
 admin_pages.route.adminSend = 
     function(quest, ponse)
     {
-        var userId = _userIdFromRequest(quest);
+        var userId = userPages.userIdFromRequest(quest);
         
-        service.sendEssence(userId, {},
-            function(err)
+        userly.deliverEssenceToUserWithId(userId, {},
+            function(err, msg)
             {
                 if (err) {
                     var obj = {};

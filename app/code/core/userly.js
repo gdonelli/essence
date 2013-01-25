@@ -4,18 +4,26 @@
  */
 
 
-var     authentication  = require('authentication')
-    ,   presentation    = require('presentation')
-    ,   database        = require('database')
-    ,   async           = require('async')
-    ,   _               = require('underscore')
-    
-    ,   twitter = use('twitter')
-    ,	email   = use('email') 
+var     _     = require('underscore')
+    ,   async = require('async')
+
     ,   a       = use('a')
+    ,	email   = use('email') 
+    ,   twitter     = use('twitter')
+    ,   database    = use('database')
+    ,   presentation    = use('presentation')
+    ,   authentication  = use('authentication')
     ;
 
+
 var userly = exports;
+
+/*
+    options:
+        preview     [true/false]
+        sinceDate   [Date]
+        
+*/
 
 userly.deliverEssenceToUserWithId =
     function(idstr, options, callback /* (err, msg) */)
@@ -32,6 +40,12 @@ userly.deliverEssenceToUserWithId =
 userly.deliverEssenceToUser = 
     function(userEntry, options, callback /* (err, msg) */)
     {
+        if (!options)
+            options = {};
+        
+        if (!options.sinceDate)
+            options.sinceDate = userEntry.deliveryDate;
+        
     	async.waterfall(
             [   function(callback)
                 {
@@ -49,6 +63,7 @@ userly.deliverEssenceToUser =
         ,   callback);
     };
 
+//!!!: Private
 
 function _getAugmentedVipList(userEntry, options, callback /* (err, augmentedVipList) */ )
 {
@@ -152,10 +167,12 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
             
             filterOptions.includeResponses = false;
             
-            if (options && options.sinceDate)
+            if (options && options.preview)
+                filterOptions.maxCount = 3;
+            else if (options && options.sinceDate)
                 filterOptions.sinceDate = options.sinceDate;
             else
-                filterOptions.maxCount = 3;
+                filterOptions.sinceDate =  _yesterday();
                 
             var relevantTweets = _filterTweets(tweets, filterOptions);
             

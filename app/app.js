@@ -125,8 +125,8 @@ function _addRoutesFromModule(name, module, middleware, middlewareName)
 
 _addRoutesFromModule( 'index', index );
 _addRoutesFromModule( 'authentication', authentication );
-_addRoutesFromModule( 'userPages', userPages, authentication.middleware, 'user' );
-
+_addRoutesFromModule( 'userPages',  userPages,  authentication.middleware, 'user' );
+_addRoutesFromModule( 'adminPages', adminPages, authentication.middleware, 'user' );
 
 // ---------------------
 // Http Server
@@ -165,11 +165,8 @@ app.get( '/friends',
         
     });
 
-if (process.env.SUBDOMAIN)
-{
-    var engine  = use('engine');
-    engine.start();
-}
+var scheduler  = use('scheduler');
+scheduler.start();
 
 var envVars = [
         'CONSUMER_KEY'

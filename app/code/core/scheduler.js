@@ -6,31 +6,28 @@ var     request = require('request')
     ,	domain  = require('domain')
     ,	moment  = require('moment')
         
-    ,   database    = use('database')
-    ,   essence     = use('essence')
-    ,	authentication = use('authentication')
-    ,	message = use('message')
-    ,	email   = use('email')
+    ,   database = use('database')
+    ,	email    = use('email')
+    ,   userly   = use('userly')
     
     ,   package = require('./../../package.json')
     ;
 
 
-var engine = exports;
+var scheduler = exports;
 
-engine.debugModeEmail        = false;
-engine.debugModeDeliveryDate = false;
+scheduler.debugModeEmail        = false;
+scheduler.debugModeDeliveryDate = false;
 
-if (process.env.SUBDOMAIN == undefined)
-{
-    engine.debugModeEmail        = true; // send email all to admin, 
-    engine.debugModeDeliveryDate = true; // don't change deliveryDate if set to true
+if (process.env.SUBDOMAIN == undefined) {
+    scheduler.debugModeEmail        = true; // send email all to admin, 
+    scheduler.debugModeDeliveryDate = true; // don't change deliveryDate if set to true
 }
 
-console.log('engine.debugModeEmail: '        + engine.debugModeEmail);
-console.log('engine.debugModeDeliveryDate: ' + engine.debugModeDeliveryDate);
+console.log('scheduler.debugModeEmail: '        + scheduler.debugModeEmail);
+console.log('scheduler.debugModeDeliveryDate: ' + scheduler.debugModeDeliveryDate);
 
-engine.start = 
+scheduler.start = 
     function()
     {
         var d = domain.create();
@@ -57,22 +54,22 @@ engine.start =
     
 function _pass()
 {
-    engine.pass(
+    scheduler.pass(
         function(err, results)
         {
             if (err) {
-                console.error('engine.pass error:');
+                console.error('scheduler.pass error:');
                 console.error(err);
             }
             else {
-                console.log('engine.pass v' + package.version + ' results:');
+                console.log('scheduler.pass v' + package.version + ' results:');
                 console.log(results );
             }
         });
 }
 
 
-engine.pass = 
+scheduler.pass = 
     function(callback /* (err, results) */)
     {
         var error           = 0;
@@ -137,22 +134,16 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
     if (!_shouldDeliverForUser(userEntry))
         return callback( kSkipState );
 
-/*
-    if (process.env.SUBDOMAIN == undefined) {
-        console.log('will deliver to ' + userEntry.email);
-        return callback(kDeliveryState);
-    }
-*/
     var state = kDeliveryState;
     var deliveryOptions = {};
     
-    if (engine.debugModeEmail){
+    if (scheduler.debugModeEmail){
         deliveryOptions.email = process.env.ADMIN_EMAIL_ADDRESS;
         state = kTestDeliveryState;
     }
-
-    engine.deliverEssenceToUser(userEntry, deliveryOptions,
-        function(err)
+    
+    userly.deliverEssenceToUser(userEntry, {},
+        function(err, msg)
         {
             if (err) {
                 state = kErrorState;
@@ -169,7 +160,7 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
                 userEntry.deliveryError.count++;
             }
             else {
-                if (engine.debugModeDeliveryDate)
+                if (scheduler.debugModeDeliveryDate)
                     state = kTestDeliveryState;
                 else
                     userEntry.deliveryDate = currentDeliveryDate;
@@ -245,18 +236,6 @@ function _isTheRightTime(userEntry)
 }
 
 
-function _hrFromMilli(milliseconds)
-{
-    return Math.round(milliseconds / 1000 / 60 / 60, 2);
-}
-
-
-function _milliForHr(hours)
-{
-    return hours * 1000 * 60 *60;
-}
-
-
 function _shouldDeliverForUser(userEntry)
 {
     var name = userEntry.twitter.user.name;
@@ -279,92 +258,13 @@ function _shouldDeliverForUser(userEntry)
 }
 
 
-function _timeUntilNextDelivery(userEntry) // in milliseconds
+function _hrFromMilli(milliseconds)
 {
-    var userOffsetFromUTC = userEntry.twitter.user.utc_offset;
-
-    var nowUTC = moment.utc();
-    var sodUTC = moment.utc().sod();    // Start of day
-    
-    var whenToFireInDay = 19 * 60 * 60; // 7pm, seconds
-    
-    var addSeconds = whenToFireInDay - userOffsetFromUTC;
-    
-    var scheduledFireForUser  = sodUTC.add('seconds', addSeconds);
-
-    var diff = scheduledFireForUser - nowUTC;
-    
-    if (diff < 0){
-        scheduledFireForUser.add('days', 1);
-        diff = scheduledFireForUser - nowUTC;
-    }
-    
-    return diff;
+    return Math.round(milliseconds / 1000 / 60 / 60, 2);
 }
 
 
-function _firstTimeDate()
+function _milliForHr(hours)
 {
-    var result = new Date();
-    result.setDate(result.getDate() - 2); // 2 days ago
-    return result;    
+    return hours * 1000 * 60 *60;
 }
-
-
-engine.deliverEssenceToUser =
-    function(userEntry, options, callback /* (err) */)
-    {
-        console.log('Delivering Essence to: ' + userEntry.twitter.user.name);
-
-        engine.getEssenceMessageForUser(userEntry,
-            function(err, htmlMessage)
-            {
-                if (err)
-                    return callback(err);
-                
-                var userEmail = userEntry.email;
-                var userName  = userEntry.twitter.user.name;
-
-                // Override user email for debugging and test purposes
-                if (options && options.email)
-                    userEmail = options.email;
-
-                console.log(' => delivery to: ' + userName + ' <' + userEmail + '>');
-                
-                email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
-            });
-    };
-
-
-engine.getEssenceMessageForUser =
-    function(userEntry, callback /* (err, html) */)
-    {
-        // console.log('-> ' + userEntry.twitter.user.name);
-        
-        var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
-        
-        if (!userEntry.vipList || userEntry.vipList.length == 0)
-            return callback(null);
-
-        var sinceDate;
-        
-        if (userEntry.deliveryDate)
-            sinceDate = userEntry.deliveryDate;
-        else
-            sinceDate = _firstTimeDate();
-
-        console.log('about to essence.getAugmentedVipList');
-            
-        essence.getAugmentedVipList(oauth, userEntry, { sinceDate: sinceDate },
-            function(err, vipList)
-            {
-                if (err)
-                    return callback(err);
-                
-                //console.log('vipList:');
-                //console.log(vipList);
-                
-                presentation.makeHTML(userEntry, vipList, {}, callback);
-            });
-    };
-

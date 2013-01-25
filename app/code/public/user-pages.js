@@ -10,15 +10,15 @@ var     path    = require('path')
     ,   service         = use('service')
     ;
 
-var user_pages = exports;
+var userPages = exports;
 
 
-user_pages.path = {};
-user_pages.route = {};
+userPages.path = {};
+userPages.route = {};
 
 
-user_pages.path.settings    = '/settings';
-user_pages.route.settings   = 
+userPages.path.settings    = '/settings';
+userPages.route.settings   = 
     function(quest, ponse)
     {
         var user = authentication.userFromRequest(quest);
@@ -32,11 +32,11 @@ user_pages.route.settings   =
     }
 
 
-user_pages.path.deleteDelete    = '/delete-delete/:userId?';
-user_pages.route.deleteDelete   = 
+userPages.path.deleteDelete    = '/delete-delete/:userId?';
+userPages.route.deleteDelete   = 
     function(quest, ponse)
     {
-        var userId = _userIdFromRequest(quest);
+        var userId = userPages.userIdFromRequest(quest);
         
         database.removeUserUserWithId(userId,
             function(err)
@@ -54,11 +54,11 @@ user_pages.route.deleteDelete   =
     };
 
 
-user_pages.path.delete  = '/delete/:userId?';
-user_pages.route.delete = 
+userPages.path.delete  = '/delete/:userId?';
+userPages.route.delete = 
     function(quest, ponse)
     {
-        var userId = _userIdFromRequest(quest);
+        var userId = userPages.userIdFromRequest(quest);
         
         database.getUserEntryById(userId,
             function(err, userEntry)
@@ -78,8 +78,8 @@ user_pages.route.delete =
     };
 
 
-user_pages.path.confirmEmail    = '/confirm/:userId?/:ticket?';
-user_pages.route.confirmEmail   = 
+userPages.path.confirmEmail    = '/confirm/:userId?/:ticket?';
+userPages.route.confirmEmail   = 
     function(quest, ponse)
     {
         var userId;
@@ -106,21 +106,21 @@ user_pages.route.confirmEmail   =
             });
     };
 
+userPages.userIdFromRequest = 
+    function(quest)
+    {
+        if (quest.params.userId)
+            return quest.params.userId;
+        else
+            return authentication.userFromRequest(quest)._id;
+    };
 
-function _userIdFromRequest(quest)
-{
-    if (quest.params.userId)
-        return quest.params.userId;
-    else
-        return authentication.userFromRequest(quest)._id;
-}
 
-
-user_pages.path.previewTxt  = '/preview_txt/:userId?';
-user_pages.route.previewTxt = 
+userPages.path.previewTxt  = '/preview_txt/:userId?';
+userPages.route.previewTxt = 
     function(quest, ponse)
     {
-        var userId = _userIdFromRequest(quest);
+        var userId = userPages.userIdFromRequest(quest);
 
         // console.log('About to get service.getAugmentedVipList');
 
@@ -143,11 +143,11 @@ user_pages.route.previewTxt =
     };
 
 
-user_pages.path.preview     = '/preview/:userId?';
-user_pages.route.preview    = 
+userPages.path.preview     = '/preview/:userId?';
+userPages.route.preview    = 
     function(quest, ponse)
     {
-        var userId = _userIdFromRequest(quest);
+        var userId = userPages.userIdFromRequest(quest);
 
         // console.log('About to get service.getAugmentedVipList');
 
@@ -169,12 +169,12 @@ user_pages.route.preview    =
     };
 
 
-user_pages.path.actual  = '/actual/:userId?';
-user_pages.route.actual = 
+userPages.path.actual  = '/actual/:userId?';
+userPages.route.actual = 
     function(quest, ponse)
     {
         var engine = use('engine');
-        var userId = _userIdFromRequest(quest);
+        var userId = userPages.userIdFromRequest(quest);
         
         database.getUserEntryById(userId,
             function(err, userEntry)
