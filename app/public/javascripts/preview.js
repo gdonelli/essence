@@ -16,8 +16,9 @@ serviceAPI.on('connect',
 
 function SetupUI()
 {
-    _showSpinner();
     _loadPreview();
+    
+    serviceAPI.on(ServiceAPI.vipListDidChangeEvent, _loadPreview );
 }
 
 //!!!: Private
@@ -27,8 +28,19 @@ function _previewBox()
     return $('#preview-box');
 }
 
+function _spinnerBox()
+{
+    return $('#home-spinner');
+}
+
 function _loadPreview()
 {
+    var loadingHTML = '<h1>Loading preview...</h1><div id="home-spinner"></div>';
+    
+    _previewBox().html(loadingHTML);
+
+    _showSpinner();
+    
     serviceAPI.preview(
         function(err, html) {
             if (err) {
@@ -62,5 +74,5 @@ function _showSpinner()
     };
     
     var spinner = new Spinner( opts ).spin();
-    $('#home-spinner').append(spinner.el);
+    _spinnerBox().append(spinner.el);
 }

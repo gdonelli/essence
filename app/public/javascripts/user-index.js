@@ -51,7 +51,7 @@ function _updateState(state)
     else if (state == 'GOOD')
     {
         title    = 'Essence is up and running';
-        subtitle = 'Your Essence will be delivered daily in the evening, here&rsquo;s a <a href="/preview" target="_blank">preview</a>';
+        subtitle = 'Your Essence will be delivered daily in the evening, here&rsquo;s a <a href="/preview">preview</a>';
 
     	$('#disable').css('display', 'inline');
     }

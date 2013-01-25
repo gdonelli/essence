@@ -142,8 +142,8 @@ service.socket.addVip =
                 vipList.splice(0, 0, vipEntry);
                 userEntry.vipList = vipList;
                 
-                console.log('userEntry.vipList:');
-                console.log(userEntry.vipList);
+                //console.log('userEntry.vipList:');
+                //console.log(userEntry.vipList);
                 
                 _updateUserVipList(userEntry, callback);
             });

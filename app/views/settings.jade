@@ -19,6 +19,8 @@ block last-section
         ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
             li
                 a(href="/") Home
+            li
+                a(href="/preview") Preview
             li.disabled
                 a(href="/settings") Settings
             li.divider
@@ -74,5 +76,6 @@ block content
                     a(onclick='SaveEmail()') We can send it again...
                     | )
             
-            #done
+            #settings-endpage
+                a.btn.btn-large(href='/preview') Preview
                 a.btn.btn-large(href='/') Done

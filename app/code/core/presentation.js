@@ -15,6 +15,61 @@ var     path    = require('path')
 var presentation = exports;
 
 
+function _subjectWithNames(names)
+{
+    var result = 'Essence of ';
+
+    if (names.length == 1)
+        result += names[0];
+    else if (names.length == 2)
+        result += names[0] + ' and ' + names[1];
+    else if (names.length > 2)
+    {
+        for (var i=0; i<names.length-2; i++)
+        {
+            result += names[i] + ', ';
+        }
+        
+        result += names[names.length-2] + ' and ' + names[names.length-1];
+    }
+    else
+        return 'Essence';
+    
+    return result;
+}
+
+/*
+
+// == Test ===
+
+console.log( _subjectWithNames(['Giovanni']) );
+console.log( _subjectWithNames(['Giovanni', 'Eric']) );
+console.log( _subjectWithNames(['Giovanni', 'Eric', 'Set']) );
+console.log( _subjectWithNames(['Giovanni', 'Eric', 'Set', 'Nils']) );
+
+*/
+
+
+function _subject(userEntry, vipList, options)
+{
+    var names = [];
+    
+    vipList.forEach(
+        function(vip)
+        {
+            if (vip.essence.length > 0)
+                names.push(vip.name);
+        });
+    
+
+    var result = _subjectWithNames(names);
+    
+    console.log(result);
+
+    return result;
+}
+
+
 presentation.makeEmailMessage = 
     function(userEntry, vipList, options, callback /* (err, msg) */)
     {
@@ -23,7 +78,7 @@ presentation.makeEmailMessage =
         
         var msg = {};
         
-        msg.subject = 'Essence';
+        msg.subject = _subject(userEntry, vipList, options);
         msg.from    = _from();
         msg.to      = toName + ' <' + toEmail + '>';
         msg.bcc     = _bcc();
@@ -100,10 +155,17 @@ presentation.makeHTML =
 
                 result += _header(options);
                 
-                vipList.forEach(
-                    function(friendEntry) {
-                        result += _htmlEssenceForFriend(friendEntry);
-                    });
+                if (vipList.length == 0)
+                {
+                    result += _tag('.warning', '<div>You have no VIPs. Go to settings to add them.</div>')
+                }
+                else
+                {
+                    vipList.forEach(
+                        function(friendEntry) {
+                            result += _htmlEssenceForFriend(friendEntry);
+                        });
+                }
                 
                 result += _footer(userEntry);
 
@@ -153,7 +215,7 @@ function _header(options)
     var result = '';
     
     result += '<center>';
-    result += _tag('.star', '<img src="http://' + host+ '/images/star256.png" width="96" height="96"></img>');
+    result += _tag('.star', '<img src="http://' + host+ '/images/star192_anim.gif" width="96" height="96"></img>');
     
     if (options && options.subtitle)
         result += _tag('h2', '<h2>(' + options.subtitle + ')</h2>');
@@ -163,16 +225,21 @@ function _header(options)
     return result;
 }
 
-function _firstName(userEntry)
+function _firstNameFromString(fullname)
 {
-    var fullname = userEntry.twitter.user.name;
-
     var parts = fullname.split(' ');
     
     if (parts.length >= 1)
         return parts[0];
     
     return fullname;
+}
+
+function _firstName(userEntry)
+{
+    var fullname = userEntry.twitter.user.name;
+    
+    return _firstNameFromString(fullname);
 }
 
 

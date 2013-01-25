@@ -144,16 +144,18 @@ body
     position: relative
     padding 1px
     display: inline-block
-    border-radius: 8px
+    border-radius: 4px
     background-color: #fbfbfb
-    width: 300px
-    margin: 8px 24px;
+    width: 284px
+    border: 1px solid #DDD
+    margin: 8px 0;
 
 .peopleTableHeader
     position: relative;
     padding-top: 8px
     padding-bottom: 16px
     height: 40px;
+    border-bottom: 1px solid #DDD
 
 tableHeaderItem()
     position: absolute;
@@ -173,7 +175,7 @@ tableHeaderItem()
 
     overflow-x: hidden
     overflow-y: auto
-    height: 200px
+    height: 216px
     // background-color: yellow
 
 ._row
@@ -245,7 +247,7 @@ tableHeaderItem()
 #vip-table
     .peopleTableHeader
         h4
-            margin: 8px 0 0 0
+            margin: 12px 0 0 0
             text-align: center
 
     .peopleTableRows
@@ -279,6 +281,7 @@ tableHeaderItem()
     padding: 0
     visibility: hidden
 
-#done
+#settings-endpage
     text-align: center
-    
+    a
+        margin: 0 16px
