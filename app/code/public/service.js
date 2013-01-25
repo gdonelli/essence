@@ -11,9 +11,6 @@ var		async			= require('async')
     ,	email           = use('email')
     ,	a				= use('a')
     ,	io				= use('io')
-    ,   essence         = use('essence')
-    ,	message         = use('message')
-    ,	engine			= use('engine')
     ;
 
 
@@ -186,6 +183,18 @@ service.socket.getUserEntry =
             });
     };
 
+// Removes the private property
+function _safeUserEntry(userEntry)
+{
+    if (userEntry) {
+        delete userEntry.secret;
+        delete userEntry.twitter.oauth;
+    }
+    
+    return userEntry;
+}
+
+//???: Confirm Email
 
 service.event.confirmEmail = 'service.confirmEmail';
 
@@ -279,42 +288,7 @@ service.verifyEmail =
             });
     };
 
-service.destroyEssenceList =
-    function(userId, callback /* (err) */) 
-    {
-        database.getUserEntryById(userId,
-            function(err, userEntry) {
-                if (err)
-                    return callback(err);
-
-                var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
-                
-                essence.destroyList(oauth, callback);
-            });
-    };
-
-
-service.getAugmentedVipList = 
-    function(userId, options, callback /* (err, userEntry, list) */) 
-    {
-        // console.log('about to service.getAugmentedVipList');
-        
-        database.getUserEntryById(userId,
-            function(err, userEntry) {
-                if (err)
-                    return callback(err);
-
-                var oauth = authentication.makeOAuth(userEntry.twitter.oauth);
-
-                // console.log('about to essence.getAugmentedVipList');
-
-                essence.getAugmentedVipList(oauth, userEntry, options,
-                    function(err, list)
-                    {
-                        callback(err, userEntry, list);
-                    });
-            });
-    };
+//???: Service State
 
 /*
     The possible service states:
@@ -407,30 +381,6 @@ service.serviceState =
             });
     };
 
-
-service.sendEssence =
-    function(userId, options, callback /* (err) */) 
-    {
-        database.getUserEntryById(userId,
-            function(err, userEntry) {
-                if (err)
-                    return callback(err);
-                
-                engine.deliverEssenceToUser(userEntry, {}, callback);
-            });
-    };
-
-
-// Removes the private property
-function _safeUserEntry(userEntry)
-{
-    if (userEntry) {
-        delete userEntry.secret;
-        delete userEntry.twitter.oauth;
-    }
-    
-    return userEntry;
-}
 
 // TODO: Constant using use module
 

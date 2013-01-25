@@ -364,7 +364,7 @@ engine.getEssenceMessageForUser =
                 //console.log('vipList:');
                 //console.log(vipList);
                 
-                message.make(userEntry, vipList, {}, callback);
+                presentation.makeHTML(userEntry, vipList, {}, callback);
             });
     };
 

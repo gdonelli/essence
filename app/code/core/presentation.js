@@ -12,16 +12,72 @@ var     path    = require('path')
     ;
 
 
-var message = exports;
+var presentation = exports;
 
-var host;
 
-if (process.env.SUBDOMAIN)
-    host = 'essence.jit.su';
-else
-    host = 'local.essence.com:3001';
+presentation.makeEmailMessage = 
+    function(userEntry, vipList, options, callback /* (err, msg) */)
+    {
+        var toName  = userEntry.twitter.user.name;
+        var toEmail = userEntry.email;
+        
+        var msg = {};
+        
+        msg.subject = 'Essence';
+        msg.from    = _from();
+        msg.to      = toName + ' <' + toEmail + '>';
+        msg.bcc     = _bcc();
+        msg.text    = presentation.makePlainText(userEntry, vipList, options);
 
-message.make =
+        presentation.makeHTML(userEntry, vipList, options,
+            function(err, html)
+            {
+                if (err)
+                    return callback(err);
+            
+                msg.attachment  = [{
+                        data: html
+                    ,	alternative: true
+                    }];
+                    
+                callback(null, msg);
+            });
+    };
+    
+
+presentation.makePlainText =
+    function(userEntry, vipList, options)
+    {
+        var result = 'Essence\n\n';
+        
+        vipList.forEach(
+            function(friendEntry) {
+                result += _plainTextEssenceForFriend(friendEntry);
+            });
+        
+        result += '\n';
+        
+        var settingsURL = _settingsURL(userEntry);
+        result += 'Settings: <' + settingsURL + '>\n';
+        
+        var feedbackURL = _feedbackURL(userEntry);
+        result += 'Feedback: <' + feedbackURL + '>\n';
+
+        var supportURL  = _supportURL(userEntry);
+        result += 'Support: <' + supportURL + '>\n';
+
+        var unsubscribeURL = _unsubscribeURL(userEntry);
+        result += 'Unsubscribe: <' + unsubscribeURL + '>\n';
+
+        result += '\n\n';
+        
+        result += 'v' + _version();
+        
+        return result;
+    };
+    
+    
+presentation.makeHTML =
     function(userEntry, vipList, options, callback /* (err, html) */ )
     {
         _getMessageCSS( 
@@ -60,6 +116,38 @@ message.make =
             });
     };
 
+
+presentation.stringToHTML = 
+    function(string)
+    {
+        return _toHTML(string);
+    }
+
+
+// TODO: Private
+
+
+var host;
+
+if (process.env.SUBDOMAIN)
+    host = 'essence.jit.su';
+else
+    host = 'local.essence.com:3001';
+
+function _from()
+{
+    a.assert_string(process.env.EMAIL_ADDRESS);
+    
+    return 'Essence <' + process.env.EMAIL_ADDRESS + '>';
+}
+
+function _bcc()
+{
+    a.assert_string(process.env.ADMIN_EMAIL_ADDRESS);
+    
+    return 'Essence Admin <' + process.env.ADMIN_EMAIL_ADDRESS + '>';
+}
+
 function _header(options)
 {
     var result = '';
@@ -87,11 +175,38 @@ function _firstName(userEntry)
     return fullname;
 }
 
+
+function _unsubscribeURL(userEntry)
+{
+    return 'http://' + host + '/delete/' + userEntry._id;
+}
+
+function _settingsURL(userEntry)
+{
+    return 'http://' + host + '/settings';
+}
+
+function _feedbackURL(userEntry)
+{
+    return 'mailto:' + process.env.EMAIL_ADDRESS + '?subject=Feedback v'  + package.version;
+}
+
+function _supportURL(userEntry)
+{
+    return 'mailto:' + process.env.EMAIL_ADDRESS + '?subject=Support v'  + package.version;
+}
+
+function _version()
+{
+    return package.version;
+}
+
 function _footer(userEntry)
 {
-    var unsuscribeLink = 'http://' + host + '/delete/' + userEntry._id;
-    var settingsLink = 'http://' + host + '/settings' ;
-
+    var unsubscribeURL = _unsubscribeURL(userEntry);
+    var settingsURL = _settingsURL(userEntry);
+    var feedbackURL = _feedbackURL(userEntry);
+    var supportURL  = _supportURL(userEntry);
 
     var result = '';
 
@@ -100,14 +215,14 @@ function _footer(userEntry)
     result += _tag('.thatsit', '<div>That&rsquo;s it ' + _firstName(userEntry) + ', ' + 'what do you think about Essence?</div>');
     result += _tag('.footer-buttons', '<div>'); // Buttons
 
-    result += _tag('.footer-btn', '<a href="' + settingsLink + '" target="_blank">Settings</a>');
-    result += _tag('.footer-btn', '<a href="mailto:' + process.env.EMAIL_ADDRESS + '?subject=Feedback v' + package.version + '">Feedback</a>');
-    result += _tag('.footer-btn', '<a href="mailto:' + process.env.EMAIL_ADDRESS + '?subject=Support v'  + package.version + '">Support</a>');
+    result += _tag('.footer-btn', '<a href="' + settingsURL + '" target="_blank">Settings</a>');
+    result += _tag('.footer-btn', '<a href="' + feedbackURL + '">Feedback</a>');
+    result += _tag('.footer-btn', '<a href="' + supportURL + '">Support</a>');
     
     result += '</div>';
     
-    result += _tag('.footer-a', '<a href="' + unsuscribeLink + '" target="_blank">Unsubscribe</a>');
-    result += _tag('.version', '<div>v' + package.version + '</div>');
+    result += _tag('.footer-a', '<a href="' + unsubscribeURL + '" target="_blank">Unsubscribe</a>');
+    result += _tag('.version', '<div>v' + _version() + '</div>');
     
     result += '</div>';
 
@@ -128,12 +243,6 @@ function _toHTML(string)
 {
     return _htmlEncoder().htmlEncode(string);
 }
-
-message.stringToHTML = 
-    function(string)
-    {
-        return _toHTML(string);
-    }
 
 
 function _tag(styleKey, htmlCode)
@@ -169,7 +278,6 @@ function _tag(styleKey, htmlCode)
     return fstPart + ' style=\'' + _getStyle(styleKey) + '\'' + sndPart;
 }
 
-//TODO: caching
 function _getStyle(key) // works for css file rendered by styl
 {
     var indexOfKey = -1;
@@ -206,7 +314,7 @@ function _getStyle(key) // works for css file rendered by styl
 }
 
 
-var cacheCSS = false;
+var cacheCSS = true;
 
 var _messageCSS;
 
@@ -257,16 +365,48 @@ function _file_getStylesheet( callback /* (err, data) */ )
     fs.readFile( stylePath, callback);
 }
 
-function _htmlEssenceForFriend(friend)
+function _validEssenceForFriend(friend)
 {
     if (!friend.essence) {
         console.error('friend.essence not defined');
         console.error('for friend:');
         console.error(friend);
-        return '';
+        return false;
     }
     
     if (friend.essence.length == 0)
+        return false;
+
+    return true;
+}
+
+
+function _plainTextEssenceForFriend(friend)
+{
+    if (!_validEssenceForFriend(friend))
+        return '';
+        
+    var result = '';
+
+    var sampleTweet = _.first(friend.essence);
+    var twitterUser = sampleTweet.user;
+    
+    result += '=[ ' + twitterUser.name + ' ]=\n';
+
+    friend.essence.forEach(
+        function(tweet){
+            result += tweet.text + '\n';
+        });
+
+    result += '\n';
+
+    return result;
+}
+
+
+function _htmlEssenceForFriend(friend)
+{
+    if (!_validEssenceForFriend(friend))
         return '';
         
     var result = '';
@@ -281,15 +421,12 @@ function _htmlEssenceForFriend(friend)
     result += _tag('.header', '<div>');
 
     result += _imgAvatarForUser(twitterUser, '.avatar');
-
     result += _tag('.name-box', '<div>');
     result += _tag('.name', '<p>' + _toHTML(twitterUser.name) + '</p>');
-    result += '</div>';
 
-    
     result += '</div>';
     
-
+    result += '</div>';
 
     // class="tweets"
     result += _tag('.tweets', '<div>');

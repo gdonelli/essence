@@ -22,7 +22,7 @@ if ( isApp && process.env.SUBDOMAIN != undefined ) { // enable profiling
 require( __dirname + '/code/lib/use' ).setup([ __dirname + '/code' ]);
 
 
-// Import
+// require
 var     express = require('express')
     ,   http    = require('http')
     ,   path    = require('path')
@@ -30,11 +30,13 @@ var     express = require('express')
     ,	fs      = require('fs')
     ;
 
+// use
 var 	authentication  = use('authentication')
     ,   twitter         = use('twitter')
     ,   index           = use('index')
     ,   io              = use('io')
-    ,   pages           = use('pages')
+    ,   userPages       = use('user-pages')
+    ,   adminPages      = use('admin-pages')
     ;
 
 // Startup
@@ -123,7 +125,7 @@ function _addRoutesFromModule(name, module, middleware, middlewareName)
 
 _addRoutesFromModule( 'index', index );
 _addRoutesFromModule( 'authentication', authentication );
-_addRoutesFromModule( 'pages', pages, authentication.middleware, 'user' );
+_addRoutesFromModule( 'userPages', userPages, authentication.middleware, 'user' );
 
 
 // ---------------------

@@ -6,21 +6,19 @@
 var     path    = require('path')
     ,   fs      = require('fs')
     ,   authentication  = use('authentication')
-    ,	message         = use('message')
     ,	database		= use('database')
     ,   service         = use('service')
     ;
 
-var pages = exports;
+var user_pages = exports;
 
 
-pages.path = {};
-pages.route = {};
+user_pages.path = {};
+user_pages.route = {};
 
 
-pages.path.settings = '/settings';
-
-pages.route.settings = 
+user_pages.path.settings    = '/settings';
+user_pages.route.settings   = 
     function(quest, ponse)
     {
         var user = authentication.userFromRequest(quest);
@@ -34,9 +32,8 @@ pages.route.settings =
     }
 
 
-pages.path.deleteDelete = '/delete-delete/:userId?';
-
-pages.route.deleteDelete = 
+user_pages.path.deleteDelete    = '/delete-delete/:userId?';
+user_pages.route.deleteDelete   = 
     function(quest, ponse)
     {
         var userId = _userIdFromRequest(quest);
@@ -57,9 +54,8 @@ pages.route.deleteDelete =
     };
 
 
-pages.path.delete = '/delete/:userId?';
-
-pages.route.delete = 
+user_pages.path.delete  = '/delete/:userId?';
+user_pages.route.delete = 
     function(quest, ponse)
     {
         var userId = _userIdFromRequest(quest);
@@ -82,9 +78,8 @@ pages.route.delete =
     };
 
 
-pages.path.confirmEmail = '/confirm/:userId?/:ticket?';
-
-pages.route.confirmEmail = 
+user_pages.path.confirmEmail    = '/confirm/:userId?/:ticket?';
+user_pages.route.confirmEmail   = 
     function(quest, ponse)
     {
         var userId;
@@ -121,51 +116,8 @@ function _userIdFromRequest(quest)
 }
 
 
-
-pages.path.destroyList = '/destroyList/:userId?';
-
-pages.route.destroyList = 
-    function(quest, ponse)
-    {
-        var userId = _userIdFromRequest(quest);
-
-        service.destroyEssenceList(userId,
-            function(err)
-            {
-                ponse.send( { error: err } );
-            });
-    };
-
-pages.path.cleanDeliveryDate = '/admin/cleanDeliveryDate/:userId?';
-
-pages.route.cleanDeliveryDate = 
-    function(quest, ponse)
-    {
-        var userId = _userIdFromRequest(quest);
-        
-        database.getUserEntryById(userId,
-            function(err, userEntry)
-            {
-                if (err)
-                    return ponse.send(err.message);
-                
-                delete userEntry.deliveryDate;
-                
-                database.saveUserEntry(userEntry,
-                    function(err, userEntry) 
-                    {
-                        if (err)
-                            return ponse.send(err.message);
-                            
-                        ponse.send('OK');
-                    });
-            });
-    };
-
-    
-pages.path.preview = '/preview/:userId?';
-
-pages.route.preview = 
+user_pages.path.previewTxt  = '/preview_txt/:userId?';
+user_pages.route.previewTxt = 
     function(quest, ponse)
     {
         var userId = _userIdFromRequest(quest);
@@ -180,9 +132,34 @@ pages.route.preview =
                     return ponse.send( err.message );
                 }
                 
-                // console.log('About to message.make');
-                
-                message.make(userEntry, vipList, { subtitle: 'Preview' },
+                presentation.makePlainText(userEntry, vipList, { subtitle: 'Preview' },
+                    function(err, html)
+                    {
+                        //ponse.writeHead(200, {'Content-Type': 'text/html'});
+                        //ponse.end(html);
+                        ponse.send(html);
+                    });
+            });    
+    };
+
+
+user_pages.path.preview     = '/preview/:userId?';
+user_pages.route.preview    = 
+    function(quest, ponse)
+    {
+        var userId = _userIdFromRequest(quest);
+
+        // console.log('About to get service.getAugmentedVipList');
+
+        service.getAugmentedVipList(userId, { preview: true },
+            function(err, userEntry, vipList)
+            {
+                if (err) {
+                    // TODO: deal with too many request error
+                    return ponse.send( err.message );
+                }
+                                
+                presentation.makeHTML(userEntry, vipList, { subtitle: 'Preview' },
                     function(err, html)
                     {
                         ponse.writeHead(200, {'Content-Type': 'text/html'});
@@ -192,18 +169,8 @@ pages.route.preview =
     };
 
 
-pages.path.tz = '/tz';
-
-pages.route.tz = 
-    function(quest, ponse)
-    {
-        ponse.send( 'offset: ' + (new Date).getTimezoneOffset() );
-    }
-
-
-pages.path.actual = '/actual/:userId?';
-
-pages.route.actual = 
+user_pages.path.actual  = '/actual/:userId?';
+user_pages.route.actual = 
     function(quest, ponse)
     {
         var engine = use('engine');
@@ -227,62 +194,4 @@ pages.route.actual =
             });
     };
 
-
-pages.path.allusers = '/admin/users';
-
-pages.route.allusers = 
-    function(quest, ponse)
-    {
-        ponse.writeHead(200, {'Content-Type': 'text/html'});
-        ponse.write('<!DOCTYPE html><html>');
-
-        ponse.write('<table cellpadding="10px">');
-
-        database.forEachUser(
-            function(err, user) {
-                if (err)
-                    ponse.write('<td>Error: ' + err.message + '</td>');
-            
-                if (err || user == null)
-                    return ponse.end('</table></html>');
-                    
-                var row = '';
-                
-                row += '<tr>';
-                
-                row += '<td><strong>' + message.stringToHTML(user.twitter.user.name) + '</strong></td>';
-                row += '<td>' + message.stringToHTML(user.email) + '</td>';
-                row += '<td>#' + (user.vipList ? user.vipList.length : 0) + ' </td>';
-                row += '<td><a target="_blank" href="/preview/' + user._id + '">preview</a></td>';
-                row += '<td><a target="_blank" href="/actual/' + user._id + '">actual</a></td>';
-                row += '<td><a target="_blank" href="/admin/send/' + user._id + '">send</a></td>';
-                row += '<td><a target="_blank" href="/admin/cleanDeliveryDate/' + user._id + '">clean deliveryDate</a></td>';
-
-                row += '</tr>';
-                
-                ponse.write(row);
-            });
-    };
-
-pages.path.adminSend = '/admin/send/:userId?';
-
-pages.route.adminSend = 
-    function(quest, ponse)
-    {
-        var userId = _userIdFromRequest(quest);
-        
-        service.sendEssence(userId, {},
-            function(err)
-            {
-                if (err) {
-                    var obj = {};
-                    obj.message = err.message;
-                    obj.stack = err.stack;
-                    
-                    return ponse.send( obj );
-                }
-                
-                ponse.send('OK');
-            });
-    };
     

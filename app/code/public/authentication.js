@@ -10,10 +10,10 @@ var querystring = require('querystring')
     ,   package = require('./../../package.json')
 
 
-    ,   twitter = use('twitter')
-    ,   database= use('database')
-    ,   service = use('service')
-    ,   pages   = use('pages')
+    ,   twitter  = use('twitter')
+    ,   database = use('database')
+    ,   service   = use('service')
+    ,   userPages = use('user-pages')
     ;
 
 
@@ -197,7 +197,7 @@ function _loginResponse(quest, ponse)
                             if ( service.stateForUser(userEntry) == 'NO-EMAIL' ||
                                  service.stateForUser(userEntry) == 'NO-VIP' )
                             {
-                                ponse.redirect(pages.path.settings);
+                                ponse.redirect(userPages.path.settings);
                             }
                             else
                                 ponse.redirect('/');
@@ -266,6 +266,11 @@ function _userFromSession(session)
 
 authentication.oauthFromRequest = _oauthFromObject;
 authentication.oauthFromSocket  = _oauthFromObject;
+
+authentication.oauthFromUserEntry = 
+    function(userEntry) {
+        return _makeOAuth(userEntry.twitter.oauth);
+    };
 
 function _oauthFromObject(o)
 {

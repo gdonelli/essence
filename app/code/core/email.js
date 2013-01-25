@@ -31,40 +31,40 @@ function _smtpServer()
     return _server;
 }
 
-email.sendEssenceTo =
-    function(userName, userEmail, htmlMessage, callback /* (err) */ )
-    {
-        // console.log('email.sendEssenceTo: ' + userEmail );
+//email.sendEssenceTo =
+//    function(userName, userEmail, htmlMessage, callback /* (err) */ )
+//    {
+//        // console.log('email.sendEssenceTo: ' + userEmail );
+//
+//        if (!userEmail)
+//            return callback(new Error('No valid email given'));
+//            
+//        var msg = {};
+//        msg.subject = 'Essence';
+//        msg.from    = _from();
+//        msg.to      = userName + ' <' + userEmail + '>';
+//        msg.bcc     = process.env.ADMIN_EMAIL_ADDRESS;
+//        msg.attachment  = [{ 
+//                data: htmlMessage 
+//            ,	alternative:true
+//            }];
+//            
+//        msg.text = 'Essence is delivered as rich HTML attached to this email';
+//        
+//        console.log('msg.to: ' + msg.to );
+//        
+//        email.send(msg, callback);
+//    };
 
-        if (!userEmail)
-            return callback(new Error('No valid email given'));
-            
-        var msg = {};
-        msg.subject = 'Essence';
-        msg.from    = _from();
-        msg.to      = userName + ' <' + userEmail + '>';
-        msg.bcc     = process.env.ADMIN_EMAIL_ADDRESS;
-        msg.attachment  = [{ 
-                data: htmlMessage 
-            ,	alternative:true
-            }];
-            
-        msg.text = 'Essence is delivered as rich HTML attached to this email';
-        
-        console.log('msg.to: ' + msg.to );
-        
-        email.send(msg, callback);
-    };
 
-
-email.sendEssence =
-    function(userEntry, htmlMessage, callback /* (err) */ )
-    {
-        var userEmail = userEntry.email;
-        var userName  = userEntry.twitter.user.name;
-        
-        email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
-    };
+//email.sendEssence =
+//    function(userEntry, htmlMessage, callback /* (err) */ )
+//    {
+//        var userEmail = userEntry.email;
+//        var userName  = userEntry.twitter.user.name;
+//        
+//        email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
+//    };
 
 function _from()
 {
@@ -72,6 +72,14 @@ function _from()
     
     return 'Essence <' + process.env.EMAIL_ADDRESS + '>';
 }
+
+function _bcc()
+{
+    a.assert_string(process.env.ADMIN_EMAIL_ADDRESS);
+    
+    return 'Essence Admin <' + process.env.ADMIN_EMAIL_ADDRESS + '>';
+}
+
 
 email.sendConfirmationMessage = 
     function(userEntry, confirmationURL, callback /* (err, message) */ )

@@ -228,6 +228,7 @@ function _users_lookup100(oauth, arrayOfUserIds, callback /* (err, data) */, cac
 {
     assert(arrayOfUserIds.length <= 100, 'arrayOfUserIds.length is not <= 100, is #' + arrayOfUserIds.length);
     
+    // test http
     var apiURL = 'https://api.twitter.com/1.1/users/lookup.json';
 
     var allIds = '';
@@ -236,6 +237,8 @@ function _users_lookup100(oauth, arrayOfUserIds, callback /* (err, data) */, cac
     
     var params = { user_id: allIds };
     
+    // post is buggy with read permissions
+    // I get 401 error
     twitter.post(oauth, apiURL, params, callback, cache);
 }
 
@@ -411,13 +414,19 @@ twitter.getFriends =
                     return callback(err);
                 else if (data.ids == undefined)
                     return callback(new Error('data.ids is undefined'));
-
+                
                 progressEmitter.emit('progress', 0.25);
                 
                 var lookup =
                     twitter.users.lookup( oauth, data.ids,
                         function(err, data)
                         {
+                            if (err) {
+                                console.error('twitter.users.lookup error: ');
+                                console.error(err);
+                                return callback(err);
+                            }
+
                             var result = _.map(data,
                                 function(userInfo) {
                                     var propertiesToPick =

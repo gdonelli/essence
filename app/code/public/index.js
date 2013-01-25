@@ -7,9 +7,7 @@ var     path    = require('path')
     ,   fs      = require('fs')
     
     ,   authentication  = use('authentication')
-    ,	message         = use('message')
     ,	database		= use('database')
-    ,   pages           = use('pages') 
     ;
 
 var index = exports;
