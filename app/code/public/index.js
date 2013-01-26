@@ -7,7 +7,9 @@ var     path    = require('path')
     ,   fs      = require('fs')
     
     ,   authentication  = use('authentication')
-    ,	database		= use('database')
+    ,	database    = use('database')
+    ,	userly      = use('userly')
+    ,	a           = use('a')
     ;
 
 var index = exports;
@@ -56,3 +58,29 @@ function _userIndex(quest, ponse)
         } );        
 }
 
+
+index.path.prettyemail = '/prettyemail';
+
+index.route.prettyemail = 
+    function(quest, ponse)
+    {
+        var heroUserId = process.env.HERO_ID;
+        
+        a.assert_string(heroUserId);
+        
+
+        userly.previewForUserWithId(heroUserId, {}, 
+            function(err, html)
+            {
+                if (err)
+                    return ponse.send(err.message);
+
+                ponse.writeHead(200, {'Content-Type': 'text/html'});
+                ponse.write('<!DOCTYPE html><html><body>');
+                
+                ponse.write(html);
+                
+                ponse.end('</body></html>');
+                
+            });
+    };
