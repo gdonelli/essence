@@ -23,30 +23,24 @@ function _subjectWithNames(names)
         result += names[0];
     else if (names.length == 2)
         result += names[0] + ' and ' + names[1];
-    else if (names.length > 2)
-    {
-        for (var i=0; i<names.length-2; i++)
-        {
-            result += names[i] + ', ';
-        }
-        
-        result += names[names.length-2] + ' and ' + names[names.length-1];
-    }
+    else if (names.length == 3)
+        result += names[0] + ', ' + names[1] + ' and ' + names[2];
+    else if (names.length > 3)
+        result += names[0] + ', ' + names[1] + ' and ' + (names.length - 2) + ' more';
     else
         return 'Essence';
     
     return result;
 }
 
-/*
+
 
 // == Test ===
-
+/*
 console.log( _subjectWithNames(['Giovanni']) );
 console.log( _subjectWithNames(['Giovanni', 'Eric']) );
 console.log( _subjectWithNames(['Giovanni', 'Eric', 'Set']) );
 console.log( _subjectWithNames(['Giovanni', 'Eric', 'Set', 'Nils']) );
-
 */
 
 
