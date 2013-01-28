@@ -215,7 +215,10 @@ function _header(options)
     var result = '';
     
     result += '<center>';
+    
+    result += '<a href="http://' + host+'">';
     result += _tag('.star', '<img src="http://' + host+ '/images/star192_anim.gif" width="96" height="96"></img>');
+    result += '</a>';
     
     if (options && options.subtitle)
         result += _tag('h2', '<h2>(' + options.subtitle + ')</h2>');

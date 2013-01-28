@@ -53,10 +53,23 @@ userly.deliverEssenceToUser =
                 }
             ,   function(augmentedVipList, callback)
                 {
-                    presentation.makeEmailMessage(userEntry, augmentedVipList, options, callback);
+                    // Make sure we always deliver some tweets
+                    var countTweets = 0;
+                    augmentedVipList.forEach(
+                        function(vipEntry){
+                            countTweets += vipEntry.essence.length;
+                        });
+                    
+                    if (countTweets > 0)
+                        presentation.makeEmailMessage(userEntry, augmentedVipList, options, callback);
+                    else
+                        callback(null, null);
                 }
             ,   function(msg, callback)
                 {
+                    if (msg === null) // We have no tweets to deliver
+                        return callback(null, null);
+                        
                     if (options.email)
                         msg.to = options.email;
                     

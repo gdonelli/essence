@@ -102,7 +102,7 @@ userPages.route.confirmEmail   =
                 if (err)
                     return ponse.send(err.message);
                     
-                ponse.redirect(pages.path.settings);
+                ponse.redirect(userPages.path.settings);
             });
     };
 

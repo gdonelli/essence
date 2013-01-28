@@ -32,3 +32,5 @@ jitsu env set DB_PORT $DB_PORT
 jitsu env set DB_NAME $DB_NAME
 jitsu env set DB_USERNAME $DB_USERNAME
 jitsu env set DB_PASSWORD $DB_PASSWORD
+
+jitsu env set HERO_ID $HERO_ID
