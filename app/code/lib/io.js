@@ -157,11 +157,12 @@ function _socketListen(socket)
                                     
                                     if (err.message)
                                         errObject.error = err.message;
+                                        
                                     if (err.code)
                                         errObject.errorCode = err.code;
                                     
-                                    // console.error('errObject:');
-                                    // console.error(errObject);
+                                    console.error('ioroute -> err.code:');
+                                    console.error(err.code);
 
                                     return callback(errObject);
                                 }

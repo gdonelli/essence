@@ -84,10 +84,17 @@ presentation.makeEmailMessage =
                 if (err)
                     return callback(err);
             
+                msg.html = html;
+                
+                /* 
+                
+                // emailjs
+                
                 msg.attachment  = [{
                         data: html
                     ,	alternative: true
                     }];
+                */
                     
                 callback(null, msg);
             });

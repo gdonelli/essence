@@ -98,17 +98,18 @@ admin_pages.route.adminSend =
         var userId = userPages.userIdFromRequest(quest);
         
         userly.deliverEssenceToUserWithId(userId, {},
-            function(err, msg)
-            {
+            function(err, msg) {
                 if (err) {
                     var obj = {};
                     obj.message = err.message;
                     obj.stack = err.stack;
-                    
-                    return ponse.send( obj );
+                    return ponse.send(obj);
                 }
                 
-                ponse.send('OK');
+                if (msg === null)
+                    ponse.send('Nothing to send, Message is null.');
+                else
+                    ponse.send('Message sent!');
             });
     };
     

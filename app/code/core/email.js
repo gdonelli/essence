@@ -3,68 +3,31 @@
  * email
  */
 
-var 	emailjs = require('emailjs')
-    ,	a       = use('a')
+var 	nodemailer  = require('nodemailer')
+
+    ,	a   = use('a')
     ;
 
 
 var email = exports;
 
-var _server;
+var _nodemailerTransport;
 
-function _smtpServer()
+function _nodemailerServer()
 {
-    if (!_server) {
-        a.assert_string(process.env.EMAIL_ADDRESS);
-        a.assert_string(process.env.SMTP_USER);
-        a.assert_string(process.env.SMTP_PASSWORD);
-        a.assert_string(process.env.SMTP_HOST);
-        
-        _server = emailjs.server.connect({
-                user:       process.env.SMTP_USER
-            ,   password:   process.env.SMTP_PASSWORD
-            ,   host:       process.env.SMTP_HOST
-            ,   ssl:        true
+    if (!_nodemailerTransport)
+    {
+        _nodemailerTransport = nodemailer.createTransport("SMTP",{
+                service: "Gmail",
+                auth: {
+                    user: process.env.SMTP_USER + "@gmail.com",
+                    pass: process.env.SMTP_PASSWORD
+                }
             });
     }
     
-    return _server;
+    return _nodemailerTransport;
 }
-
-//email.sendEssenceTo =
-//    function(userName, userEmail, htmlMessage, callback /* (err) */ )
-//    {
-//        // console.log('email.sendEssenceTo: ' + userEmail );
-//
-//        if (!userEmail)
-//            return callback(new Error('No valid email given'));
-//            
-//        var msg = {};
-//        msg.subject = 'Essence';
-//        msg.from    = _from();
-//        msg.to      = userName + ' <' + userEmail + '>';
-//        msg.bcc     = process.env.ADMIN_EMAIL_ADDRESS;
-//        msg.attachment  = [{ 
-//                data: htmlMessage 
-//            ,	alternative:true
-//            }];
-//            
-//        msg.text = 'Essence is delivered as rich HTML attached to this email';
-//        
-//        console.log('msg.to: ' + msg.to );
-//        
-//        email.send(msg, callback);
-//    };
-
-
-//email.sendEssence =
-//    function(userEntry, htmlMessage, callback /* (err) */ )
-//    {
-//        var userEmail = userEntry.email;
-//        var userName  = userEntry.twitter.user.name;
-//        
-//        email.sendEssenceTo(userName, userEmail, htmlMessage, callback);
-//    };
 
 function _from()
 {
@@ -87,7 +50,7 @@ email.sendConfirmationMessage =
         var userEmail = userEntry.email_to_confirm;
         var userName = userEntry.twitter.user.name;
         
-        var subject = 'Please confirm Essence activation';
+        var subject = userName + ', please activate Essence now';
         var msg = {
             	subject: subject
             ,	from:   _from()
@@ -118,13 +81,14 @@ email.sendConfirmationMessage =
         
         email.send(msg, callback);
     };
-    
+
+
 email.send =
     function(msg, callback)
     {
-        var server = _smtpServer();
-
-        server.send(msg, 
+        var server = _nodemailerServer();
+        
+        server.sendMail(msg,
             function(err, message)
             {
                 if (err) {
@@ -137,9 +101,10 @@ email.send =
                 }
                 
                 callback(err, message);
-            });    
+            });
     };
-    
+
+
 email.sendErrorMessage = 
     function(err, callback)
     {
@@ -153,4 +118,4 @@ email.sendErrorMessage =
         
         email.send(msg, callback);
     };
-    
+

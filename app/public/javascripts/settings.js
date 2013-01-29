@@ -318,6 +318,11 @@ function _updateEmail(userEntry)
     }    
 }
 
+function _tooManyAlert()
+{
+    return $('#too-many');
+}
+
 function ________________(){}
 
 function AddVip(id, element)
@@ -331,11 +336,24 @@ function AddVip(id, element)
             if (err) {
                 console.log('addVip error:');
             	console.log(err);
+                
+                // console.log('addVip error.message:' + err.message);
+                // console.log('addVip error.code:'    + err.code);
+            	
                 $(element).addClass('btn-danger');
                 $(element).removeClass('disabled');
                 $(element).removeAttr('disabled');
+
+                $(element).html('Add&nbsp;<i class="icon-arrow-right"></i>');
+                
+                if (err.code === 'TOOMANY')
+                    _tooManyAlert().show();
+                
+                
                 return;
             }
+            
+            _tooManyAlert().hide();
             
             $(element).addClass('btn-success');
             $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-ok"></i>&nbsp;&nbsp;&nbsp;&nbsp;');

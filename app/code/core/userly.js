@@ -168,6 +168,18 @@ function _getTweetsSinceDate(tweets, sinceDate)
         sinceDate
 */
 
+function _isDirectTweet(tweet)
+{
+    if (tweet.text.length >= 4)
+    {
+        var tweetHead = tweet.text.substring(0, 4).trim();
+        
+        return tweetHead[0] == '@';
+    }
+    
+    return false;
+}
+
 function _filterTweets(tweets, options)
 {
     var result = tweets;
@@ -175,14 +187,19 @@ function _filterTweets(tweets, options)
     if (options.sinceDate)
         result = _getTweetsSinceDate(tweets, options.sinceDate);
     
-    if (!options.includeResponses)
-        result = _.filter(result, 
-            function(tweet) {
-                if (tweet.in_reply_to_status_id)
-                    return options.includeResponses;
-                
-                return true;
-            });
+    // Filter responses and direct messages
+    result = _.filter(result, 
+        function(tweet) {
+            if (tweet.in_reply_to_status_id)
+                return options.includeResponses;
+            
+            if ( _isDirectTweet(tweet) ) {
+                console.log('direct tweet: ' + tweet.text );
+                return false;
+            }
+
+            return true;
+        });
     
     if (options.maxCount)
         result = _.first(result, options.maxCount);

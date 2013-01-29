@@ -1,6 +1,6 @@
 {
   "name": "essence",
-  "version": "1.0.9",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "start": "app.js"
@@ -16,9 +16,9 @@
     "async": "*",
     "nodefly": "stable",
     "mongodb": "*",
-    "emailjs": "*",
     "node-html-encoder": "*",
-    "moment": "*"
+    "moment": "*",
+    "nodemailer": "*"
   },
   "subdomain": "essence",
   "author": "Giovanni Donelli <giovanni.donelli@gmail.com>",

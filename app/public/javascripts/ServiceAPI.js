@@ -70,6 +70,7 @@ ServiceAPI.prototype._peformService =
                     var ponseError = ponse.error;
                                        
                     var err;
+                    
                     if (ponseError){
                         err = new Error(ponseError);
                         err.message = ponseError;
@@ -77,8 +78,8 @@ ServiceAPI.prototype._peformService =
                     else
                         err = new Error();
                         
-                    if ( ponseError && ponseError.code )
-                        err.code = ponseError.code;
+                    if ( ponse.errorCode )
+                        err.code = ponse.errorCode;
                     
                     callback(err);
                 }
