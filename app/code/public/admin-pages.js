@@ -5,6 +5,7 @@
 
 var     path    = require('path')
     ,   fs      = require('fs')
+    ,	moment  = require('moment')
     
     ,	database		= use('database')
     ,   service         = use('service')
@@ -112,4 +113,50 @@ admin_pages.route.adminSend =
                     ponse.send('Message sent!');
             });
     };
-    
+
+admin_pages.path.tracking  = '/admin/tracking/:userId?';
+admin_pages.route.tracking = 
+    function(quest, ponse)
+    {
+        ponse.writeHead(200, {'Content-Type': 'text/html'});
+        ponse.write('<!DOCTYPE html><html>');
+
+        ponse.write('<table cellpadding="10px">');
+        
+        database.getCursorOnTracking(
+            function(err, cursor)
+            {
+                cursor.each(
+                    function(err, dataPoint) {
+                        if (err)
+                            ponse.write('<td>Error: ' + err.message + '</td>');
+                    
+                        if (err || dataPoint == null)
+                            return ponse.end('</table></html>');
+                            
+                        var row = '';
+                        
+                        row += '<tr>';
+
+                        row += '<td>' + dataPoint.date + '</td>';
+                        
+                        row += '<td><strong>' + presentation.stringToHTML(dataPoint.userTwitter) + '</strong></td>';
+                        row += '<td>' + dataPoint.action + '</td>';
+        /*
+                        row += '<td>' + presentation.stringToHTML(user.email) + '</td>';
+                        row += '<td>#' + (user.vipList ? user.vipList.length : 0) + ' </td>';
+                        row += '<td><a target="_blank" href="/preview/' + user._id + '">preview</a></td>';
+                        row += '<td><a target="_blank" href="/actual/' + user._id + '">actual</a></td>';
+                        row += '<td><a target="_blank" href="/admin/send/' + user._id + '">send</a></td>';
+                        row += '<td><a target="_blank" href="/admin/cleanDeliveryDate/' + user._id + '">clean deliveryDate</a></td>';
+        */
+
+                        row += '</tr>';
+                        
+                        ponse.write(row);
+                    });
+
+            
+            });
+
+    };

@@ -194,7 +194,7 @@ function _filterTweets(tweets, options)
                 return options.includeResponses;
             
             if ( _isDirectTweet(tweet) ) {
-                console.log('direct tweet: ' + tweet.text );
+                // console.log('direct tweet: ' + tweet.text );
                 return false;
             }
 

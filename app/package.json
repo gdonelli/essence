@@ -1,6 +1,6 @@
 {
   "name": "essence",
-  "version": "0.2.1",
+  "version": "0.3.2",
   "private": true,
   "scripts": {
     "start": "app.js"

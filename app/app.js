@@ -37,6 +37,7 @@ var 	authentication  = use('authentication')
     ,   io              = use('io')
     ,   userPages       = use('user-pages')
     ,   adminPages      = use('admin-pages')
+    ,	tracking        = use('tracking') 
     ;
 
 // Startup
@@ -50,8 +51,10 @@ assert( process.env.SESSION_SECRET != undefined,    'process.env.SESSION_SECRET 
 
 var cookieParser = express.cookieParser( process.env.SESSION_SECRET);
 
+var cookieLife = (1000 * 60 * 60) /* hour */ * 24 /* day */ * 30 /* month */;
+
 var sessionStore = new MongoStore({
-                            cookie: { maxAge: 60000 * 60 }
+                            cookie: { maxAge: cookieLife }
                         ,   url: process.env.SESSION_DB_URL
                         ,   auto_reconnect: true
                         });
@@ -125,6 +128,8 @@ function _addRoutesFromModule(name, module, middleware, middlewareName)
 
 _addRoutesFromModule( 'index', index );
 _addRoutesFromModule( 'authentication', authentication );
+_addRoutesFromModule( 'tracking',       tracking );
+
 _addRoutesFromModule( 'userPages',  userPages,  authentication.middleware, 'user' );
 _addRoutesFromModule( 'adminPages', adminPages, authentication.middleware, 'user' );
 
@@ -165,8 +170,10 @@ app.get( '/friends',
         
     });
 
+/*
 var scheduler  = use('scheduler');
 scheduler.start();
+*/
 
 var envVars = [
         'CONSUMER_KEY'

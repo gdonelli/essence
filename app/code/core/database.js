@@ -85,23 +85,23 @@ database.userLogin =
 database.getUserEntryById =
     function(idstr, callback /* (err, userEntry) */ )
     {
-        a.assert_string(idstr);
-        var momgoId;
+        var mongoId;
         
         try {
-            momgoId = mongodb.ObjectID(idstr);
+            a.assert_def(idstr);
+            mongoId = mongodb.ObjectID(idstr);
         }
         catch(err) {
-            return callback(err);
+            return callback(new Error('Invalid UserId given: ' + idstr));
         }
         
-        _findUser( { _id: momgoId },
+        _findUser( { _id: mongoId },
             function(err, userEntry) {
                 if (err)
                     return callback(err);
                   
                 if (!userEntry)
-                    return callback( new Error('Cannot find user with id: `'+ momgoId + '`') );
+                    return callback( new Error('Cannot find user with id: `'+ mongoId + '`') );
                   
                 callback(null, userEntry);
             } );
@@ -128,19 +128,36 @@ database.saveUserEntry =
             });
     };
 
+//!!!: get Cursor
+function _getCursor(getCollection_f, limit, sort, callback)
+{
+    getCollection_f(
+        function(err, collection)
+        {
+            if (err)
+                return callback(err);
+                
+            var options = {};
+            options.limit = limit;
+                    
+            if (sort)
+               options.sort = sort;
+
+            
+            collection.find( {}, options, callback);
+        });    
+}
+
+database.getCursorOnTracking =
+    function(callback /* (err, cursor) */ )
+    {
+        _getCursor(_getTrackingCollection, 100, [ [ 'date' , -1 ] ], callback);
+    }
+    
 database.getCursorOnUsers =
     function(callback /* (err, cursor) */ )
     {
-        _getUserCollection(
-            function(err, userCollection)
-            {
-                if (err)
-                    return callback(err);
-                    
-                var cursor = userCollection.find();
-
-                callback(null, cursor);
-            });
+        _getCursor(_getUserCollection, 100, [ [ 'last_login' , -1 ] ], callback);
     };
 
 database.removeUserUserWithId =
@@ -152,16 +169,15 @@ database.removeUserUserWithId =
                 if (err)
                     return callback(err);
                 
-                var momgoId;
-                
+                var mongoId;
                 try {
-                    momgoId = mongodb.ObjectID(idstr);
+                    mongoId = mongodb.ObjectID(idstr);
                 }
                 catch(err) {
                     return callback(err);
                 }
                 
-                userCollection.remove( { _id: momgoId }, { single: true } , 
+                userCollection.remove( { _id: mongoId }, { single: true } , 
                     function(err, numberOfRemovedDocs)
                     {
                         if (numberOfRemovedDocs == 0)
@@ -184,6 +200,30 @@ database.forEachUser =
                 cursor.each(callback);
             });
     };
+
+
+database.insertTrackingPoint = 
+    function(dataPoint, callback /* (err, data) */)
+    {
+    	_getTrackingCollection(
+            function(err, statsCollection)
+            {
+                if (err)
+                    return callback(err);
+                
+                statsCollection.insert(dataPoint, 
+                    function(err, result)
+                    {
+                        if (err)
+                            return callback(err);
+                        
+                        if (result.length != 1)
+                            return callback( new Error('result.length != 1') );
+                        
+                        callback(null, result[0]);
+                    });
+            });
+    }
 
 function _addUser(userInfo, callback /* (err, userEntry) */)
 {
@@ -298,33 +338,12 @@ function _getCollection(collectionName, callback /* (err, collection) */ )
  
 }
 
-database._userCollection = null;
+
+//!!!: User Collection
 
 function _getUserCollection( callback /* (err, collection) */ )
 {
-    if (database._userCollection) {
-        process.nextTick(
-            function() {
-                callback(null, database._userCollection);
-            });
-        return;
-    }
-
-    async.waterfall(
-            [   function(callback) { // Get user collection
-                    _getCollection('user', callback)
-                }
-            ,	function(collection, callback) { // Get setup collection
-                    _setupUserCollection(collection, callback);
-                }
-            ]
-        ,	function(err, collection)
-            {
-                if (!err)
-                    database._userCollection = collection;
-                    
-                callback(err, collection);
-            });
+    _getGlobalCollection( 'user', _setupUserCollection, callback );
 }
 
 function _setupUserCollection(collection, callback /* (err, collection) */ )
@@ -339,6 +358,55 @@ function _setupUserCollection(collection, callback /* (err, collection) */ )
         ,   function(err, indexName)
             {
                 // console.log('indexName: ' + indexName);
+                callback(err, collection);
+            });
+}
+
+
+//!!!: Stats Collection
+
+function _getTrackingCollection( callback /* (err, collection) */ )
+{
+    _getGlobalCollection( 'tracking', _setupTrackingCollection, callback );
+}
+
+function _setupTrackingCollection(collection, callback /* (err, collection) */ )
+{
+    collection.ensureIndex(
+            [ ['userid', 1], ['date', -1] ]
+        ,   function(err, indexName) {
+                callback(err, collection);
+            });
+}
+
+
+//!!!: aux
+
+function _getGlobalCollection( collectionName, setupCollection, callback /* (err, collection) */)
+{
+    var globalName = '_' + collectionName;
+    
+    if (database[globalName]) {
+        process.nextTick(
+            function() {
+                callback(null, database[globalName]);
+            });
+        return;
+    }
+
+    async.waterfall(
+            [   function(callback) { // Get user collection
+                    _getCollection(collectionName, callback)
+                }
+            ,	function(collection, callback) { // Get setup collection
+                    setupCollection(collection, callback);
+                }
+            ]
+        ,	function(err, collection)
+            {
+                if (!err)
+                    database[globalName] = collection;
+                    
                 callback(err, collection);
             });
 }

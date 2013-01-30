@@ -8,6 +8,7 @@ var		async			= require('async')
 	,	authentication  = use('authentication')
     ,	database        = use('database')
     ,   twitter         = use('twitter')
+    ,	confirm         = use('confirm')
     ,	userly			= use('userly')
     ,	email           = use('email')
     ,	a				= use('a')
@@ -50,7 +51,6 @@ service.socket.getTwitterFriends =
             function(value) {
                 console.log('progress - ' + value);
             });
-        
         
         // Emit progess with a given event name
         
@@ -252,7 +252,7 @@ service.socket.confirmEmail =
                         var questHost = socket.session.host;
                 		var confirmURL = 'http://' + questHost + '/confirm/' + userEntry._id + '/' + userEntry.secret.email_ticket;
                         
-                		email.sendConfirmationMessage(userEntry, confirmURL, 
+                		confirm.sendConfirmationMessage(userEntry, confirmURL, 
                             function(err) {
                                 if (err)
                                     return callback(err);

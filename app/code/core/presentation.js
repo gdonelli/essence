@@ -154,7 +154,7 @@ presentation.makeHTML =
                 
                 result += _tag('body', '<div>'); // div container
 
-                result += _header(options);
+                result += _header(userEntry, options);
                 
                 if (vipList.length == 0)
                 {
@@ -211,14 +211,15 @@ function _bcc()
     return 'Essence Admin <' + process.env.ADMIN_EMAIL_ADDRESS + '>';
 }
 
-function _header(options)
+function _header(userEntry, options)
 {
     var result = '';
+
+    var msgIndex = userEntry.messageIndex ? userEntry.messageIndex : 0;
     
     result += '<center>';
-    
     result += '<a href="http://' + host+'">';
-    result += _tag('.star', '<img src="http://' + host+ '/images/star192_anim.gif" width="96" height="96"></img>');
+    result += _tag('.star', '<img src="http://' + host+ '/logo/' + userEntry._id + '/' + msgIndex+ '/image.gif" width="96" height="96"></img>');
     result += '</a>';
     
     if (options && options.subtitle)
