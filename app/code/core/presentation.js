@@ -214,8 +214,8 @@ function _bcc()
 function _header(userEntry, options)
 {
     var result = '';
-
-    var msgIndex = userEntry.messageIndex ? userEntry.messageIndex : 0;
+    
+    var msgIndex = userEntry.deliveryIndex ? userEntry.deliveryIndex : 0;
     
     result += '<center>';
     result += '<a href="http://' + host+'">';

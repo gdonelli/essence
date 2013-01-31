@@ -165,7 +165,14 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
                 if (scheduler.debugModeDeliveryDate)
                     state = kTestDeliveryState;
                 else
+                {
                     userEntry.deliveryDate = currentDeliveryDate;
+                    
+                    if (userEntry.deliveryIndex)
+                        userEntry.deliveryIndex++;
+                    else
+                        userEntry.deliveryIndex = 1;
+                }
                     
                 delete userEntry.deliveryError;
             }

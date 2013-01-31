@@ -32,6 +32,37 @@ function _servePublicFile(filePath, contentType, ponse)
 
 tracking.debugTrackLocal = true;
 
+
+//!!!: Go To
+
+tracking.path.goto = '/go/:userId?/:msgIndex?/*'
+
+tracking.route.goto = 
+    function(quest, ponse)
+    {
+        var userIdStr = quest.params.userId;
+        var msgIndex  = quest.params.msgIndex;
+        
+        var questURL = quest.url;
+        
+        var endOfUserSlash = questURL.indexOf('/', 5);
+        console.log('endOfUserSlash: ' + endOfUserSlash);
+
+        var endOfMsgSlash = questURL.indexOf('/', endOfUserSlash + 1);
+        console.log('endOfMsgSlash: ' + endOfMsgSlash);
+        
+        var urlToGoTo = questURL.substring(endOfMsgSlash + 1, questURL.length);
+        
+        console.log('urlToGoTo: ' + urlToGoTo);
+        
+        if (!urlToGoTo)
+            ponse.send('Cannot redirect, passed empty URL');
+        else
+            ponse.redirect(urlToGoTo);
+    };
+
+//!!!: Logo
+
 tracking.path.logo = '/logo/:userId?/:msgIndex?/image.gif'
 
 tracking.route.logo = 
@@ -42,12 +73,12 @@ tracking.route.logo =
 
         var noTracking = false;
         
-        console.log('quest.headers: ');
-        console.log(quest.headers);
+        // console.log('quest.headers: ');
+        // console.log(quest.headers);
 
         var host = quest.headers['host'];
         
-        console.log('host: ' + host + ' indexOf: ' + host.indexOf('local') );
+        // console.log('host: ' + host + ' indexOf: ' + host.indexOf('local') );
 
         if (!tracking.debugTrackLocal)
         {
@@ -72,31 +103,31 @@ tracking.route.logo =
         	var userIdStr = quest.params.userId;
             var msgIndex  = quest.params.msgIndex;
 
-            console.log('userIdStr: ' + userIdStr);
-            console.log('msgIndex : ' + msgIndex);
+            // console.log('userIdStr: ' + userIdStr);
+            // console.log('msgIndex : ' + msgIndex);
             
             var data = _.pick(quest.headers, ['user-agent', 'referer']);
             
+            var messageIndex;
+            
             if ( msgIndex.isNumber() ) {
-                var messageIndex = Math.floor(msgIndex);
-                data.messageIndex = messageIndex;
+                messageIndex = Math.floor(msgIndex);
             }
             else {
                 console.error('messageIndex is not valid:' + msgIndex);
                 return;
             }
-                
 
-            tracking.trackUserWithId(userIdStr, 'msg-load', data,
+            tracking.trackUserWithId(userIdStr, 'msg-load', messageIndex, data,
                 function(err, entry)
                 {
                     if (err) {
-                    	console.log('Tracking error:');
-                    	console.log(err);
+                    	console.error('Tracking error:');
+                    	console.error(err);
                     }
                     else {
-                    	console.log('Added tracking point:');
-                    	console.log(entry);
+                    	// console.log('Added tracking point:');
+                    	// console.log(entry);
                     }
                 });
         }
@@ -104,11 +135,10 @@ tracking.route.logo =
 
 
 tracking.trackUserWithId = 
-    function(userIdStr, action, data, callback /* (err, entry) */)
+    function(userIdStr, action, messageIndex, data, callback /* (err, entry) */)
     {
         a.assert_string(action, 'action');
        
-        
         database.getUserEntryById(userIdStr, 
             function(err, userEntry) {
                 if (err)
@@ -117,12 +147,12 @@ tracking.trackUserWithId =
                 if (!userEntry)
                     return callback( new Error('Cannot find user with id:' + userIdStr) );
 
-                _addStatPointToUserEntry(userEntry, action, data, callback);
+                _addStatPointToUserEntry(userEntry, action, messageIndex, data, callback);
             });
     };
 
 
-function _addStatPointToUserEntry(userEntry, action, data, callback /* (err, entry) */)
+function _addStatPointToUserEntry(userEntry, action, messageIndex, data, callback /* (err, entry) */)
 {
     var dataPoint = {};
 
@@ -132,8 +162,11 @@ function _addStatPointToUserEntry(userEntry, action, data, callback /* (err, ent
     dataPoint.userTwitter = userEntry.twitter.user.screen_name;
     
     dataPoint.action = action;
-    dataPoint.data   = data;
     dataPoint.date   = userEntry.last_activity;
+    dataPoint.messageIndex =  messageIndex;
+    
+    dataPoint.data   = data;
+    
     
     async.parallel([
         function(callback) {

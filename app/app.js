@@ -170,10 +170,10 @@ app.get( '/friends',
         
     });
 
-/*
+
 var scheduler  = use('scheduler');
+
 scheduler.start();
-*/
 
 var envVars = [
         'CONSUMER_KEY'
