@@ -35,33 +35,89 @@ tracking.debugTrackLocal = true;
 
 //!!!: Go To
 
-tracking.path.goto = '/go/:userId?/:msgIndex?/*'
+function _nIndexOf(sourceStr, strToFind, num)
+{
+    var result = -1;
+    
+    for (var i=0; i<num; i++)
+    {
+        result++;
+        result = sourceStr.indexOf(strToFind, result);
+        
+        console.log('result: ' + result);
+        
+        if (result < 0)
+            return -1;
+    }
+    
+    return result;
+}
+
+tracking.path.goto = '/go/:userId?/:msgIndex?/:tweetId?/*'
 
 tracking.route.goto = 
     function(quest, ponse)
     {
         var userIdStr = quest.params.userId;
         var msgIndex  = quest.params.msgIndex;
+        var tweetId   = quest.params.tweetId;
+        
+        if (! (userIdStr && msgIndex && tweetId) )
+            return _gotoError(quest, ponse);
         
         var questURL = quest.url;
         
-        var endOfUserSlash = questURL.indexOf('/', 5);
-        console.log('endOfUserSlash: ' + endOfUserSlash);
+        var redirectURLIndex = _nIndexOf(questURL, '/', 5);
+        if (redirectURLIndex < 0)
+            return _gotoError(quest, ponse);
 
-        var endOfMsgSlash = questURL.indexOf('/', endOfUserSlash + 1);
-        console.log('endOfMsgSlash: ' + endOfMsgSlash);
+        var urlToGoTo = questURL.substring(redirectURLIndex + 1, questURL.length);
         
-        var urlToGoTo = questURL.substring(endOfMsgSlash + 1, questURL.length);
-        
-        console.log('urlToGoTo: ' + urlToGoTo);
-        
+        if (urlToGoTo.length < 4)
+            return _gotoError(quest, ponse);
+       
         if (!urlToGoTo)
-            ponse.send('Cannot redirect, passed empty URL');
+            return _gotoError(quest, ponse);
         else
             ponse.redirect(urlToGoTo);
+        
+        
+        var messageIndex;
+        if ( msgIndex.isNumber() ) {
+            messageIndex = Math.floor(msgIndex);
+        }
+        else {
+            console.error('messageIndex is not valid:' + msgIndex);
+            return;
+        }
+        
+        var data = _dataFromHeader(quest);
+        data.tweetId = tweetId;
+        
+        tracking.trackUserWithId(userIdStr, 'msg-goto', messageIndex, data, 
+            function(err, entry) {
+                if (err) {
+                    console.error('Tracking error:');
+                    console.error(err);
+                }
+                else {
+                    console.log('Added tracking point:');
+                    console.log(entry);
+                }
+            });
     };
 
+function _gotoError(quest, ponse)
+{
+    ponse.send('Cannot redirect');
+}
+
 //!!!: Logo
+
+function _dataFromHeader(quest)
+{
+    return _.pick(quest.headers, ['user-agent', 'referer']);
+}
 
 tracking.path.logo = '/logo/:userId?/:msgIndex?/image.gif'
 
@@ -106,7 +162,7 @@ tracking.route.logo =
             // console.log('userIdStr: ' + userIdStr);
             // console.log('msgIndex : ' + msgIndex);
             
-            var data = _.pick(quest.headers, ['user-agent', 'referer']);
+            var data = _dataFromHeader(quest)
             
             var messageIndex;
             

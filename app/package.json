@@ -18,7 +18,8 @@
     "mongodb": "*",
     "node-html-encoder": "*",
     "moment": "*",
-    "nodemailer": "*"
+    "nodemailer": "*",
+    "ua-parser": "*"
   },
   "subdomain": "essence",
   "author": "Giovanni Donelli <giovanni.donelli@gmail.com>",

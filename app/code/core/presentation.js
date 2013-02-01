@@ -164,7 +164,7 @@ presentation.makeHTML =
                 {
                     vipList.forEach(
                         function(friendEntry) {
-                            result += _htmlEssenceForFriend(friendEntry);
+                            result += _htmlEssenceForFriend(userEntry, friendEntry);
                         });
                 }
                 
@@ -211,11 +211,18 @@ function _bcc()
     return 'Essence Admin <' + process.env.ADMIN_EMAIL_ADDRESS + '>';
 }
 
+function _deliveryIndex(userEntry)
+{
+    if (userEntry.deliveryIndex)
+        return userEntry.deliveryIndex;
+    else
+        return 0;
+}
+
 function _header(userEntry, options)
 {
     var result = '';
-    
-    var msgIndex = userEntry.deliveryIndex ? userEntry.deliveryIndex : 0;
+    var msgIndex = _deliveryIndex(userEntry);
     
     result += '<center>';
     result += '<a href="http://' + host+'">';
@@ -476,7 +483,7 @@ function _plainTextEssenceForFriend(friend)
 }
 
 
-function _htmlEssenceForFriend(friend)
+function _htmlEssenceForFriend(userEntry, friend)
 {
     if (!_validEssenceForFriend(friend))
         return '';
@@ -503,7 +510,7 @@ function _htmlEssenceForFriend(friend)
     // class="tweets"
     result += _tag('.tweets', '<div>');
     
-    result += _writeTweets(friend.essence);
+    result += _writeTweets(userEntry, friend.essence);
     
     result += '</div>';
 
@@ -579,7 +586,13 @@ function _isURL(str)
     return true;
 }
 
-function _tweetLink(tweet)
+presentation.tweetURL =
+    function(screenName, tweetId)
+    {
+        return 'https://twitter.com/' + screenName + '/status/' + tweetId;
+    };
+
+function _tweetLink(userEntry, tweet)
 {
     // console.log(tweet);
     
@@ -603,17 +616,20 @@ function _tweetLink(tweet)
             break;
         }
     }
-    if (foundURL)
-        return foundURL;
-    else
-        return 'https://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id_str;
+    
+    if (!foundURL)
+        foundURL = presentation.tweetURL(tweet.user.screen_name, tweet.id_str);
+        
+    var result = 'http://' + host + '/go/' + userEntry._id + '/' + _deliveryIndex(userEntry) + '/' + tweet.id_str + '/' + foundURL;
+    
+    return result;
 }
 
-function _retweetToHTML(tweet, className)
+function _retweetToHTML(userEntry, tweet, className)
 {
     var srcTweet   = tweet.retweeted_status;
     var user       = srcTweet.user;
-    var userAvatar = user.profile_image_url; 
+    var userAvatar = user.profile_image_url;
     
     var prefix = '';
 
@@ -621,13 +637,13 @@ function _retweetToHTML(tweet, className)
     
     prefix += _tag('.retweet-name', '<span>' + _toHTML(user.name) + ':&nbsp;</span>' );
     
-    return _tweetToHTML(srcTweet, className, prefix);
+    return _tweetToHTML(userEntry, srcTweet, className, prefix);
 }
 
-function _tweetToHTML( tweet, className, prefix )
+function _tweetToHTML(userEntry, tweet, className, prefix )
 {
     if (tweet.retweeted_status) // is a re-tweet
-        return _retweetToHTML(tweet, className);
+        return _retweetToHTML(userEntry, tweet, className);
     
     var style = '';
   
@@ -638,7 +654,7 @@ function _tweetToHTML( tweet, className, prefix )
     
     result += _tag(className, '<div>');
     
-    result += _tag('a', '<a target="_blank" href="' + _tweetLink(tweet) + '">');
+    result += _tag('a', '<a target="_blank" href="' + _tweetLink(userEntry, tweet) + '">');
     
     if (prefix)
         result += prefix;
@@ -651,7 +667,7 @@ function _tweetToHTML( tweet, className, prefix )
     return result;
 }
 
-function _writeTweets(tweets)
+function _writeTweets(userEntry, tweets)
 {
     if (!tweets)
         return '[ undefined tweets ]';
@@ -671,7 +687,7 @@ function _writeTweets(tweets)
         if (i == tweets.length-1)
             className = '.last-tweet';
         
-        var htmlEntry = _tweetToHTML(tweet_i, className);
+        var htmlEntry = _tweetToHTML(userEntry, tweet_i, className);
         result += htmlEntry;
     }
     

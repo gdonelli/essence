@@ -6,6 +6,7 @@
 var     path    = require('path')
     ,   fs      = require('fs')
     ,	moment  = require('moment')
+    ,   uaparser = require('ua-parser') 
     
     ,	database		= use('database')
     ,   service         = use('service')
@@ -137,20 +138,43 @@ admin_pages.route.tracking =
                         var row = '';
                         
                         row += '<tr>';
-
-                        row += '<td>' + dataPoint.date + '</td>';
+                        
+                        var when = moment( new Date(dataPoint.date) );
+                        
+                        row += '<td>' + when.fromNow() + '</td>';
                         
                         row += '<td><strong>' + presentation.stringToHTML(dataPoint.userTwitter) + '</strong></td>';
                         row += '<td>' + dataPoint.action + '</td>';
-        /*
-                        row += '<td>' + presentation.stringToHTML(user.email) + '</td>';
-                        row += '<td>#' + (user.vipList ? user.vipList.length : 0) + ' </td>';
-                        row += '<td><a target="_blank" href="/preview/' + user._id + '">preview</a></td>';
-                        row += '<td><a target="_blank" href="/actual/' + user._id + '">actual</a></td>';
-                        row += '<td><a target="_blank" href="/admin/send/' + user._id + '">send</a></td>';
-                        row += '<td><a target="_blank" href="/admin/cleanDeliveryDate/' + user._id + '">clean deliveryDate</a></td>';
-        */
-
+                        
+                        
+                        row += '<td>';
+                        
+                        if (dataPoint.action == 'msg-goto')
+                        {
+                            row += '<a href="' + presentation.tweetURL(dataPoint.userTwitter, dataPoint.data.tweetId) + '" target="_blank">' + dataPoint.messageIndex + ' tweet</a>';
+                        }
+                        else
+                        {
+                            row += dataPoint.messageIndex;
+                        }
+                        
+                        row += '</td>';
+                        
+                        var pointUserAgent = dataPoint.data['user-agent'];
+                        
+                        if (pointUserAgent) {
+                            var srcAgent =  uaparser.parse(pointUserAgent);
+                            console.log(srcAgent);
+                            
+                            if (srcAgent) {
+                                if (srcAgent.userAgent)
+                                    row += '<td>' +  srcAgent.userAgent.toString() + '</td>';
+                                
+                                if (srcAgent.os)
+                                    row += '<td>' +  srcAgent.os.toString() + '</td>';
+                            }
+                        }
+                        
                         row += '</tr>';
                         
                         ponse.write(row);
