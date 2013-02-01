@@ -164,7 +164,7 @@ admin_pages.route.tracking =
                         
                         if (pointUserAgent) {
                             var srcAgent =  uaparser.parse(pointUserAgent);
-                            console.log(srcAgent);
+                            // console.log(srcAgent);
                             
                             if (srcAgent) {
                                 if (srcAgent.userAgent)

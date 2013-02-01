@@ -130,14 +130,14 @@ _addRoutesFromModule( 'index', index );
 _addRoutesFromModule( 'authentication', authentication );
 _addRoutesFromModule( 'tracking',       tracking );
 
-_addRoutesFromModule( 'userPages',  userPages,  authentication.middleware, 'user' );
-_addRoutesFromModule( 'adminPages', adminPages, authentication.middleware, 'user' );
+_addRoutesFromModule( 'userPages',  userPages,  authentication.middleware,  'user' );
+_addRoutesFromModule( 'adminPages', adminPages, authentication.admin,       'admin' );
+
 
 // ---------------------
 // Http Server
 
 var expressServer = http.createServer(app);
-
 expressServer.listen(app.get('port'),
     function(){
         console.log("Essence server listening on port " + app.get('port'));
@@ -147,33 +147,16 @@ expressServer.listen(app.get('port'),
 // Socket.io
 
 io.setup(expressServer, cookieParser, sessionStore, sessionKey);
-
 io.addRoutesFromModule('service');
 
+// ---------------------
+// Scheduler
+
+var scheduler  = use('scheduler');
+scheduler.start();
 
 // ---------------------
 // Test
-
-app.get( '/friends',
-    function(quest, ponse)
-    {
-        var oauth   = authentication.oauthFromRequest(quest);
-        var user    = authentication.userFromRequest(quest);
-
-        twitter.getFriends(oauth, user.id,
-            function(err, data) {
-                console.log('twitter.getFriends:');
-                console.log(data);
-                
-                ponse.send(data);
-            });
-        
-    });
-
-
-var scheduler  = use('scheduler');
-
-scheduler.start();
 
 var envVars = [
         'CONSUMER_KEY'

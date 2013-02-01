@@ -237,6 +237,25 @@ authentication.middleware =
         
     };
 
+authentication.admin =     
+    function(quest, ponse, next)
+    {
+        authentication.middleware(quest, ponse, 
+            function()
+            {
+                var user = _userFromSession(quest.session);
+
+                if (user.id == process.env.ADMIN_TWITTER_ID)
+                	next();
+                else
+                {
+                    ponse.writeHead(403, {'Content-Type': 'text/html'});
+                    ponse.end('Forbidden you are not the admin');
+                }
+            });
+    }
+
+
 function _dialogRedirectURL(quest)
 {
     var questHeaders = quest.headers;
