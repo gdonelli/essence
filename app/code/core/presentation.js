@@ -9,6 +9,8 @@ var     path    = require('path')
     ,	stylus  = require('stylus')
     ,	HTMLEncoder = require('node-html-encoder').Encoder
     ,	package = require('../../package.json')
+    
+    ,	email   = use('email')
     ;
 
 
@@ -73,9 +75,9 @@ presentation.makeEmailMessage =
         var msg = {};
         
         msg.subject = _subject(userEntry, vipList, options);
-        msg.from    = _from();
+        msg.from    = email.from();
         msg.to      = toName + ' <' + toEmail + '>';
-        msg.bcc     = _bcc();
+        msg.bcc     = email.bcc();
         msg.text    = presentation.makePlainText(userEntry, vipList, options);
 
         presentation.makeHTML(userEntry, vipList, options,
@@ -85,16 +87,6 @@ presentation.makeEmailMessage =
                     return callback(err);
             
                 msg.html = html;
-                
-                /* 
-                
-                // emailjs
-                
-                msg.attachment  = [{
-                        data: html
-                    ,	alternative: true
-                    }];
-                */
                     
                 callback(null, msg);
             });
@@ -197,20 +189,6 @@ if (process.env.SUBDOMAIN)
 else
     host = 'local.essence.com:3001';
 
-function _from()
-{
-    a.assert_string(process.env.EMAIL_ADDRESS);
-    
-    return 'Essence <' + process.env.EMAIL_ADDRESS + '>';
-}
-
-function _bcc()
-{
-    a.assert_string(process.env.ADMIN_EMAIL_ADDRESS);
-    
-    return 'Essence Admin <' + process.env.ADMIN_EMAIL_ADDRESS + '>';
-}
-
 function _deliveryIndex(userEntry)
 {
     if (userEntry.deliveryIndex)
@@ -231,6 +209,8 @@ function _header(userEntry, options)
     
     if (options && options.subtitle)
         result += _tag('h2', '<h2>(' + options.subtitle + ')</h2>');
+    else if (userEntry.deliveryDate == undefined)
+        result += _tag('h2', '<h2>Welcome to Essence</h2>');
     
     result += '</center>';
     

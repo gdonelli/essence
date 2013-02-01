@@ -29,19 +29,19 @@ function _nodemailerServer()
     return _nodemailerTransport;
 }
 
-function _from()
-{
-    a.assert_string(process.env.EMAIL_ADDRESS);
-    
-    return 'Essence <' + process.env.EMAIL_ADDRESS + '>';
-}
 
-function _bcc()
-{
-    a.assert_string(process.env.ADMIN_EMAIL_ADDRESS);
-    
-    return 'Essence Admin <' + process.env.ADMIN_EMAIL_ADDRESS + '>';
-}
+email.from =
+    function() {
+        a.assert_string(process.env.EMAIL_ADDRESS);
+        return 'Essence <' + process.env.EMAIL_ADDRESS + '>';
+    };
+
+
+email.bcc =
+    function() {
+        a.assert_string(process.env.ADMIN_EMAIL_ADDRESS);
+        return 'Essence Admin <' + process.env.ADMIN_EMAIL_ADDRESS + '>';
+    };
 
 
 email.send =
@@ -72,7 +72,7 @@ email.sendErrorMessage =
         var subject = 'Essence error: ' + err.message;
         var msg = {
             	subject: subject
-            ,	from:   _from()
+            ,	from:   email.from()
             ,	to:     'Daddy <' + process.env.ADMIN_EMAIL_ADDRESS + '>'
             }
         msg.text = err.stack;

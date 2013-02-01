@@ -18,7 +18,7 @@ confirm.sendConfirmationMessage =
         var subject = userName + ', please activate Essence now';
         var msg = {
             	subject: subject
-            ,	from:   _from()
+            ,	from:   email.from()
             ,	to:     userName + ' <' + userEmail + '>'
             ,   bcc:	process.env.ADMIN_EMAIL_ADDRESS
             }

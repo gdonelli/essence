@@ -360,7 +360,7 @@ function AddVip(id, element)
         });
     
     $(element).addClass('disabled');
-    $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-refresh"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
+    $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<img src="/images/spinner.gif"></img>&nbsp;&nbsp;&nbsp;&nbsp;');
     $(element).attr('disabled', 'disabled');
     
     console.log(element);
@@ -432,7 +432,7 @@ function SaveEmail()
 {
     var saveButton = _saveEmailButton();
     
-    saveButton.html('<i class="icon-refresh"></i>');
+    saveButton.html('<img src="/images/spinner.gif"></img>');
     saveButton.addClass('disabled');
     saveButton.removeClass('btn-primary');
     

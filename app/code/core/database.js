@@ -56,8 +56,6 @@ database.userLogin =
         var twitterId = freshUserEntry.twitter.user.id;
         a.assert_number(twitterId);
         
-        freshUserEntry.last_login = new Date();
-
         async.waterfall(
             [   function(callback) {        //  Get userEntry
                     _findUserWithTwitterId(twitterId, callback);
@@ -68,12 +66,13 @@ database.userLogin =
                     {
                         // Make sure we propagate freshUserEntry
                         userEntry.twitter = freshUserEntry.twitter;
-                        
-                        // freshUserEntry._id = userEntry._id;
+                        userEntry.last_login = new Date();
                         
                         return callback(null, userEntry);
                     }
-             
+                    
+                    freshUserEntry.last_login = new Date();
+
                     // First user login ever ...
                     _addUser(freshUserEntry, callback);
                 },

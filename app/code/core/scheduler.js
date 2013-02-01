@@ -53,9 +53,17 @@ scheduler.start =
         })
     };
 
+var clycleMutex = false;
 
 function _performCycle()
 {
+    if (clycleMutex) {
+        console.error('!!! Already in delivery cycle !!!');
+        return;
+    }
+
+    clycleMutex = true;
+    
     scheduler.cycle(
         function(err, results)
         {
@@ -67,6 +75,8 @@ function _performCycle()
                 console.log('scheduler.cycle v' + package.version + ':' );
                 console.log( results );
             }
+            
+            clycleMutex = false;
         });
 }
 
@@ -261,6 +271,22 @@ function _shouldDeliverForUser(userEntry)
     if (userEntry.disabled) {
         console.log('  | disabled');
         return false;
+    }
+    
+    // First user experience
+    if (userEntry.deliveryDate == undefined)
+    {
+        var lastLoginDate = new Date(userEntry.last_login);
+        var timediff = new Date() - lastLoginDate;
+        
+        console.log('last login diff ' + timediff / 1000/ 60 + ' minutes');
+        
+        if (timediff > 1000 * 60 * 15 ) /* 30 min */
+        {
+            console.log('Sending first Essence to: ' + userEntry.twitter.user.screen_name );
+            
+            return true;
+        }
     }
     
     return _isTheRightTime(userEntry);

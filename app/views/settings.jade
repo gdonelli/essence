@@ -31,8 +31,28 @@ block content
     .user-content
         h1 Settings
 
+        // ---------
+        //   EMAIL
+        // ---------
+        #your-email.user-section
+            h3 1. What&rsquo;s your email?
+            p.muted The email address where you would like to receive your Essence.
+            input#email(type="text", placeholder="Email")
+            button#save-email.btn.disabled(onclick='SaveEmail()') Save
+            
+            #confirm-alert.alert.alert-error.alert-block
+                h4 Please confirm your email
+                | We just sent you a message, please follow the steps to confirm that your email is correct.
+                br
+                | (You haven&apos;t received it? 
+                a(onclick='SaveEmail()') We can send it again...
+                | )
+
+        // ---------
+        // |  VIP  |
+        // ---------
         #pick-friends.user-section
-            h3 1. Who are your VIPs?
+            h3 2. Who are your VIPs?
             p.muted Select the people you would like to collect tweets from
             
             #too-many.alert.alert-error
@@ -70,20 +90,9 @@ block content
                 .peopleTableRows
                     // #vip-placeholder.muted To add friends to your VIP list use the table on the left
                     
-            #your-email.user-section
-                h3 2. What&rsquo;s your email?
-                p.muted The email address where you would like to receive your Essence.
-                input#email(type="text", placeholder="Email")
-                button#save-email.btn.disabled(onclick='SaveEmail()') Save
-                
-                #confirm-alert.alert.alert-error.alert-block
-                    h4 Please confirm your email
-                    | We just sent you a message, please follow the steps to confirm that your email is correct.
-                    br
-                    | (You haven&apos;t received it? 
-                    a(onclick='SaveEmail()') We can send it again...
-                    | )
-            
-            #settings-endpage
-                // a.btn.btn-large(href='/preview') Preview
-                a.btn.btn-large(href='/') Done
+        // ---------
+        //   Done
+        // ---------
+        #settings-endpage
+            // a.btn.btn-large(href='/preview') Preview
+            a.btn.btn-large(href='/') Done

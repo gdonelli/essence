@@ -174,9 +174,20 @@ admin_pages.route.tracking =
                                     row += '<td>' +  srcAgent.os.toString() + '</td>';
                             }
                         }
+
+                        var referer = dataPoint.data['referer'];
+                        
+                        row += '<td>';
+                        
+                        if (referer)
+                             row += referer;
+                             
+                        row += '</td>';
+
                         
                         row += '</tr>';
                         
+                            
                         ponse.write(row);
                     });
 
