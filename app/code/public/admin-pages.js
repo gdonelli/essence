@@ -151,7 +151,7 @@ admin_pages.route.tracking =
                         
                         if (dataPoint.action == 'msg-goto')
                         {
-                            row += '<a href="' + presentation.tweetURL(dataPoint.userTwitter, dataPoint.data.tweetId) + '" target="_blank">' + dataPoint.messageIndex + ' tweet</a>';
+                            row += dataPoint.messageIndex + ' <a href="' + presentation.tweetURL(dataPoint.userTwitter, dataPoint.data.tweetId) + '" target="_blank">tweet</a>';
                         }
                         else
                         {
