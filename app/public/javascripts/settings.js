@@ -1,28 +1,4 @@
 
-function ________private________(){}
-
-var serviceAPI = new ServiceAPI();
-
-serviceAPI.on('disconnect',
-    function()
-    {
-        $('#disconnectModal').modal('show');
-    });
-
-serviceAPI.on('connect',
-    function()
-    {
-        $('#disconnectModal').modal('hide');
-    });
-
-
-// Internal
-
-function test()
-{
-    console.log('test');
-}
-
 
 function _friendTableRows()
 {

@@ -161,3 +161,28 @@ ServiceAPI.prototype.on =
         this.socket.on(event, callback);
     };
 
+
+//!!!: Global serviceAPI
+
+var serviceAPI = new ServiceAPI();
+
+var disconnectTimer = null;
+
+serviceAPI.on('disconnect',
+    function()
+    {
+        clearTimeout(disconnectTimer);
+        disconnectTimer = null;
+        
+        disconnectTimer = setTimeout(
+            function() {
+                $('#disconnectModal').modal('show');
+            }, 1000);
+    });
+
+serviceAPI.on('connect',
+    function()
+    {
+        clearTimeout(disconnectTimer);
+        $('#disconnectModal').modal('hide');
+    });

@@ -1,18 +1,4 @@
 
-var serviceAPI = new ServiceAPI();
-
-serviceAPI.on('disconnect',
-    function()
-    {
-        $('#disconnectModal').modal('show');
-    });
-
-serviceAPI.on('connect',
-    function()
-    {
-        $('#disconnectModal').modal('hide');
-    });
-
 
 function SetupUI()
 {

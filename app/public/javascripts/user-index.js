@@ -69,21 +69,6 @@ function _updateState(state)
     $('#home-dashboard').css('visibility', 'visible');
 }
 
-
-var serviceAPI = new ServiceAPI();
-
-serviceAPI.on('disconnect',
-    function()
-    {
-        $('#disconnectModal').modal('show');
-    });
-
-serviceAPI.on('connect',
-    function()
-    {
-        $('#disconnectModal').modal('hide');
-    });
-
 function SetupUI()
 {
     _showSpinner();
