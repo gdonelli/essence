@@ -118,7 +118,7 @@ presentation.makePlainText =
 
         result += '\n\n';
         
-        result += 'v' + _version();
+        result += 'v' + global.appVersion;
         
         return result;
     };
@@ -276,7 +276,7 @@ function _footer(userEntry)
     result += '</div>';
     
     result += _tag('.footer-a', '<a href="' + unsubscribeURL + '" target="_blank">Unsubscribe</a>');
-    result += _tag('.version', '<div>v' + _version() + '</div>');
+    result += _tag('.version', '<div>v' + global.appVersion + '</div>');
     
     result += '</div>';
 

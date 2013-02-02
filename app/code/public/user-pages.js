@@ -38,22 +38,27 @@ userPages.route.deleteDelete   =
     function(quest, ponse)
     {
         var userId = userPages.userIdFromRequest(quest);
-        
-        database.removeUserUserWithId(userId,
+
+        tracking.trackUserWithId(userId, 'delete', null, tracking.dataFromHeader(quest),
             function(err)
             {
                 if (err)
-                {
-                    console.error('Failed to remove user with id: ' + userId + ' Error:');
-                    console.error(err);
-                    
-                    ponse.send( err.toString() );
-                }
-                else
-                    authentication.route.logout(quest, ponse);
-            });
+                    console.error('Failed to track delete for userId:' + userId);
             
-        tracking.trackUserWithId(userId, 'delete', null, tracking.dataFromHeader(quest) );
+                database.removeUserUserWithId(userId,
+                    function(err)
+                    {
+                        if (err)
+                        {
+                            console.error('Failed to remove user with id: ' + userId + ' Error:');
+                            console.error(err);
+                            
+                            ponse.send( err.toString() );
+                        }
+                        else
+                            authentication.route.logout(quest, ponse);
+                    });
+            });
     };
 
 

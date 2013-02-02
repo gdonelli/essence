@@ -40,6 +40,11 @@ function _HTMLRowForPerson(friendEntry, buttonCode)
 
 }
 
+function _addButtonHTML()
+{
+    return 'Add&nbsp;<i class="icon-star"></i>';
+}
+
 function _HTMLRowForTwitterFriend(friendEntry)
 {
     var buttonCode = '';
@@ -47,8 +52,7 @@ function _HTMLRowForTwitterFriend(friendEntry)
     buttonCode += '<button type="button" class="btn btn-small" ';
     buttonCode += 'onclick="AddVip(\''  + friendEntry.id + '\', this)"';
     buttonCode += '>';
-    buttonCode += 'Add';
-    buttonCode += '&nbsp;<i class="icon-arrow-right"></i>';
+    buttonCode += _addButtonHTML();
     buttonCode += '</button>';
     
     return _HTMLRowForPerson(friendEntry, buttonCode);
@@ -320,7 +324,7 @@ function AddVip(id, element)
                 $(element).removeClass('disabled');
                 $(element).removeAttr('disabled');
 
-                $(element).html('Add&nbsp;<i class="icon-arrow-right"></i>');
+                $(element).html(_addButtonHTML());
                 
                 if (err.code === 'TOOMANY')
                     _tooManyAlert().show();
@@ -336,7 +340,7 @@ function AddVip(id, element)
         });
     
     $(element).addClass('disabled');
-    $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<img src="/images/spinner.gif"></img>&nbsp;&nbsp;&nbsp;&nbsp;');
+    $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-ok"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
     $(element).attr('disabled', 'disabled');
     
     console.log(element);
@@ -408,7 +412,7 @@ function SaveEmail()
 {
     var saveButton = _saveEmailButton();
     
-    saveButton.html('<img src="/images/spinner.gif"></img>');
+    saveButton.html('<img id="images-spinner-gif" src="/images/spinner.gif"></img>');
     saveButton.addClass('disabled');
     saveButton.removeClass('btn-primary');
     
@@ -453,6 +457,11 @@ function SetupUI()
     LoadTwitterFriends();
     
     _listenForEvents();
+    
+    if (document.images) {
+        var spinner = new Image();
+        spinner.src = "/images/spinner.gif";
+    }
 }
 
 

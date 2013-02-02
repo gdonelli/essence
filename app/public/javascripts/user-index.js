@@ -43,7 +43,7 @@ function _updateState(state)
     if (state == 'NO-EMAIL' || 
         state == 'NO-VIP'   )
     {
-        title    = 'Essence needs your settings...';
+        title    = '<span class="alert alert-danger">Essence needs your settings...</span>';
         subtitle = 'Go to settings to configure Essence';
         
         $('#settings').addClass('btn-primary');
@@ -63,7 +63,7 @@ function _updateState(state)
         $('#enable').css('display', 'inline');
     }
 
-    $('#home-title').text(title);
+    $('#home-title').html(title);
     $('#home-subtitle').html(subtitle);
     $('#home-spinner').remove();
     $('#home-dashboard').css('visibility', 'visible');

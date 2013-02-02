@@ -198,12 +198,18 @@ tracking.trackUserWithId =
        
         database.getUserEntryById(userIdStr, 
             function(err, userEntry) {
-                if (err)
-                    return callback(err);
-
-                if (!userEntry)
-                    return callback( new Error('Cannot find user with id:' + userIdStr) );
-
+                if (err) {
+                    if (callback)
+                        callback(err)
+                    return;
+                }
+                
+                if (!userEntry) {
+                    if (callback)
+                        callback( new Error('Cannot find user with id:' + userIdStr) );
+                    return;
+                }
+                
                 tracking.trackUser(userEntry, action, messageIndex, data, callback);
             });
     };
@@ -227,7 +233,6 @@ tracking.trackUser =
         
         if (data)
             dataPoint.data = data;
-        
         
         async.parallel([
             function(callback) {
