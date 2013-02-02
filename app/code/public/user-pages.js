@@ -6,8 +6,9 @@
 var     path    = require('path')
     ,   fs      = require('fs')
     ,   authentication  = use('authentication')
-    ,	database		= use('database')
-    ,   service         = use('service')
+    ,	database	= use('database')
+    ,   service     = use('service')
+    ,   tracking    = use('tracking')
     ;
 
 var userPages = exports;
@@ -51,6 +52,8 @@ userPages.route.deleteDelete   =
                 else
                     authentication.route.logout(quest, ponse);
             });
+            
+        tracking.trackUserWithId(userId, 'delete', null, tracking.dataFromHeader(quest) );
     };
 
 

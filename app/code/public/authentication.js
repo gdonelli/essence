@@ -7,19 +7,18 @@ var querystring = require('querystring')
     ,   request = require('request')
     ,	assert  = require('assert')
     ,   _       = require('underscore')
-    ,   package = require('./../../package.json')
-
 
     ,   twitter  = use('twitter')
     ,   database = use('database')
     ,   service   = use('service')
     ,   userPages = use('user-pages')
+    ,   tracking  =  use('tracking')
     ;
 
 
 var authentication = exports;
 
-authentication.version = package.version;
+authentication.version = global.appVersion;
 
 authentication.path = {};
 authentication.route= {};
@@ -201,6 +200,8 @@ function _loginResponse(quest, ponse)
                             }
                             else
                                 ponse.redirect('/');
+                                
+                            tracking.trackUser(userEntry, 'login', null, tracking.dataFromHeader(quest));
                         });
                     
                 });
@@ -214,6 +215,10 @@ authentication.path.logout = '/logout';
 authentication.route.logout =
     function(quest, ponse)
     {
+        var user = _userFromSession(quest.session);
+        
+        tracking.trackUserWithId(user._id, 'logout', null, tracking.dataFromHeader(quest));
+
         quest.session.destroy();
                
         ponse.redirect('/');

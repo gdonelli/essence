@@ -160,30 +160,31 @@ admin_pages.route.tracking =
                         
                         row += '</td>';
                         
-                        var pointUserAgent = dataPoint.data['user-agent'];
-                        
-                        if (pointUserAgent) {
-                            var srcAgent =  uaparser.parse(pointUserAgent);
-                            // console.log(srcAgent);
+                        if (dataPoint.data) {
+                            var pointUserAgent = dataPoint.data['user-agent'];
                             
-                            if (srcAgent) {
-                                if (srcAgent.userAgent)
-                                    row += '<td>' +  srcAgent.userAgent.toString() + '</td>';
+                            if (pointUserAgent) {
+                                var srcAgent =  uaparser.parse(pointUserAgent);
+                                // console.log(srcAgent);
                                 
-                                if (srcAgent.os)
-                                    row += '<td>' +  srcAgent.os.toString() + '</td>';
+                                if (srcAgent) {
+                                    if (srcAgent.userAgent)
+                                        row += '<td>' +  srcAgent.userAgent.toString() + '</td>';
+                                    
+                                    if (srcAgent.os)
+                                        row += '<td>' +  srcAgent.os.toString() + '</td>';
+                                }
                             }
+
+                            var referer = dataPoint.data['referer'];
+                            
+                            row += '<td>';
+                            
+                            if (referer)
+                                 row += referer;
+                                 
+                            row += '</td>';
                         }
-
-                        var referer = dataPoint.data['referer'];
-                        
-                        row += '<td>';
-                        
-                        if (referer)
-                             row += referer;
-                             
-                        row += '</td>';
-
                         
                         row += '</tr>';
                         

@@ -4,9 +4,10 @@
 
 var package = require('./package.json')
 
-console.log('Essence v' + package.version);
-
 global.appPublicPath = __dirname + '/public';
+global.appVersion    = package.version;
+
+console.log('Essence v' + global.appVersion);
 
 // Nodefly
 var isApp = ( require.main.filename.indexOf('app.js') > 0 );
@@ -15,7 +16,7 @@ if ( isApp && process.env.SUBDOMAIN != undefined ) { // enable profiling
     console.log(' [ nodefly running... ] ');
     require('nodefly').profile(
             process.env.NODEFLY_ID
-        ,   ['Essence', package.version, process.env.SUBDOMAIN ] );
+        ,   ['Essence', global.appVersion, process.env.SUBDOMAIN ] );
 }
 
 // Use setup

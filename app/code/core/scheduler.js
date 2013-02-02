@@ -10,7 +10,6 @@ var     request = require('request')
     ,	email    = use('email')
     ,   userly   = use('userly')
     
-    ,   package = require('./../../package.json')
     ;
 
 
@@ -72,7 +71,7 @@ function _performCycle()
                 console.error(err);
             }
             else {
-                console.log('scheduler.cycle v' + package.version + ':' );
+                console.log('scheduler.cycle v' + global.appVersion + ':' );
                 console.log( results );
             }
             

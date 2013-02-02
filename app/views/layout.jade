@@ -38,7 +38,7 @@ html(lang='en')
 
             h3.brand
                 a(href='/') Essence
-                    span#beta &nbsp;&alpha;lpha
+                    span#beta &nbsp;&beta;eta
                 
             hr
         
@@ -48,7 +48,9 @@ html(lang='en')
         
         .footer
             span Essence by 
-                a(href='http://www.twitter.com/gdonelli') @gdonelli
+                a(href='http://www.twitter.com/gdonelli') @gdonelli 
+            span#version v
+                span= global.appVersion
             a.pull-right(href='javascript:SendEmailToFeedback()') Feedback &middot; Support
 
         
@@ -60,3 +62,4 @@ html(lang='en')
             .modal-footer
                 a.btn(onClick="$('#disconnectModal').modal('hide')") Close
                 a.btn.btn-primary(onClick="window.location.reload()") Reload Page
+        

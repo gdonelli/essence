@@ -91,7 +91,7 @@ tracking.route.goto =
             return;
         }
         
-        var data = _dataFromHeader(quest);
+        var data = tracking.dataFromHeader(quest);
         data.tweetId = tweetId;
         
         tracking.trackUserWithId(userIdStr, 'msg-goto', messageIndex, data, 
@@ -114,10 +114,11 @@ function _gotoError(quest, ponse)
 
 //!!!: Logo
 
-function _dataFromHeader(quest)
-{
-    return _.pick(quest.headers, ['user-agent', 'referer']);
-}
+tracking.dataFromHeader = 
+    function(quest)
+    {
+        return _.pick(quest.headers, ['user-agent', 'referer']);
+    };
 
 tracking.path.logo = '/logo/:userId?/:msgIndex?/image.gif'
 
@@ -162,7 +163,7 @@ tracking.route.logo =
             // console.log('userIdStr: ' + userIdStr);
             // console.log('msgIndex : ' + msgIndex);
             
-            var data = _dataFromHeader(quest)
+            var data = tracking.dataFromHeader(quest)
             
             var messageIndex;
             
@@ -203,54 +204,59 @@ tracking.trackUserWithId =
                 if (!userEntry)
                     return callback( new Error('Cannot find user with id:' + userIdStr) );
 
-                _addStatPointToUserEntry(userEntry, action, messageIndex, data, callback);
+                tracking.trackUser(userEntry, action, messageIndex, data, callback);
             });
     };
 
+  
+tracking.trackUser = 
+    function(userEntry, action, messageIndex, data, callback /* (err, entry) */)
+    {
+        var dataPoint = {};
 
-function _addStatPointToUserEntry(userEntry, action, messageIndex, data, callback /* (err, entry) */)
-{
-    var dataPoint = {};
+        userEntry.last_activity = new Date();
 
-    userEntry.last_activity = new Date();
-
-    dataPoint.userId      = userEntry._id;
-    dataPoint.userTwitter = userEntry.twitter.user.screen_name;
-    
-    dataPoint.action = action;
-    dataPoint.date   = userEntry.last_activity;
-    dataPoint.messageIndex =  messageIndex;
-    
-    dataPoint.data   = data;
-    
-    
-    async.parallel([
-        function(callback) {
-            database.insertTrackingPoint(dataPoint,
-                function(err, entry)
-                {
-                    if (err) {
-                        console.error('database.insertTrackingPoint failed with error:');
-                        console.error(err);
-                        return callback(err);
-                    }
-
-                    // console.log('insertStatPoint entry: ');
-                    // console.log(entry);
-                    
-                    callback(null, entry);
-                });
-        },
-        function(callback) {
-            database.saveUserEntry(userEntry, callback);
-        } ], 
+        dataPoint.userId      = userEntry._id;
+        dataPoint.userTwitter = userEntry.twitter.user.screen_name;
         
-        function(err, results)
-        {
-            if (err)
-                return callback(err);
+        dataPoint.action = action;
+        dataPoint.date   = userEntry.last_activity;
         
-            callback(null, results[0]);
-        });
-}
+        if (messageIndex)
+            dataPoint.messageIndex =  messageIndex;
+        
+        if (data)
+            dataPoint.data = data;
+        
+        
+        async.parallel([
+            function(callback) {
+                database.insertTrackingPoint(dataPoint,
+                    function(err, entry)
+                    {
+                        if (err) {
+                            console.error('database.insertTrackingPoint failed with error:');
+                            console.error(err);
+                            return callback(err);
+                        }
+
+                        // console.log('insertStatPoint entry: ');
+                        // console.log(entry);
+                        
+                        callback(null, entry);
+                    });
+            },
+            function(callback) {
+                database.saveUserEntry(userEntry, callback);
+            } ], 
+            
+            function(err, results)
+            {
+                if (err)
+                    return callback(err);
+                
+                if (callback)
+                    callback(null, results[0]);
+            });
+    };
 

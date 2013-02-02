@@ -8,7 +8,6 @@ var     path    = require('path')
     ,   request = require('request')
     ,	stylus  = require('stylus')
     ,	HTMLEncoder = require('node-html-encoder').Encoder
-    ,	package = require('../../package.json')
     
     ,	email   = use('email')
     ;
@@ -247,18 +246,14 @@ function _settingsURL(userEntry)
 
 function _feedbackURL(userEntry)
 {
-    return 'mailto:' + process.env.EMAIL_ADDRESS + '?subject=Feedback v'  + package.version;
+    return 'mailto:' + process.env.EMAIL_ADDRESS + '?subject=Feedback v'  + global.appVersion;
 }
 
 function _supportURL(userEntry)
 {
-    return 'mailto:' + process.env.EMAIL_ADDRESS + '?subject=Support v'  + package.version;
+    return 'mailto:' + process.env.EMAIL_ADDRESS + '?subject=Support v'  + global.appVersion;
 }
 
-function _version()
-{
-    return package.version;
-}
 
 function _footer(userEntry)
 {
