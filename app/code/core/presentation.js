@@ -184,7 +184,7 @@ presentation.stringToHTML =
 var host;
 
 if (process.env.SUBDOMAIN)
-    host = 'essence.jit.su';
+    host = 'essenceapp.com';
 else
     host = 'local.essence.com:3001';
 

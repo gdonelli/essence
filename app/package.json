@@ -1,6 +1,6 @@
 {
   "name": "essence",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": true,
   "scripts": {
     "start": "app.js"
@@ -25,5 +25,9 @@
   "author": "Giovanni Donelli <giovanni.donelli@gmail.com>",
   "engines": {
     "node": "v0.8.*"
-  }
+  },
+  "domains": [
+      "essenceapp.com",
+      "www.essenceapp.com"
+    ]
 }

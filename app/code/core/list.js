@@ -22,126 +22,7 @@ var _essenceListName        = 'EssenceApp.com';
 var _essenceListDesciption  = 'Never miss these tweets (managed by EssenceApp.com)';
 
 
-function _getTweetsSinceDate(tweets, sinceDate)
-{
-    var lastIndex = tweets.length;
-    
-    for (var i=0; i<tweets.length; i++) {
-        var tweet_i = tweets[i];
-        
-        var tweetCreated = new Date(tweet_i.created_at);
-        var timeDiff = tweetCreated - sinceDate;
-        lastIndex = i;
-        
-        if (timeDiff<0)
-            break;
-    }
-    
-    var result = tweets.slice(0, lastIndex);
-    
-    
-    return result;
-}
-
-/*  Options:
-        includeResponses
-        maxCount
-        sinceDate
-*/
-
-function _filterTweets(tweets, options)
-{
-    var result = tweets;
-    
-    if (options.sinceDate)
-        result = _getTweetsSinceDate(tweets, options.sinceDate);
-    
-    if (!options.includeResponses)
-        result = _.filter(result, 
-            function(tweet) {
-                if (tweet.in_reply_to_status_id)
-                    return options.includeResponses;
-                
-                return true;
-            });
-    
-    if (options.maxCount)
-        result = _.first(result, options.maxCount);
-    
-    return result;
-}
-
-function _yesterday()
-{
-    var result = new Date();
-    result.setDate(result.getDate() - 1);
-    return result;    
-}
-
-function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntry)*/, cache)
-{
-    a.assert_obj(oauth);
-    a.assert_obj(vipEntry);
-    a.assert_f(callback);
-    a.assert_def(vipEntry.id);
-
-    // console.log('about to twitter.statuses.user_timeline');
-    
-    twitter.statuses.user_timeline(oauth, vipEntry.id, 
-        function(err, tweets) {
-            if (err)
-                return callback(err);
-                
-            var filterOptions = {};
-            
-            filterOptions.includeResponses = false;
-            
-            if (options && options.sinceDate)
-                filterOptions.sinceDate = options.sinceDate;
-            else
-                filterOptions.maxCount = 3;
-                
-            var relevantTweets = _filterTweets(tweets, filterOptions);
-            
-            vipEntry.essence = relevantTweets;
-            
-            callback(err, vipEntry);
-        }, cache);
-}
-
-// Adds tweets to vipList
-
-essence.getAugmentedVipList =
-    function(oauth, userEntry, options, callback /* (err, augmentedVipList) */ )
-    {
-        var vipList = _.map( userEntry.vipList, _.clone );
-        
-        var cache = (options.preview === true)
-        
-        async.map(vipList
-            ,	function(vipEntry, callback) { 
-                    _fillUpEssenceForVip(oauth, vipEntry, options, callback, cache); 
-                }
-            ,	function(err, results) {
-                    // console.log('->essence.getAugmentedVipList err:');
-                    // console.error(err);
-                    
-                    if (err)
-                        return callback(err);
-                    
-                    // console.log( 'sorting viplist' );
-                    
-                    vipList = vipList.sort(
-                        function(a, b){
-                            return a.essence.length - b.essence.length;
-                        });
-                                       
-                    callback(null, vipList);
-                });
-    }
-
-
-essence.getList =
+list.getList =
     function(oauth, createIfNeeded, callback /* (err, list) */)
     {
         twitter.lists.list(oauth,
@@ -164,35 +45,15 @@ essence.getList =
             });
     };
 
-function _userDictionaryFromList(list)
-{
-    var result = {};
- 
-    _.each(list,
-        function(entry) {
-            if (!entry || !entry.id) {
-                console.error('Cannot access entry.id, entry: ');
-                console.error(entry);
-                console.error('list:');
-                console.error(list);
-                return;
-            }
-            
-            result[entry.id] = entry;
-        })
-    
-    return result;
-}
 
-
-essence.setupList =
+list.setup =
     function(oauth, vipList, callback /* (err, list) */)
     {
         a.assert_obj(oauth);
         a.assert_array(vipList);
         a.assert_f(callback);
     
-        essence.getList(oauth, true, 
+        list.getList(oauth, true, 
             function(err, list)
             {
                 if (err)
@@ -200,7 +61,7 @@ essence.setupList =
                 
                 var listId = list.id;
                 
-                console.log('essence.getList- list:');
+                console.log('list.getList- list:');
                 console.log(list);
 
                 twitter.lists.members(oauth, listId, 
@@ -280,10 +141,10 @@ essence.setupList =
             });
     };
 
-essence.destroyList =
+list.destroy =
     function(oauth, callback /* (err) */)
     {
-        essence.getList(oauth, false,
+        list.getList(oauth, false,
             function(err, list)
             {
                 if (err)
@@ -303,3 +164,26 @@ essence.destroyList =
 
     };
 
+
+//!!!: Private
+
+
+function _userDictionaryFromList(list)
+{
+    var result = {};
+ 
+    _.each(list,
+        function(entry) {
+            if (!entry || !entry.id) {
+                console.error('Cannot access entry.id, entry: ');
+                console.error(entry);
+                console.error('list:');
+                console.error(list);
+                return;
+            }
+            
+            result[entry.id] = entry;
+        })
+    
+    return result;
+}

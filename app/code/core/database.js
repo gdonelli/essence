@@ -156,7 +156,7 @@ database.getCursorOnTracking =
 database.getCursorOnUsers =
     function(callback /* (err, cursor) */ )
     {
-        _getCursor(_getUserCollection, 100, [ [ 'last_login' , -1 ] ], callback);
+        _getCursor(_getUserCollection, 100, [ [ 'last_activity' , -1 ] ], callback);
     };
 
 database.removeUserUserWithId =

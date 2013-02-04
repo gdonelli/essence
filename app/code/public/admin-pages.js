@@ -31,7 +31,24 @@ admin_pages.route.allusers  =
         ponse.write('<!DOCTYPE html><html>');
 
         ponse.write('<table cellpadding="10px">');
-
+        
+        var row = '';
+        
+        row += '<tr>';
+        
+        row += '<td>Name</td>';
+        row += '<td>Email</td>';
+        row += '<td>VIP</td>';
+        row += '<td>last_activity</td>';
+        row += '<td></td>';
+        row += '<td></td>';
+        row += '<td></td>';
+        row += '<td></td>';
+        
+        row += '</tr>';
+        
+        ponse.write(row);
+        
         database.forEachUser(
             function(err, user) {
                 if (err)
@@ -40,13 +57,24 @@ admin_pages.route.allusers  =
                 if (err || user == null)
                     return ponse.end('</table></html>');
                     
-                var row = '';
+                row = '';
                 
                 row += '<tr>';
                 
                 row += '<td><strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong></td>';
                 row += '<td>' + presentation.stringToHTML(user.email) + '</td>';
                 row += '<td>#' + (user.vipList ? user.vipList.length : 0) + ' </td>';
+                
+                row += '<td>';
+                
+                if (user.last_activity)
+                    row +=  _stringRelativeFromDBDateString(user.last_activity);
+                else
+                    row += 'no activity';
+
+                row += '</td>';
+                
+                
                 row += '<td><a target="_blank" href="/preview/' + user._id + '">preview</a></td>';
                 row += '<td><a target="_blank" href="/actual/' + user._id + '">actual</a></td>';
                 row += '<td><a target="_blank" href="/admin/send/' + user._id + '">send</a></td>';
@@ -115,6 +143,13 @@ admin_pages.route.adminSend =
             });
     };
 
+function _stringRelativeFromDBDateString(dateString)
+{
+    var when = moment( new Date(dateString) );
+    
+    return when.fromNow();
+}
+
 admin_pages.path.tracking  = '/admin/tracking/:userId?';
 admin_pages.route.tracking = 
     function(quest, ponse)
@@ -139,9 +174,7 @@ admin_pages.route.tracking =
                         
                         row += '<tr>';
                         
-                        var when = moment( new Date(dataPoint.date) );
-                        
-                        row += '<td>' + when.fromNow() + '</td>';
+                        row += '<td>' + _stringRelativeFromDBDateString(dataPoint.date) + '</td>';
                         
                         row += '<td><strong>' + presentation.stringToHTML(dataPoint.userTwitter) + '</strong></td>';
                         row += '<td>' + dataPoint.action + '</td>';
