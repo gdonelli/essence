@@ -89,7 +89,7 @@ userly.previewForUserWithId =
                     
                 userly.previewForUser(userEntry, options, callback);
             });
-    }
+    };
     
 userly.previewForUser =
     function(userEntry, options, callback /* (err, html) */ )
@@ -109,7 +109,30 @@ userly.previewForUser =
             ]
         ,   callback);
         
-    }
+    };
+
+userly.confirmEmailForUserEntry = 
+    function(userEntry, callback /* (err, userEntry) */)
+    {
+        if (!userEntry.email_to_confirm)
+            return callback(new Error('no email_to_confirm'));
+            
+        // Make email official
+        userEntry.email = userEntry.email_to_confirm;
+        
+        // Clean up
+        delete userEntry.email_to_confirm;
+        delete userEntry.secret.email_ticket;
+        
+        database.saveUserEntry(userEntry, 
+            function(err, userEntry)
+            {
+                if (err)
+                    return callback( new Error('Failed to confirm user') );
+                
+                callback(null, userEntry);
+            });
+    };
     
 //!!!: Private
 

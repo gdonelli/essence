@@ -82,8 +82,8 @@ function _setup(oauth, vipList, callback /* (err, list) */)
             
             var listId = list.id;
             
-            console.log('list.getList- list:');
-            console.log(list);
+            // console.log('list.getList- list:');
+            // console.log(list);
 
             twitter.lists.members(oauth, listId, 
                 function(err, members) {

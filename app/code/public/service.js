@@ -285,27 +285,16 @@ service.verifyEmail =
                 
                 if (!userEntry.email_to_confirm || userEntry.email_to_confirm.length < 4)
                     return callback( new Error('Invalid email in user entry' ) );
-                    
-                // Make email official
-                userEntry.email = userEntry.email_to_confirm;
                 
-                // Clean up
-                delete userEntry.email_to_confirm;
-                delete userEntry.secret.email_ticket;
-                
-                database.saveUserEntry(userEntry, 
-                    function(err, userEntry)
-                    {
+                userly.confirmEmailForUserEntry(userEntry,
+                    function(err, userEntry) {
                         if (err)
-                            return callback( new Error('Failed to confirm user') );
-                        else
-                        {
-                            io.emitUserEvent( userEntry._id, service.emailDidChange, _safeUserEntry(userEntry) );
-                            
-                            _emitServiceDidChangeForUser(userEntry);
-                            
-                            return callback(null, userEntry.email);
-                        }
+                            return callback(err);
+                        
+                        io.emitUserEvent( userEntry._id, service.emailDidChange, _safeUserEntry(userEntry) );
+                        _emitServiceDidChangeForUser(userEntry);
+                        
+                        return callback(null, userEntry.email);
                     });
             });
     };

@@ -24,7 +24,6 @@ admin_pages.path = {};
 admin_pages.route = {};
 
 
-
 //!!!: Users Admin page      
 
 admin_pages.path.allusers   = '/admin/users';
@@ -51,6 +50,8 @@ admin_pages.route.allusers  =
 
         row += '<td>LIST</td>';
         
+        row += '<td>delete</td>';
+        
         row += '</tr>';
         
         ponse.write(row);
@@ -68,7 +69,15 @@ admin_pages.route.allusers  =
                 row += '<tr>';
                 
                 row += '<td><strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong></td>';
-                row += '<td>' + presentation.stringToHTML(user.email) + '</td>';
+                
+                if (user.email)
+                    row += '<td>' + presentation.stringToHTML(user.email) + '</td>';
+                else if (user.email_to_confirm)
+                    row += '<td style="color:orange;">' + presentation.stringToHTML(user.email_to_confirm) + ' <a href="/admin/confirm-email/' + user._id + '">confirm </a></td>';
+                else
+                    row += '<td>-</td>';
+                
+                
                 row += '<td>#' + (user.vipList ? user.vipList.length : 0) + ' </td>';
                 
                 row += '<td>';
@@ -87,6 +96,7 @@ admin_pages.route.allusers  =
                 row += '<td><a target="_blank" href="/admin/cleanDeliveryDate/' + user._id + '">clean</a></td>';
 
                 row += '<td><a target="_blank" href="/admin/list/setup/' + user._id + '">setup</a> | <a target="_blank" href="/admin/list/destroy/' + user._id + '">destroy</a></td>';
+                row += '<td><a target="_blank" href="/delete/' + user._id + '">delete</a></td>';
 
                 row += '</tr>';
                 
@@ -236,10 +246,7 @@ admin_pages.route.tracking =
 
     };
 
-
-//!!!: List
-
-function _listCommand(quest, callback /* (err, userEntry, oauth) */)
+function _userCommand(quest, callback /* (err, userEntry, oauth) */)
 {
     var userId = userPages.userIdFromRequest(quest);
     
@@ -256,6 +263,30 @@ function _listCommand(quest, callback /* (err, userEntry, oauth) */)
 }
 
 
+admin_pages.path.confirmEmail  = '/admin/confirm-email/:userId?';
+admin_pages.route.confirmEmail = 
+    function(quest, ponse)
+    {
+        _userCommand(quest, 
+            function(err, userEntry, oauth)
+            {
+                if (err)
+                    return ponse.send(err.message);
+                    
+                userly.confirmEmailForUserEntry(userEntry, 
+                    function(err, userEntry)
+                    {
+                        if (err)
+                            return ponse.send(err.message);
+                        
+                        ponse.send(userEntry);
+                    });
+            });
+    };
+    
+
+//!!!: List
+
 admin_pages.path.listSetup   = '/admin/list/setup/:userId?';
 admin_pages.route.listSetup  = 
     function(quest, ponse)
@@ -271,7 +302,6 @@ admin_pages.route.listSetup  =
                 ponse.send(list);
             });
     };
-    
 
 admin_pages.path.listDestroy   = '/admin/list/destroy/:userId?';
 admin_pages.route.listDestroy  = 
