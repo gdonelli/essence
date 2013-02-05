@@ -319,7 +319,7 @@ twitter.lists.create =
         var params = { 
                 name: name
             ,   description: description
-            ,   mode: 'private'
+            /* ,   mode: 'private'*/
             };
         
         twitter.post(oauth, apiURL, params, callback);

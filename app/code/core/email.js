@@ -76,6 +76,7 @@ email.sendErrorMessage =
             ,	to:     'Daddy <' + process.env.ADMIN_EMAIL_ADDRESS + '>'
             }
         msg.text = err.stack;
+        msg.text += '\n\n v' + global.appVersion;
         
         email.send(msg, callback);
     };

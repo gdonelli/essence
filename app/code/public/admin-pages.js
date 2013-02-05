@@ -14,6 +14,7 @@ var     path    = require('path')
     ,   authentication  = use('authentication')
     ,   presentation    = use('presentation')
     ,   userPages       = use('user-pages')
+    ,   list            = use('list')
     ;
 
 var admin_pages = exports;
@@ -22,6 +23,9 @@ var admin_pages = exports;
 admin_pages.path = {};
 admin_pages.route = {};
 
+
+
+//!!!: Users Admin page      
 
 admin_pages.path.allusers   = '/admin/users';
 admin_pages.route.allusers  = 
@@ -43,7 +47,9 @@ admin_pages.route.allusers  =
         row += '<td></td>';
         row += '<td></td>';
         row += '<td></td>';
-        row += '<td></td>';
+        row += '<td>DeliveryDate</td>';
+
+        row += '<td>LIST</td>';
         
         row += '</tr>';
         
@@ -78,7 +84,9 @@ admin_pages.route.allusers  =
                 row += '<td><a target="_blank" href="/preview/' + user._id + '">preview</a></td>';
                 row += '<td><a target="_blank" href="/actual/' + user._id + '">actual</a></td>';
                 row += '<td><a target="_blank" href="/admin/send/' + user._id + '">send</a></td>';
-                row += '<td><a target="_blank" href="/admin/cleanDeliveryDate/' + user._id + '">clean deliveryDate</a></td>';
+                row += '<td><a target="_blank" href="/admin/cleanDeliveryDate/' + user._id + '">clean</a></td>';
+
+                row += '<td><a target="_blank" href="/admin/list/setup/' + user._id + '">setup</a> | <a target="_blank" href="/admin/list/destroy/' + user._id + '">destroy</a></td>';
 
                 row += '</tr>';
                 
@@ -229,3 +237,57 @@ admin_pages.route.tracking =
             });
 
     };
+
+
+//!!!: List
+
+function _listCommand(quest, callback /* (err, userEntry, oauth) */)
+{
+    var userId = userPages.userIdFromRequest(quest);
+    
+    database.getUserEntryById(userId,
+        function(err, userEntry)
+        {
+            if (err)
+                return callback(err);
+            
+            var oauth = authentication.oauthFromUserEntry(userEntry);
+
+            callback(null, userEntry, oauth);
+        });
+}
+
+
+admin_pages.path.listSetup   = '/admin/list/setup/:userId?';
+admin_pages.route.listSetup  = 
+    function(quest, ponse)
+    {
+    	var userId = userPages.userIdFromRequest(quest);
+        
+        list.setupForUserId(userId, 
+            function(err, list)
+            {
+                if (err)
+                    return ponse.send(err.message);
+                
+                ponse.send(list);
+            });
+    };
+    
+
+admin_pages.path.listDestroy   = '/admin/list/destroy/:userId?';
+admin_pages.route.listDestroy  = 
+    function(quest, ponse)
+    {
+    	var userId = userPages.userIdFromRequest(quest);
+        
+        list.destroyForUserId(userId, 
+            function(err, list)
+            {
+                if (err)
+                    return ponse.send(err.message);
+                
+                ponse.send(list);
+            });
+    };
+

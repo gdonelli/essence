@@ -201,7 +201,7 @@ function _loginResponse(quest, ponse)
                             else
                                 ponse.redirect('/');
                                 
-                            tracking.trackUser(userEntry, 'login', null, tracking.dataFromHeader(quest));
+                            tracking.trackUserEntry(userEntry, 'login', null, tracking.dataFromHeader(quest));
                         });
                     
                 });

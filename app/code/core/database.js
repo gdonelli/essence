@@ -159,7 +159,7 @@ database.getCursorOnUsers =
         _getCursor(_getUserCollection, 100, [ [ 'last_activity' , -1 ] ], callback);
     };
 
-database.removeUserUserWithId =
+database.removeUserWithId =
     function(idstr, callback /* (err) */)
     {
         _getUserCollection(

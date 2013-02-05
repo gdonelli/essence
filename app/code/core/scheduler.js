@@ -9,6 +9,7 @@ var     request = require('request')
     ,   database = use('database')
     ,	email    = use('email')
     ,   userly   = use('userly')
+    ,	list     = use('list')
     
     ;
 
@@ -197,6 +198,16 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
                     }
                     
                     callback(state);
+                });
+            
+            // Setup the Twitter list for user
+            list.setupForUserEntry(userEntry, 
+                function(err, list)
+                {
+                    if (err) {
+                        console.error('Failed to setup Essence list for user: ' + userEntry._id);
+                        console.error(err.stack);
+                    }
                 });
         });
 }

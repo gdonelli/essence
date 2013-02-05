@@ -210,12 +210,12 @@ tracking.trackUserWithId =
                     return;
                 }
                 
-                tracking.trackUser(userEntry, action, messageIndex, data, callback);
+                tracking.trackUserEntry(userEntry, action, messageIndex, data, callback);
             });
     };
 
   
-tracking.trackUser = 
+tracking.trackUserEntry = 
     function(userEntry, action, messageIndex, data, callback /* (err, entry) */)
     {
         var dataPoint = {};

@@ -5,10 +5,14 @@
 
 var     path    = require('path')
     ,   fs      = require('fs')
+    ,   async   = require('async')
+    
+    
     ,   authentication  = use('authentication')
     ,	database	= use('database')
     ,   service     = use('service')
     ,   tracking    = use('tracking')
+    ,	list		= use('list')
     ;
 
 var userPages = exports;
@@ -38,27 +42,52 @@ userPages.route.deleteDelete   =
     function(quest, ponse)
     {
         var userId = userPages.userIdFromRequest(quest);
+        
+        async.waterfall(
+            [
+                function(callback) // Get UserEntry
+                {
+                    database.getUserEntryById(userId, callback);
+                }
+            ,	function(userEntry, callback) // Destroy Twitter list
+                {
+                    list.destroyForUserEntry(userEntry, 
+                        function(err)
+                        {
+                            if (err)
+                                console.error('list.destroyForUserEntry failed for ' + userId);
+                                
+                            callback(null, userEntry);
+                        })
+                }
+            ,   function(userEntry, callback) // Track delete action
+                {
+                    tracking.trackUserEntry(userEntry, 'delete', null, tracking.dataFromHeader(quest), 
+                        function(err)
+                        {
+                            if (err)
+                                console.error('tracking.trackUserEntry failed for ' + userId);
 
-        tracking.trackUserWithId(userId, 'delete', null, tracking.dataFromHeader(quest),
+                            callback(null, userEntry);
+                        })
+                }
+            ,   function(userEntry, callback) // Remove User from DB
+                {
+                    database.removeUserWithId(userId, callback)
+                }
+            ],
             function(err)
             {
                 if (err)
-                    console.error('Failed to track delete for userId:' + userId);
-            
-                database.removeUserUserWithId(userId,
-                    function(err)
-                    {
-                        if (err)
-                        {
-                            console.error('Failed to remove user with id: ' + userId + ' Error:');
-                            console.error(err);
-                            
-                            ponse.send( err.toString() );
-                        }
-                        else
-                            authentication.route.logout(quest, ponse);
-                    });
-            });
+                {
+                    console.error('Failed to remove user with id: ' + userId + ' Error:');
+                    console.error(err);
+                    
+                    ponse.send( err.toString() );
+                }
+                else
+                    authentication.route.logout(quest, ponse);
+            })
     };
 
 
