@@ -305,10 +305,25 @@ function _tooManyAlert()
 
 function ________________(){}
 
+
+var tooManyAlertHTML;
+
+function _showTooManyAlert()
+{
+    _tooManyAlert().html(tooManyAlertHTML);
+    _tooManyAlert().show();
+}
+
+function _hideTooManyAlert()
+{
+    _tooManyAlert().html('');
+    _tooManyAlert().hide();
+}
+
 function AddVip(id, element)
 {
     console.log('Add friend with id: ' + id);
-    
+
     var friendEntry = _.find(_friends, function(entry) { return entry.id == id; } );
     
     serviceAPI.addVip(friendEntry,
@@ -327,14 +342,13 @@ function AddVip(id, element)
                 $(element).html(_addButtonHTML());
                 
                 if (err.code === 'TOOMANY')
-                    _tooManyAlert().show();
-                
-                
+                    _showTooManyAlert();
+    
                 return;
             }
             
-            _tooManyAlert().hide();
-            
+            _hideTooManyAlert();
+             
             $(element).addClass('btn-success');
             $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-ok"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
         });
@@ -347,7 +361,6 @@ function AddVip(id, element)
 }
 
 
-
 function RemoveVip(id, element)
 {
     serviceAPI.removeVip( { id: id },
@@ -358,6 +371,8 @@ function RemoveVip(id, element)
                 return;
             }
             
+            _tooManyAlert().hide();
+
             _emptySearchField();
             $('#friend-search').val('');
         });
@@ -462,6 +477,8 @@ function SetupUI()
         var spinner = new Image();
         spinner.src = "/images/spinner.gif";
     }
+    
+    tooManyAlertHTML = _tooManyAlert().html();
 }
 
 

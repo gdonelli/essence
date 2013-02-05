@@ -126,7 +126,7 @@ service.socket.addVip =
                 if (userEntry.vipList)
                     vipList = userEntry.vipList;
                 
-                if (vipList.length >= 20) {
+                if (vipList.length >= 10) {
                     var tooManyError = new Error('You cannot add more than 20 friends');
                     tooManyError.code = 'TOOMANY';
                     return callback( tooManyError );
