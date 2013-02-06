@@ -207,9 +207,13 @@ admin_pages.route.tracking =
                             row += dataPoint.messageIndex;
                             
                         if (dataPoint.action == 'msg-goto')
-                            row +=  ' <a href="' + presentation.tweetURL(dataPoint.userTwitter, dataPoint.data.tweetId) + '" target="_blank">tweet</a>';
-
-                        
+                            if (dataPoint.data.tweetId)
+                                row += ' <a href="' + presentation.tweetURL(dataPoint.userTwitter, dataPoint.data.tweetId) + '" target="_blank">tweet</a>';
+                            else if (dataPoint.data.goto)
+                                row += ' <a href="' + dataPoint.data.goto + '" target="_blank">link</a>';
+                            else
+                                row += '???';
+                    
                         row += '</td>';
                         
                         if (dataPoint.data) {

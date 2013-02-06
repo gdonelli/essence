@@ -92,8 +92,12 @@ tracking.route.goto =
         }
         
         var data = tracking.dataFromHeader(quest);
-        data.tweetId = tweetId;
         
+        if (tweetId != 'goto' || tweetId.length > 5)
+            data.tweetId = tweetId;
+        else
+            data.goto = urlToGoTo;
+            
         tracking.trackUserWithId(userIdStr, 'msg-goto', messageIndex, data, 
             function(err, entry) {
                 if (err) {
@@ -101,8 +105,8 @@ tracking.route.goto =
                     console.error(err);
                 }
                 else {
-                    console.log('Added tracking point:');
-                    console.log(entry);
+                    // console.log('Added tracking point:');
+                    // console.log(entry);
                 }
             });
     };

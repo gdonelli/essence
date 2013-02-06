@@ -202,7 +202,7 @@ function _header(userEntry, options)
     var msgIndex = _deliveryIndex(userEntry);
     
     result += '<center>';
-    result += '<a href="http://' + host+'">';
+    result += '<a href="' + _gotoURL(userEntry, null, 'http://' + host) + '">';
     result += _tag('.star', '<img src="http://' + host+ '/logo/' + userEntry._id + '/' + msgIndex+ '/image.gif" width="96" height="96"></img>');
     result += '</a>';
     
@@ -467,20 +467,25 @@ function _htmlEssenceForFriend(userEntry, friend)
     var sampleTweet = _.first(friend.essence);
     var twitterUser = sampleTweet.user;
     
-    // class="user-essence"
+    // .user-essence
     result += '<div style="' + _styleForUser(twitterUser) +'">' ;
 
-    // header
+    var twitterUserURL = 'http://www.twitter.com/' + friend.screen_name;
 
+    result += '<a href="' + _gotoURL(userEntry, null, twitterUserURL) + '" target="_blank">';
+    // .header 
     result += _tag('.header', '<div>');
-
     result += _imgAvatarForUser(twitterUser, '.avatar');
+    
+    // .name-box
     result += _tag('.name-box', '<div>');
     result += _tag('.name', '<p>' + _toHTML(twitterUser.name) + '</p>');
-
     result += '</div>';
+
     
     result += '</div>';
+
+    result += '</a>';
 
     // class="tweets"
     result += _tag('.tweets', '<div>');
@@ -567,10 +572,43 @@ presentation.tweetURL =
         return 'https://twitter.com/' + screenName + '/status/' + tweetId;
     };
 
+
+function _wordsFromText(text)
+{
+    var result = [];
+    var startMatch = 0;
+    
+    for ( var i = 0; i<text.length; i++ )
+    {
+        var isLastChar = (i == (text.length - 1) );
+    
+        if ( __isWordBreakChar(text[i]) || isLastChar )
+        {
+            var endMatch = isLastChar ? text.length : i;
+            
+            if (startMatch < endMatch) 
+            {
+                var newWord  = text.substring(startMatch, endMatch);
+                result.push(newWord);
+                //console.log('<' + newWord + '>');
+            }            
+            
+            startMatch = i + 1;
+        }
+    }
+    
+    return result;
+    
+    function __isWordBreakChar(aChar) {
+        return (aChar == ' '    ||
+                aChar == '\n'   ||
+                aChar == '\t'   ||
+                aChar == ',');
+    }
+}
+
 function _tweetLink(userEntry, tweet)
 {
-    // console.log(tweet);
-    
     var text = tweet.text;
     
     if (!text) {
@@ -578,8 +616,8 @@ function _tweetLink(userEntry, tweet)
         console.error(tweet);
         return '#';
     }
-        
-    var elements = text.split(' ');
+    
+    var elements = _wordsFromText(text);
     
     var foundURL;
     for (var i=0; i<elements.length; i++)
@@ -595,9 +633,14 @@ function _tweetLink(userEntry, tweet)
     if (!foundURL)
         foundURL = presentation.tweetURL(tweet.user.screen_name, tweet.id_str);
         
-    var result = 'http://' + host + '/go/' + userEntry._id + '/' + _deliveryIndex(userEntry) + '/' + tweet.id_str + '/' + foundURL;
+    return _gotoURL(userEntry, tweet, foundURL);
+}
+
+function _gotoURL(userEntry, tweet, url)
+{
+    var tweetId = tweet ? tweet.id_str : 'goto';
     
-    return result;
+    return 'http://' + host + '/go/' + userEntry._id + '/' + _deliveryIndex(userEntry) + '/' + tweetId + '/' + url;
 }
 
 function _retweetToHTML(userEntry, tweet, className)
