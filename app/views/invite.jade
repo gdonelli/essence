@@ -1,0 +1,41 @@
+extends layout
+
+
+block last-section
+    include menu
+
+block extra-script
+    script(src='/javascripts/ServiceAPI.js')
+    script(src='/javascripts/invite.js')
+    script(src='/javascripts/spin.min.js')
+    script
+        $('body').ready(
+            function() {
+                SetupUI();
+            });
+    
+block content
+    .user-content
+        h1 Invite your friends!
+        .alert.alert-info 
+            h4 Five VIPs per friend
+            p For every friend who joins Essence you get to have 5 additional VIPs in your account.
+        
+        .row-fluid
+            .invite-emails-input.span6
+                h3 Invite by email
+                label Enter email addresses here:
+                textarea(type="text", spellcheck="false", autocomplete="off", placeholder="Add email addresses")
+                br
+                a.btn.btn-primary Send Invites
+
+            .invite-emails-input.span6
+                h3 Send a Tweet
+                label Enter your message here:
+                textarea(type="text", spellcheck="false", autocomplete="off", placeholder="Message for my followers") Never miss a Tweet you care about with with @Essence_app
+                    
+                br
+                p We will take care of adding the referal link for Essence.
+                a.btn.btn-primary Tweet Invite
+        
+        

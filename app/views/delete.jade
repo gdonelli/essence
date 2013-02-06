@@ -1,5 +1,9 @@
 extends layout
 
+
+block last-section
+    include menu
+
 block extra-script
     script(src='/javascripts/ServiceAPI.js')
     script
@@ -8,22 +12,6 @@ block extra-script
 
 
             });
-
-block last-section
-    li.dropdown
-        a.dropdown-toggle.muted(data-toggle="dropdown", href="#")
-            img#avatar(src=user.profile_image_url_https)
-            = user.screen_name
-            &nbsp;
-            b.caret.muted
-        ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
-            li
-                a(href="/") Home
-            li
-                a(href="/settings") Settings
-            li.divider
-            li
-                a(href="/logout") Logout
 
 block content
     .user-content

@@ -120,6 +120,7 @@ tracking.dataFromHeader =
         return _.pick(quest.headers, ['user-agent', 'referer']);
     };
 
+
 tracking.path.logo = '/logo/:userId?/:msgIndex?/image.gif'
 
 tracking.route.logo = 

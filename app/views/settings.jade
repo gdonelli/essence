@@ -1,5 +1,9 @@
 extends layout
 
+
+block last-section
+    include menu
+
 block extra-script
     script(src='/javascripts/ServiceAPI.js')
     script(src='/javascripts/settings.js')
@@ -8,24 +12,6 @@ block extra-script
             function() {
                 SetupUI();
             });
-
-block last-section
-    li.dropdown
-        a.dropdown-toggle.muted(data-toggle="dropdown", href="#")
-            img#avatar(src=user.profile_image_url_https)
-            = user.screen_name
-            &nbsp;
-            b.caret.muted
-        ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
-            li
-                a(href="/") Home
-            li
-                a(href="/preview") Preview
-            li.disabled
-                a(href="/settings") Settings
-            li.divider
-            li
-                a(href="/logout") Logout
 
 block content
     .user-content
@@ -63,32 +49,33 @@ block content
                 center 
                     em &ldquo;You must choose, but choose wisely.&rdquo;
                 
-                
-            #friends-table.peopleTable.pull-left
-                #friends-table-header.peopleTableHeader
-                    #search-header
-                        span Search:
-                        input#friend-search.input-medium.search-query(
-                            type="text", 
-                            placeholder="Name")
-
-                    #loading-header
-                        p._label Loading your friends...
-                        #friends-progress.progress.active
-                            .bar
-
-                    #error-header
-                        p._label Oops... Twitter error!
-                            span#error-header-code
-                        a(onclick='LoadTwitterFriends()') Try again
-
-                .peopleTableRows
+            .row-fluid
             
-            #vip-table.peopleTable.pull-right
-                .peopleTableHeader
-                    h4 Your VIP list
-                .peopleTableRows
-                    // #vip-placeholder.muted To add friends to your VIP list use the table on the left
+                #friends-table.peopleTable.span6
+                    #friends-table-header.peopleTableHeader
+                        #search-header
+                            span Search:
+                            input#friend-search.input-medium.search-query(
+                                type="text", 
+                                placeholder="Name")
+
+                        #loading-header
+                            p._label Loading your friends...
+                            #friends-progress.progress.active
+                                .bar
+
+                        #error-header
+                            p._label Oops... Twitter error!
+                                span#error-header-code
+                            a(onclick='LoadTwitterFriends()') Try again
+
+                    .peopleTableRows
+                
+                #vip-table.peopleTable.span6
+                    .peopleTableHeader
+                        h4 Your VIPs
+                    .peopleTableRows
+                        // #vip-placeholder.muted To add friends to your VIP list use the table on the left
                     
         // ---------
         //   Done

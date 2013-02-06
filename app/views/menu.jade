@@ -1,0 +1,19 @@
+li.dropdown
+    a.dropdown-toggle.muted(data-toggle="dropdown", href="#")
+        img#avatar(src=user.profile_image_url_https)
+        = user.screen_name
+        &nbsp;
+        b.caret.muted
+    ul#user-menu.dropdown-menu(role="menu", aria-labelledby="dLabel")
+        li
+            a(href="/") Home
+        li
+            a(href="/settings") Settings
+        li
+            a(href="/preview") Preview
+        li.divider
+        li
+            a(href="/invite") Invite Friends
+        li.divider
+        li
+            a(href="/logout") Logout

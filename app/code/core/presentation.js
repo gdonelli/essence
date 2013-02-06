@@ -184,9 +184,9 @@ presentation.stringToHTML =
 var host;
 
 if (process.env.SUBDOMAIN)
-    host = 'essenceapp.com';
+    host = 'www.essenceapp.com';
 else
-    host = 'local.essence.com:3001';
+    host = 'local.essenceapp.com:3001';
 
 function _deliveryIndex(userEntry)
 {

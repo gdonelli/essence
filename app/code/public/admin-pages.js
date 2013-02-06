@@ -68,7 +68,7 @@ admin_pages.route.allusers  =
                 
                 row += '<tr>';
                 
-                row += '<td><strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong></td>';
+                row += '<td><strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong> @' + user.twitter.user.screen_name + '</td>';
                 
                 if (user.email)
                     row += '<td>' + presentation.stringToHTML(user.email) + '</td>';
@@ -168,7 +168,7 @@ function _stringRelativeFromDBDateString(dateString)
     return when.fromNow();
 }
 
-admin_pages.path.tracking  = '/admin/tracking/:userId?';
+admin_pages.path.tracking  = '/admin/tracking/:options?';
 admin_pages.route.tracking = 
     function(quest, ponse)
     {
@@ -187,7 +187,10 @@ admin_pages.route.tracking =
                     
                         if (err || dataPoint == null)
                             return ponse.end('</table></html>');
-                            
+                        
+                        if (!quest.params.options && dataPoint.userTwitter == 'gdonelli')
+                            return;
+                        
                         var row = '';
                         
                         row += '<tr>';
