@@ -136,6 +136,26 @@ function _saveEmailButton()
 
 var _emailEventTimer;
 
+function _saveEmailButtonSetupUI()
+{
+    var emailValue = _emailField().val();
+
+    console.log( 'emailValue: ' + emailValue);
+
+    _saveEmailButton().html('Save');
+    _saveEmailButton().removeClass('btn-warning');
+    _saveEmailButton().removeClass('btn-success');
+
+    if ( _isEmailValid(emailValue) ) {
+        _saveEmailButton().removeClass('disabled');
+        _saveEmailButton().addClass('btn-primary');
+    }
+    else {
+        _saveEmailButton().addClass('disabled');
+        _saveEmailButton().removeClass('btn-primary');
+    }
+}
+
 function _emailCallback()
 {
     if (_emailEventTimer) {
@@ -145,24 +165,7 @@ function _emailCallback()
     
     _emailEventTimer = setTimeout(
         function() {
-            var emailValue = _emailField().val();
-            
-            console.log( 'emailValue: ' + emailValue);
-            
-            _saveEmailButton().html('Save');
-            _saveEmailButton().removeClass('btn-warning');
-            _saveEmailButton().removeClass('btn-success');
-            
-            if ( _isEmailValid(emailValue) ) {
-                _saveEmailButton().removeClass('disabled');
-                _saveEmailButton().addClass('btn-primary');
-            }
-            else {
-                _saveEmailButton().addClass('disabled');
-                _saveEmailButton().removeClass('btn-primary');
-            }
-            
-            
+            _saveEmailButtonSetupUI();
         }, 100);
 }
 
@@ -290,12 +293,14 @@ function _updateEmail(userEntry)
     {
         saveButton.removeClass('btn-success');
         saveButton.removeClass('btn-warning');
-        saveButton.addClass('btn-primary');
+        // saveButton.addClass('btn-primary');
         saveButton.html('Save');
-        saveButton.removeClass('disabled');
+        
+        
+        // saveButton.removeClass('disabled');
         
         confirmAlert.hide();
-    }    
+    }
 }
 
 function _tooManyAlert()

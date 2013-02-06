@@ -23,7 +23,7 @@ confirm.sendConfirmationMessage =
             ,   bcc:	process.env.ADMIN_EMAIL_ADDRESS
             }
         
-        msg.text  = 'Hi ' + userName +',\n' ;
+        msg.text  = 'Hi ' + userName +',\n\n' ;
         msg.text += '    to enable Essence, please go to the following address:\n\n'
         msg.text += confirmationURL + '\n';
         msg.text += '\n';

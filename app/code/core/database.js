@@ -150,7 +150,7 @@ function _getCursor(getCollection_f, limit, sort, callback)
 database.getCursorOnTracking =
     function(callback /* (err, cursor) */ )
     {
-        _getCursor(_getTrackingCollection, 100, [ [ 'date' , -1 ] ], callback);
+        _getCursor(_getTrackingCollection, 200, [ [ 'date' , -1 ] ], callback);
     }
     
 database.getCursorOnUsers =

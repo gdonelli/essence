@@ -226,6 +226,14 @@ service.socket.confirmEmail =
         var userId    = _userIdFromSocket(socket);
         var userEmail = a.assert_string(inputData.email);
         
+        if (inputData.email.length < 5)
+        {
+            return process.nextTick(
+                function() {
+                    return callback( new Error('invalid email') );
+                });
+        }
+        
         database.getUserEntryById(userId,
             function(err, userEntry)
             {

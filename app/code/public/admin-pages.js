@@ -175,7 +175,7 @@ admin_pages.route.tracking =
         ponse.writeHead(200, {'Content-Type': 'text/html'});
         ponse.write('<!DOCTYPE html><html>');
 
-        ponse.write('<table cellpadding="10px">');
+        ponse.write('<table cellpadding="10px" style="width:1000px">');
         
         database.getCursorOnTracking(
             function(err, cursor)
@@ -195,11 +195,11 @@ admin_pages.route.tracking =
                         
                         row += '<tr>';
                         
+                        row += '<td><strong> @' + presentation.stringToHTML(dataPoint.userTwitter) + '</strong></td>';
+                        
                         row += '<td>' + _stringRelativeFromDBDateString(dataPoint.date) + '</td>';
-                        
-                        row += '<td><strong>' + presentation.stringToHTML(dataPoint.userTwitter) + '</strong></td>';
+
                         row += '<td>' + dataPoint.action + '</td>';
-                        
                         
                         row += '<td>';
                         
@@ -215,7 +215,7 @@ admin_pages.route.tracking =
                                 row += '???';
                     
                         row += '</td>';
-                        
+
                         if (dataPoint.data) {
                             var pointUserAgent = dataPoint.data['user-agent'];
                             
@@ -237,7 +237,17 @@ admin_pages.route.tracking =
                             row += '<td>';
                             
                             if (referer)
-                                 row += referer;
+                            {
+                                row += '<a href="' + referer + '">';
+                                var maxLen = 40;
+                                if (referer.length > maxLen)
+                                    row += referer.substring(0, maxLen) + '...';
+                                else
+                                    row += referer;
+                                    
+                                row += '</a>'
+                            }
+                                 
                                  
                             row += '</td>';
                         }
