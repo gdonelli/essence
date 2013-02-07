@@ -37,6 +37,21 @@ userPages.route.invite   =
         
     }
     
+userPages.path.invite    = '/feedback/:thumb?';
+userPages.route.invite   = 
+    function(quest, ponse)
+    {
+        var user = authentication.userFromRequest(quest);
+
+        var title = 'Essence (@' + user.screen_name + ')';
+        
+        ponse.render('feedback', {
+                title: title,
+                user: user
+            } );        
+        
+    }
+    
 userPages.path.settings    = '/settings';
 userPages.route.settings   = 
     function(quest, ponse)

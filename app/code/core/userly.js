@@ -136,15 +136,36 @@ userly.confirmEmailForUserEntry =
     
 //!!!: Private
 
-function _getAugmentedVipList(userEntry, options, callback /* (err, augmentedVipList) */ )
+function _appVip()
 {
-    // Copy the VIP list, since we dont want to modify the userEntry
-    var vipList = _.map( userEntry.vipList, _.clone );
+    a.assert_string(process.env.APP_TWITTER_ID,          'APP_TWITTER_ID');
+    a.assert_string(process.env.APP_TWITTER_SCREEN_NAME, 'APP_TWITTER_SCREEN_NAME');
     
-    var cache = (options.preview === true);
+    var appId           = Math.floor(process.env.APP_TWITTER_ID);
+    var appScreenName   = process.env.APP_TWITTER_SCREEN_NAME;
     
-    var oauth = authentication.oauthFromUserEntry(userEntry);
+    return { 
+            id:             appId
+        ,   screen_name:    appScreenName
+    };
+}
+
+function _getAugmentedAppVip(oauth, options, callback /* (err, augmentedVip) */)
+{
+    var appVIP = _appVip();
     
+    _fillUpEssenceForVip(oauth, appVIP, options, 
+        function(err, augmentedVip) {
+            if (err)
+                return callback(err);
+
+            callback(null, augmentedVip);
+        }, 
+        true /* cache */);
+}
+
+function _getAugmentedVips(oauth, options, vipList, callback /* (err, vipList) */, cache)
+{
     async.map(vipList
         ,	function(vipEntry, callback)
             {
@@ -159,9 +180,49 @@ function _getAugmentedVipList(userEntry, options, callback /* (err, augmentedVip
                     function(a, b){
                         return a.essence.length - b.essence.length;
                     });
-                                   
+                
                 callback(null, vipList);
             });
+}
+
+function _getAugmentedVipList(userEntry, options, callback /* (err, augmentedVipList) */ )
+{
+    // Copy the VIP list, since we dont want to modify the userEntry
+    var vipList = _.map( userEntry.vipList, _.clone );
+    
+    var cache = (options.preview === true);
+    
+    var oauth = authentication.oauthFromUserEntry(userEntry);
+    
+    var theAppVIP = null;
+    async.waterfall([
+        // First load Essence App announcement
+            function(callback)
+            {
+                if (options.preview === true)
+                {
+                    callback(null, null);
+                }
+                else
+                    _getAugmentedAppVip(oauth, options, callback);
+            }
+        // Load VIPs    
+        ,   function(appVIP, callback)
+            {
+                theAppVIP = appVIP;
+                
+                _getAugmentedVips(oauth, options, vipList, callback, cache);
+            }
+        // Put List together if needed
+        ,   function(vipList, callback)
+            {
+                if (theAppVIP)
+                    vipList.splice(0, 0, theAppVIP);
+
+                callback(null, vipList);
+            }
+       ],
+       callback );
 }
 
 function _getTweetsSinceDate(tweets, sinceDate)

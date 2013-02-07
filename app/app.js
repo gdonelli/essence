@@ -176,6 +176,9 @@ var envVars = [
     ,   'DB_NAME'
     ,   'DB_USERNAME'
     ,   'DB_PASSWORD'
+    ,   'HERO_ID'
+    ,   'APP_TWITTER_ID'
+    ,   'APP_TWITTER_SCREEN_NAME'
 ];
 
 envVars.forEach( 

@@ -67,7 +67,6 @@ index.route.prettyemail =
         var heroUserId = process.env.HERO_ID;
         
         a.assert_string(heroUserId);
-        
 
         userly.previewForUserWithId(heroUserId, {}, 
             function(err, html)
