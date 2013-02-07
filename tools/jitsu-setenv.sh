@@ -3,6 +3,11 @@
 source ../secret/setenv.sh
 cd ../app
 
+
+jitsu env set APP_TWITTER_ID $APP_TWITTER_ID
+jitsu env set APP_TWITTER_SCREEN_NAME $APP_TWITTER_SCREEN_NAME
+
+
 # Twitter App
 
 jitsu env set CONSUMER_KEY $CONSUMER_KEY
@@ -34,3 +39,4 @@ jitsu env set DB_USERNAME $DB_USERNAME
 jitsu env set DB_PASSWORD $DB_PASSWORD
 
 jitsu env set HERO_ID $HERO_ID
+

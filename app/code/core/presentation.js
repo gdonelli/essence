@@ -53,7 +53,8 @@ function _subject(userEntry, vipList, options)
         function(vip)
         {
             if (vip.essence.length > 0)
-                names.push(vip.name);
+                if (vip.name)
+                    names.push(vip.name);
         });
     
 
