@@ -473,7 +473,8 @@ function _htmlEssenceForFriend(userEntry, friend)
 
     var twitterUserURL = 'http://www.twitter.com/' + friend.screen_name;
 
-    result += '<a href="' + _gotoURL(userEntry, null, twitterUserURL) + '" target="_blank">';
+    result += _tag('a', '<a href="' + _gotoURL(userEntry, null, twitterUserURL) + '" target="_blank">');
+
     // .header 
     result += _tag('.header', '<div>');
     result += _imgAvatarForUser(twitterUser, '.avatar');
