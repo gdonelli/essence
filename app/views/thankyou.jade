@@ -1,0 +1,16 @@
+extends layout
+
+
+block last-section
+    include menu
+
+block extra-script
+    // script(src='/javascripts/ServiceAPI.js')
+    script(src='/javascripts/spin.min.js')
+    
+block content
+    .user-content
+        h1 Thank You!
+        
+        - if (comment.length > 2)
+            p We will try to get back to you as soon as possible

@@ -5,7 +5,7 @@ block last-section
     include menu
 
 block extra-script
-    script(src='/javascripts/ServiceAPI.js')
+    // script(src='/javascripts/ServiceAPI.js')
     script(src='/javascripts/feedback.js')
     script(src='/javascripts/spin.min.js')
     script
@@ -20,10 +20,16 @@ block content
         
         #feedback
             #vote
-                #no-vote.btn.btn-large.btn-danger(onclick="NoButton()")    Nope
-                #yes-vote.btn.btn-large.btn-success(onclick="YesButton()")  Yeah!
+                #no-vote.btn.btn-large.btn-danger(onclick="NoButton()") Nope
+                #yes-vote.btn.btn-large.btn-success(onclick="YesButton()") Yeah!
             
-            #comments
+            form#vote-comment(method="post", action="/feedback/send")
+                - if (!user)
+                    label Your Email:
+                    input(name="email", placeholder="email")
+                
                 h4 Anything more to say?
                 p What can we do better? What do you like?
-                textarea
+                input#vote-input(type="text", name="vote", value="none")
+                textarea(name="comment")
+                input.btn.btn-large.btn-primary(type="submit", onclick="formSubmit()", value="Send")

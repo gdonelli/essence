@@ -176,8 +176,9 @@ function _loginResponse(quest, ponse)
                                 return _loginFail(quest, ponse, err);
                             }
                             
-                            quest.session.user._id = userEntry._id;
-                            quest.session.version = authentication.version;
+                            quest.session.user._id   = userEntry._id;
+                            quest.session.version    = authentication.version;
+                            quest.session.user.email = userEntry.email;
                             
                             /*
                             console.log('perm_token:');

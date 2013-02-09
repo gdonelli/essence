@@ -13,44 +13,15 @@ var     path    = require('path')
     ,   service     = use('service')
     ,   tracking    = use('tracking')
     ,	list		= use('list')
+
     ;
 
 var userPages = exports;
 
 
-userPages.path = {};
-userPages.route = {};
+userPages.path   = {};
+userPages.route  = {};
 
-
-userPages.path.invite    = '/invite';
-userPages.route.invite   = 
-    function(quest, ponse)
-    {
-        var user = authentication.userFromRequest(quest);
-
-        var title = 'Essence (@' + user.screen_name + ')';
-        
-        ponse.render('invite', {
-                title: title,
-                user: user
-            } );        
-        
-    }
-    
-userPages.path.invite    = '/feedback/:thumb?';
-userPages.route.invite   = 
-    function(quest, ponse)
-    {
-        var user = authentication.userFromRequest(quest);
-
-        var title = 'Essence (@' + user.screen_name + ')';
-        
-        ponse.render('feedback', {
-                title: title,
-                user: user
-            } );        
-        
-    }
     
 userPages.path.settings    = '/settings';
 userPages.route.settings   = 

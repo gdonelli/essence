@@ -113,15 +113,19 @@ function _addRoutesFromModule(name, module, middleware, middlewareName)
     keys.forEach(
         function(key)
         {
-            var path  = module.path[key];
-            var route = module.route[key];
-
+            var path   = module.path[key];
+            var route  = module.route[key];
+            var method = 'get';
+            
+            if (module.method && module.method[key])
+                method = module.method[key]
+            
             if (middleware) {
-                app.get(path, middleware, route);
+                app[method](path, middleware, route);
                 console.log('   ' + path + ' (' + middlewareName+ ')');
             }
             else {
-                app.get(path, route);
+                app[method](path, route);
                 console.log('   ' + path);
             }
         }); 
