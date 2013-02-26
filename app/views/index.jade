@@ -5,6 +5,8 @@ block extra-script
     script
         function DisableLogin()
         {
+            mixpanel.track("LoginButton");
+
             $('#jumbo-signup-button').addClass('disabled');
             
             var opts = {
