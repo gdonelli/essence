@@ -11,6 +11,18 @@ block extra-script
         $('body').ready(
             function() {
                 SetupUI();
+                mixpanel.track("settings");
+                
+                // hacky
+                var title = $('title').text();
+                var indexOfOpen = title.indexOf('(');
+                var indexOfClose = title.indexOf(')');
+                
+                if (indexOfClose > indexOfOpen) {
+                    var username = title.substring(indexOfOpen + 1, indexOfClose);
+                    // console.log('username: ' + username);
+                    mixpanel.name_tag(username) 
+                }
             });
 
 block content
@@ -82,3 +94,5 @@ block content
         #settings-endpage
             // a.btn.btn-large(href='/preview') Preview
             a.btn.btn-large(href='/') Done
+        
+            

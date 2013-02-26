@@ -19,6 +19,8 @@ function YesButton()
     $('#vote-comment').css('visibility', 'visible');
     
     $('#vote-input').val('Positive');
+    
+    mixpanel.track("YesLike");
 }
 
 function NoButton()
@@ -36,4 +38,6 @@ function NoButton()
     $('#vote-comment').css('visibility', 'visible');
     
     $('#vote-input').val('Negative');
+
+    mixpanel.track("NoLike");
 }

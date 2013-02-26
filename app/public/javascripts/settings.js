@@ -327,7 +327,9 @@ function _hideTooManyAlert()
 
 function AddVip(id, element)
 {
-    console.log('Add friend with id: ' + id);
+    mixpanel.track("AddVip");
+
+    // console.log('Add friend with id: ' + id);
 
     var friendEntry = _.find(_friends, function(entry) { return entry.id == id; } );
     
@@ -368,6 +370,8 @@ function AddVip(id, element)
 
 function RemoveVip(id, element)
 {
+    mixpanel.track("RemoveVip");
+
     serviceAPI.removeVip( { id: id },
         function(err, ponse) {
             if (err) {
@@ -432,6 +436,10 @@ function SaveEmail()
 {
     var saveButton = _saveEmailButton();
     
+    
+    mixpanel.track("SaveEmail");
+
+
     saveButton.html('<img id="images-spinner-gif" src="/images/spinner.gif"></img>');
     saveButton.addClass('disabled');
     saveButton.removeClass('btn-primary');

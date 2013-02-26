@@ -53,7 +53,7 @@ ServiceAPI.prototype._peformService =
             {
                 didTimeout = true;
                 callback( new Error('Timeout') );
-            }, 15000);
+            }, 30000);
 
         // Actual RPC
         

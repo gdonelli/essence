@@ -19,7 +19,7 @@ list.path = {};
 list.route = {};
 
 var _appListName        = 'EssenceApp.com';
-var _appListDesciption  = 'List managed by EssenceApp.com';
+var _appListDesciption  = 'Never miss a tweet you care about (managed by www.EssenceApp.com)';
 
 
 list.getList =

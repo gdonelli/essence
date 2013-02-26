@@ -62,6 +62,8 @@ function _userIndex(quest, ponse)
 }
 
 
+
+
 index.path.prettyemail  = '/prettyemail';
 index.route.prettyemail = 
     function(quest, ponse)
@@ -78,7 +80,6 @@ index.route.prettyemail =
 
                 ponse.writeHead(200, {'Content-Type': 'text/html'});
                 ponse.write('<!DOCTYPE html><html><body>');
-                
                 ponse.write(html);
                 
                 ponse.end('</body></html>');

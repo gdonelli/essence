@@ -12,6 +12,8 @@ block extra-script
         $('body').ready(
             function() {
                 SetupUI();
+                mixpanel.track("feedback");
+
             });
     
 block content

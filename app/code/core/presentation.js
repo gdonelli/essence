@@ -154,6 +154,7 @@ presentation.makeHTML =
                 }
                 else
                 {
+                    // for (var i=0; )
                     vipList.forEach(
                         function(friendEntry) {
                             result += _htmlEssenceForFriend(userEntry, friendEntry);

@@ -36,21 +36,95 @@ block extra-script
             $('#jumbo-signup-button').removeClass('disabled');
             $('#signup-spinner').html('');
         }
+        
+        function PlayVideo()
+        {
+            $('#video-player').show();
+            $('#video-player').html('<iframe width="700" height="390" src="http://www.youtube.com/embed/zGEloIzNE7w?rel=0&autoplay=1" frameborder="0" allowfullscreen></iframe>');
 
+            var videoPlayerWidth = $('#video-player').width();
+            SetupVideoSize(videoPlayerWidth);
+            
+            $('#star').hide();
+            $('#title-container').hide();
+            
+            $('#video-link span').html('Close the video');
+            $('#video-link img').hide();
+            $('#video-link').attr('href', 'javascript:CloseVideo()')
+            
+            $('#video-link').removeClass('fun-bg')
+            $('#video-link').addClass('close-bg')
+
+            if (videoPlayerWidth < 700)
+                $('#video-link').hide();
+                
+            window.scrollTo(0, 90);
+
+            mixpanel.track("play video");
+        }
+
+        function CloseVideo()
+        {
+            console.log('close');
+            $('#video-player').hide();
+            $('#video-player').html('');
+            
+            $('#star').show();
+            $('#title-container').show();
+            
+            $('#video-link span').html('Watch the video');
+            $('#video-link img').show();
+            $('#video-link').attr('href', 'javascript:PlayVideo()')
+            
+            $('#video-link').addClass('fun-bg')
+            $('#video-link').removeClass('close-bg')
+
+            mixpanel.track("play video");
+        }
+        
+        function SetupVideoSize(targetWidth)
+        {
+            var size = { width:960, height:540 }
+
+            var scaleFactor = targetWidth / size.width ;
+            
+            $('#video-player iframe').attr('width', size.width * scaleFactor);
+            $('#video-player iframe').attr('height', size.height * scaleFactor);
+        }
+        
+        var resizeTimeout;
+        window.onresize = function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                    var videoPlayerWidth = $('#video-player').width();
+                    SetupVideoSize(videoPlayerWidth);
+                }, 250); // set for 1/4 second.  May need to be adjusted.
+        };
+        
+        mixpanel.track("home");
+        
 block last-section
     li.active
         a(href="/login", onclick='DisableLogin()') Sign in
 
 
-
 block content
     .jumbotron
+
         img#star(src="/images/star320_anim.gif")
+        
+        #video-player
+
         #title-container
             h1 Never miss a tweet you care about
-        
-        p.lead Essence sends you an email once a day containing the tweets from the people you care the most
 
+
+        .row-fluid
+            p.span6.lead Essence sends you an email once a day containing the tweets from the people you care the most
+            a#video-link.lead.span6.fun-bg(href='javascript:PlayVideo()')
+                img#play(src="/images/play-icon.png")
+                span Watch the video
+                
         a#jumbo-signup-button.btn.btn-large.btn-primary( href='/login', onclick='DisableLogin()', data-loading-text="Loading...")
             img#white-bird(src='/images/twitter-white.png')
             | Sign in with Twitter

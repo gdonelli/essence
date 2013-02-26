@@ -325,6 +325,9 @@ function _fillUpEssenceForVip(oauth, vipEntry, options, callback /*(err, vipEntr
                 
             var relevantTweets = _filterTweets(tweets, filterOptions);
             
+            // Order the tweets inverse of the timeline
+            relevantTweets.reverse();
+            
             vipEntry.essence = relevantTweets;
             
             callback(err, vipEntry);
