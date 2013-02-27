@@ -1,6 +1,6 @@
 {
   "name": "essence",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "private": true,
   "scripts": {
     "start": "app.js"
@@ -19,7 +19,8 @@
     "node-html-encoder": "*",
     "moment": "*",
     "nodemailer": "*",
-    "ua-parser": "*"
+    "ua-parser": "*",
+    "use-require": "*"
   },
   "subdomain": "essence",
   "author": "Giovanni Donelli <giovanni.donelli@gmail.com>",

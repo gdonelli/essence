@@ -20,8 +20,7 @@ if ( isApp && process.env.SUBDOMAIN != undefined ) { // enable profiling
 }
 
 // Use setup
-require( __dirname + '/code/lib/use' ).setup([ __dirname + '/code' ]);
-
+require('use-require').setup([ __dirname + '/code' ]);
 
 // require
 var     express = require('express')
