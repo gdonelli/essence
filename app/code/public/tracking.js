@@ -44,7 +44,7 @@ function _nIndexOf(sourceStr, strToFind, num)
         result++;
         result = sourceStr.indexOf(strToFind, result);
         
-        console.log('result: ' + result);
+        // console.log('result: ' + result);
         
         if (result < 0)
             return -1;

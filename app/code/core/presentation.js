@@ -16,10 +16,15 @@ var     path    = require('path')
 var presentation = exports;
 
 
-function _subjectWithNames(names)
+function _subjectWithNames(count, names)
 {
-    var result = 'Essence of ';
-
+    var result;
+    
+    if (count)
+        result = 'Essence #' + count + ' — ';
+    else
+        result = 'Essence of ';
+    
     if (names.length == 1)
         result += names[0];
     else if (names.length == 2)
@@ -37,12 +42,11 @@ function _subjectWithNames(names)
 
 
 // == Test ===
-/*
-console.log( _subjectWithNames(['Giovanni']) );
-console.log( _subjectWithNames(['Giovanni', 'Eric']) );
-console.log( _subjectWithNames(['Giovanni', 'Eric', 'Set']) );
-console.log( _subjectWithNames(['Giovanni', 'Eric', 'Set', 'Nils']) );
-*/
+
+//console.log( _subjectWithNames(20, ['Giovanni']) );
+//console.log( _subjectWithNames(20, ['Giovanni', 'Eric']) );
+//console.log( _subjectWithNames(22, ['Giovanni', 'Eric', 'Set']) );
+//console.log( _subjectWithNames(23, ['Giovanni', 'Eric', 'Set', 'Nils']) );
 
 
 function _subject(userEntry, vipList, options)
@@ -58,7 +62,7 @@ function _subject(userEntry, vipList, options)
         });
     
 
-    var result = _subjectWithNames(names);
+    var result = _subjectWithNames(userEntry.deliveryIndex, names);
     
     console.log(result);
 
