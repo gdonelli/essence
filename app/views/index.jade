@@ -118,11 +118,14 @@ block content
         #video-player
 
         #title-container
-            h1 Never miss a tweet you care about
-
+            h1
+                -if(locals.h1)
+                    span=locals.h1
+                -else
+                    | Never miss a tweet you care about
 
         .row-fluid
-            p.span6.lead Essence sends you an email once a day containing the tweets from the people you care the most
+            p.span6.lead Essence sends you an email once a day containing the tweets from the people you care about the most
             a#video-link.lead.span6.fun-bg(href='javascript:PlayVideo()')
                 img#play(src="/images/play-icon.png")
                 span Watch the video
@@ -149,13 +152,13 @@ block content
                 p You tell us the Very Important People in your life. For example: your mom, your best friend, and the Dalai Lama.
                 
             .span4
-                h4 Then what?
+                h4 Once a day
                 p  At the end of the day, we collect the tweets from your VIPs and we package them up in a 
                     a(href='/prettyemail', target='_blank') pretty email message
                     |.
             
             .span4
-                h4 No strings attached
-                p  It&rsquo;s a free service, we don&rsquo;t tweet on your behalf, and you can opt-out at anytime. You can even look at the 
+                h4 Safe
+                p  We don&rsquo;t tweet on your behalf, and you can opt-out at any time. You can even look at the 
                     a(href='https://github.com/gdonelli/essence', target='_blank') source code
                     |, Yo!

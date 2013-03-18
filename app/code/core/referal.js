@@ -1,20 +1,38 @@
 
+var crypto  = require('crypto');
+
 var referal = exports;
 
-referal.tokenForUserEntry = 
-    function(userEntry)
+
+function _ASCIItoHEX(asciiString)
+{
+    return new Buffer(asciiString).toString('hex');
+}
+
+function _HEXtoASCII(string64)
+{
+    return new Buffer(string64, 'hex').toString('ascii');
+}
+
+
+referal.userIdForToken =
+    function(token)
     {
-        var md5 = crypto.createHash('md5');
+        return parseInt(token, 16);
+    };
 
-        md5.update( userEntry._id.toString() );    
-        md5.update( userEntry.twitter.user.screen_name );
-
-        return md5.digest("hex");
+referal.tokenForUserId = 
+    function(id_str)
+    {
+        return parseInt(id_str).toString(16);
     };
 
 
-referal.URLForUserEntry = 
-    function(userEntry)
+referal.URLForUserName = 
+    function(quest, id_str)
     {
-        
+        var questHeaders = quest.headers;
+        var questHost    = questHeaders.host;
+
+        return 'http://' + questHost + '/invite/' + referal.tokenForUserId(id_str);
     };

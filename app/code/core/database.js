@@ -106,6 +106,12 @@ database.getUserEntryById =
             } );
     }
 
+database.getUserEntryByTwitterId =
+    function(twitterId, callback /* (err, userEntry) */ )
+    {
+        _findUserWithTwitterId(twitterId, callback);
+    };
+
 database.saveUserEntry =
     function(userEntry, callback /* (err, userEntry) */ )
     {

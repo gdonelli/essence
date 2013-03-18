@@ -238,7 +238,13 @@ function _isTheRightTime(userEntry)
     
     var dateFormat = 'HH:mm (D MMM)';
     // Correct delivery time
-    if ( hoursInUserTime >= 19 && hoursInUserTime <= 20 )
+    
+    var deliveryWindowStart = 18;
+    var deliveryWindowEnd   = 19;
+    
+    
+    if ( hoursInUserTime >= deliveryWindowStart && 
+         hoursInUserTime <= deliveryWindowEnd )
     {
         console.log('  | Right time: ' + nowInUserTime.format(dateFormat) );
         

@@ -1,0 +1,13 @@
+extends layout
+
+
+block last-section
+    li.active
+        a(href="/login", onclick='DisableLogin()') Accept Invitation
+
+block extra-script
+    
+block content
+    .user-content
+        h1= friendName
+            |&nbsp;invited you to try Essence App

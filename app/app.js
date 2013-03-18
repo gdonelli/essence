@@ -7,6 +7,8 @@ var package = require('./package.json')
 global.appPublicPath = __dirname + '/public';
 global.appVersion    = package.version;
 
+global.brand = 'Essence ';
+
 console.log('Essence v' + global.appVersion);
 
 // Nodefly
@@ -37,7 +39,10 @@ var 	authentication  = use('authentication')
     ,   io              = use('io')
     ,   userPages       = use('user-pages')
     ,   adminPages      = use('admin-pages')
-    ,	tracking        = use('tracking') 
+    ,   tracking        = use('tracking')
+
+    ,   invite          = use('invite')
+    ,   invite_accept   = use('invite-accept')
     ;
 
 // Startup
@@ -130,13 +135,16 @@ function _addRoutesFromModule(name, module, middleware, middlewareName)
         }); 
 }
 
-_addRoutesFromModule( 'index', index );
+_addRoutesFromModule( 'index',          index );
 _addRoutesFromModule( 'authentication', authentication );
 _addRoutesFromModule( 'tracking',       tracking );
 
 _addRoutesFromModule( 'userPages',  userPages,  authentication.middleware,  'user' );
+
 _addRoutesFromModule( 'adminPages', adminPages, authentication.admin,       'admin' );
 
+_addRoutesFromModule( 'invite',     invite,     authentication.middleware,  'user' );
+_addRoutesFromModule( 'invite-accept',  invite_accept );
 
 // ---------------------
 // Http Server

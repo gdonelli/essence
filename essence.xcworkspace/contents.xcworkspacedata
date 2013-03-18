@@ -8,10 +8,10 @@
       location = "group:app/package.json">
    </FileRef>
    <FileRef
-      location = "group:app/views">
+      location = "group:app/code">
    </FileRef>
    <FileRef
-      location = "group:app/code">
+      location = "group:app/views">
    </FileRef>
    <FileRef
       location = "group:app/public">
