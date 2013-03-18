@@ -5,9 +5,7 @@ block last-section
     include menu
 
 block extra-script
-    script(src='/javascripts/ServiceAPI.js')
     script(src='/javascripts/invite.js')
-    script(src='/javascripts/spin.min.js')
     script
         $('body').ready(
             function() {
@@ -25,21 +23,14 @@ block content
             .span6
                 h3 Invite by email
                 label Enter email addresses here:
-                textarea(type="text", spellcheck="false", autocomplete="off", placeholder="Add email addresses")
+                textarea#email-textarea(type="text", spellcheck="false", autocomplete="off", placeholder="Add email addresses")
                 br
-                a.btn.btn-primary Send Invites
+                a.btn.btn-primary#send-email(onclick="SendEmail()") Send Invites
 
             .span6
                 h3 Send a Tweet
                 label Send a message to your followers
                 a.btn.btn-primary Tweet Invite
-                
-                //                
-                //                textarea(type="text", spellcheck="false", autocomplete="off", placeholder="Message for my followers") Never miss a Tweet you care about with @Essence_app
-                //                    
-                //                br
-                //                p We will take care of adding the referal link for Essence.
-
 
         h3 Or give this link to friends
         pre=referalURL
