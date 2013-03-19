@@ -48,7 +48,7 @@ database.makeTwitterVIPEntry =
     };
 
 database.userLogin =
-    function( freshUserEntry, callback /* (err, userEntry) */)
+    function( freshUserEntry, callback /* (err, userEntry, firstTime) */)
     {
         a.assert_obj(freshUserEntry);
         a.assert_f(callback);
@@ -56,14 +56,15 @@ database.userLogin =
         var twitterId = freshUserEntry.twitter.user.id;
         a.assert_number(twitterId);
         
+        var firstTime = false;
+        
         async.waterfall(
             [   function(callback) {        //  Get userEntry
                     _findUserWithTwitterId(twitterId, callback);
                 },
                 function(userEntry, callback)
                 {
-                    if (userEntry)
-                    {
+                    if (userEntry) {
                         // Make sure we propagate freshUserEntry
                         userEntry.twitter = freshUserEntry.twitter;
                         userEntry.last_login = new Date();
@@ -75,10 +76,15 @@ database.userLogin =
 
                     // First user login ever ...
                     _addUser(freshUserEntry, callback);
+                    
+                    firstTime = true;
                 },
                 database.saveUserEntry
             ],
-            callback);
+            function(err, userEntry)
+            {
+                callback(err, userEntry, firstTime);
+            });
     };
 
 database.getUserEntryById =
@@ -256,11 +262,13 @@ function _findUserWithTwitterId(id, callback)
 {
     var longId;
     
-    if (_.isString(id) )
+    if (!id)
+        return callback( new Error('Twitter Id is null or undefined') );
+    else if (_.isString(id) )
         longId = mongodb.Long.fromString(id);
     else if (_.isNumber(id) )
         longId = mongodb.Long.fromNumber(id);
-        
+    
     var findProperties = { 'twitter.user.id' : longId };
 
     _findUser(findProperties, callback);

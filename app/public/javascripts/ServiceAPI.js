@@ -71,15 +71,21 @@ ServiceAPI.prototype._peformService =
                                        
                     var err;
                     
-                    if (ponseError){
+                    console.log('ponse:');
+                    console.log(ponse);
+                    
+                    if (ponseError) {
                         err = new Error(ponseError);
                         err.message = ponseError;
                     }
                     else
                         err = new Error();
                         
-                    if ( ponse.errorCode )
+                    if (ponse.errorCode)
                         err.code = ponse.errorCode;
+                    
+                    if (ponse.meta)
+                        err.meta = ponse.meta;
                     
                     callback(err);
                 }

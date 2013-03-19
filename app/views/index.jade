@@ -104,10 +104,14 @@ block extra-script
         };
         
         mixpanel.track("home");
-        
+
+
+
+
 block last-section
     li.active
-        a(href="/login", onclick='DisableLogin()') Sign in
+        - var loginURL= "/login/" + (locals.referalToken ? locals.referalToken : "");
+        a(href=loginURL, onclick='DisableLogin()') Sign in
 
 
 block content
@@ -130,7 +134,8 @@ block content
                 img#play(src="/images/play-icon.png")
                 span Watch the video
                 
-        a#jumbo-signup-button.btn.btn-large.btn-primary( href='/login', onclick='DisableLogin()', data-loading-text="Loading...")
+        - var loginURL= "/login/" + (locals.referalToken ? locals.referalToken : "");
+        a#jumbo-signup-button.btn.btn-large.btn-primary( href=loginURL, onclick='DisableLogin()', data-loading-text="Loading...")
             img#white-bird(src='/images/twitter-white.png')
             | Sign in with Twitter
             #signup-spinner
@@ -153,12 +158,11 @@ block content
                 
             .span4
                 h4 Once a day
-                p  At the end of the day, we collect the tweets from your VIPs and we package them up in a 
-                    a(href='/prettyemail', target='_blank') pretty email message
-                    |.
-            
+                p  Everyday Essence collects the tweets from your VIPs and we package them up in a pretty email message.
+
             .span4
                 h4 Safe
                 p  We don&rsquo;t tweet on your behalf, and you can opt-out at any time. You can even look at the 
                     a(href='https://github.com/gdonelli/essence', target='_blank') source code
-                    |, Yo!
+                    | .
+                

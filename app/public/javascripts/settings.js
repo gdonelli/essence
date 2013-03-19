@@ -313,9 +313,13 @@ function ________________(){}
 
 var tooManyAlertHTML;
 
-function _showTooManyAlert()
+function _showTooManyAlert(maxVip)
 {
-    _tooManyAlert().html(tooManyAlertHTML);
+    // console.log('maxVip ' + maxVip);
+    
+    var alertHTML = tooManyAlertHTML.replace('__MAX_COUNT__', maxVip);
+    
+    _tooManyAlert().html(alertHTML);
     _tooManyAlert().show();
 }
 
@@ -349,7 +353,7 @@ function AddVip(id, element)
                 $(element).html(_addButtonHTML());
                 
                 if (err.code === 'TOOMANY')
-                    _showTooManyAlert();
+                    _showTooManyAlert(err.meta);
     
                 return;
             }

@@ -12,7 +12,8 @@ var querystring = require('querystring')
     ,   database = use('database')
     ,   service   = use('service')
     ,   userPages = use('user-pages')
-    ,   tracking  =  use('tracking')
+    ,   tracking  = use('tracking')
+    ,   referal   = use('referal')
     ;
 
 
@@ -23,7 +24,7 @@ authentication.version = global.appVersion;
 authentication.path = {};
 authentication.route= {};
 
-authentication.path.login = '/login';
+authentication.path.login = '/login/:referalToken?';
 
 authentication.timeout = 20000;
 
@@ -32,6 +33,8 @@ authentication.route.login =
     {
         assert( process.env.CONSUMER_KEY != undefined,      'process.env.CONSUMER_KEY undefined');
         assert( process.env.CONSUMER_SECRET != undefined,   'process.env.CONSUMER_SECRET undefined');
+        
+        var referalToken = quest.params.referalToken;
 
         var requestTokenURL = 'https://api.twitter.com/oauth/request_token';
         
@@ -49,6 +52,9 @@ authentication.route.login =
                 
                 // Store access_token in Session
                 quest.session.access_token = access_token;
+                
+                if (referalToken)
+                    quest.session.referalToken = referalToken;
                 
                 var authenticateURL = 'https://api.twitter.com/oauth/authenticate?oauth_token=' + access_token.oauth_token;
                 
@@ -82,7 +88,22 @@ authentication.route.loginResponse =
         }
     }
     
+function _handleReferal(quest, userEntry)
+{
+    console.log('referalToken: ' + referalToken);
     
+    var referalToken = quest.session.referalToken;
+    
+    if (referalToken) {
+        console.log('quest.session.referalToken: ' + referalToken);
+        console.log('Referal Token for User: ' +  userEntry.twitter.user.screen_name);
+        
+        referal.rewardReferralWithToken(userEntry, referalToken);
+        
+        delete quest.session.referalToken;
+    }
+}
+
 function _loginResponse(quest, ponse)
 {
     // quest.query
@@ -114,7 +135,7 @@ function _loginResponse(quest, ponse)
 
             var perm_token = querystring.parse(body);
             quest.session.perm_token = perm_token;
-
+            
             var oauth = authentication.oauthFromRequest(quest);
             
             twitter.users.show(oauth, perm_token.user_id, perm_token.screen_name, 
@@ -169,7 +190,7 @@ function _loginResponse(quest, ponse)
                     var freshEntry = database.makeTwitterUserEntry( user, oauth );
                     
                     database.userLogin( freshEntry,
-                        function(err, userEntry) {
+                        function(err, userEntry, firstTime) {
                             if (err) {
                                 console.error('database.userLogin err:');
                                 console.error(err);
@@ -190,8 +211,6 @@ function _loginResponse(quest, ponse)
                             
                             // console.log('quest.session:');
                             // console.log(quest.session);
-
-
                             // if (userEntry.email || )
                             
                             if ( service.stateForUser(userEntry) == 'NO-EMAIL' ||
@@ -203,8 +222,13 @@ function _loginResponse(quest, ponse)
                                 ponse.redirect('/');
                                 
                             tracking.trackUserEntry(userEntry, 'login', null, tracking.dataFromHeader(quest));
+
+                            if (firstTime) {
+                                console.log("--!!! First time login !!!--");
+                                _handleReferal(quest, userEntry);
+                            }
+
                         });
-                    
                 });
 
         });

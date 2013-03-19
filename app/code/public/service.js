@@ -120,15 +120,18 @@ service.socket.addVip =
             {
                 if (err)
                     return callback(err);
-
                 
                 var vipList = [];
                 if (userEntry.vipList)
                     vipList = userEntry.vipList;
                 
-                if (vipList.length >= 10) {
-                    var tooManyError = new Error('You cannot add more than 20 friends');
+                var maxVipCount = (userEntry.maxVipCount ? userEntry.maxVipCount : 10 );
+                    
+                if (vipList.length >= maxVipCount) {
+                    var tooManyError = new Error('You cannot add more than ' + maxVipCount + ' friends');
                     tooManyError.code = 'TOOMANY';
+                    tooManyError.meta = maxVipCount;
+                    
                     return callback( tooManyError );
                 }
 

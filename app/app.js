@@ -42,7 +42,7 @@ var 	authentication  = use('authentication')
     ,   tracking        = use('tracking')
 
     ,   invite          = use('invite')
-    ,   invite_accept   = use('invite-accept')
+    ,   invite_index   = use('invite-index')
     ;
 
 // Startup
@@ -144,7 +144,7 @@ _addRoutesFromModule( 'userPages',  userPages,  authentication.middleware,  'use
 _addRoutesFromModule( 'adminPages', adminPages, authentication.admin,       'admin' );
 
 _addRoutesFromModule( 'invite',     invite,     authentication.middleware,  'user' );
-_addRoutesFromModule( 'invite-accept',  invite_accept );
+_addRoutesFromModule( 'invite-index',  invite_index );
 
 // ---------------------
 // Http Server
@@ -165,7 +165,16 @@ io.addRoutesFromModule('service');
 // Scheduler
 
 var scheduler  = use('scheduler');
-scheduler.start();
+var schedulerOFF = true;
+
+if (schedulerOFF)
+{
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+    console.log('!!!!!!!!!!!!!!!!  SCHEDULER IS OFF  !!!!!!!!!!!!!!!!!!');
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+}
+else
+    scheduler.start();
 
 // ---------------------
 // Test

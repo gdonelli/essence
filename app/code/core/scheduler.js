@@ -2,7 +2,6 @@
 var     request = require('request')
     ,   assert  = require('assert')
     ,   _       = require('underscore')
-    ,	async   = require('async')
     ,	domain  = require('domain')
     ,	moment  = require('moment')
         

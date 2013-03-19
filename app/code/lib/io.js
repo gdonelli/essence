@@ -160,6 +160,9 @@ function _socketListen(socket)
                                         
                                     if (err.code)
                                         errObject.errorCode = err.code;
+
+                                    if (err.meta)
+                                        errObject.meta = err.meta;
                                     
                                     console.error('ioroute -> err.code:');
                                     console.error(err.code);
