@@ -1,0 +1,35 @@
+doctype 5
+html(lang='en')
+    head
+
+    body
+        div(style='font-family:"Lucida Grande", Helvetica, Arial, sans-serif; color:#555555; font-size:14px; border: 1px solid rgba(0,0,0,0.25); border-radius: 6px; overflow:hidden;')
+            div(style='background-color:rgb(244, 244, 244); padding: 16px')
+                img(width='28', height='28', src=user.profile_image_url, 
+                    style='width: 28px; height: 28px; border-radius: 4px; margin-right: 4px; border: 1px solid rgba(0,0,0,0.6);')
+                span(style='position:relative; top:-8px; margin-left:8px;') Invitation from 
+                    = user.name
+                a(href=locals.referalURL, style='text-decoration: none; float:right; padding: 8px 16px; background-color:#3494dc; color:white; border-radius: 4px; font-size:14px; border: 1px solid rgba(0,0,0,0.25);') View
+            
+            center
+                img(src='http://essenceapp.com/images/star320_anim.gif', width='96', height='96', style='margin:16px')
+                
+                div(style='text-align:left; margin:0px 32px 32px 32px; font-size:16px;')
+                    span Hi there,
+                    br
+                    br
+                    span &nbsp;&nbsp;&nbsp;&nbsp;
+                    span= user.name
+                    span &nbsp;wants you to try Essence App! Essence lets you be better in touch with the people you care about the most on Twitter.
+            
+                    div(style='margin:16px; padding: 8px 16px;')
+                        center
+                            a(href=locals.referalURL, style='text-decoration: none; padding: 8px 16px; background-color:#3494dc; color:white; font-weight:bold; border-radius: 4px; border: 1px solid rgba(0,0,0,0.25);') View invitation
+                    
+                    span Thanks!
+                    br
+                    span - The Essence Team
+                    br
+                    div
+                        br
+                        a(href=locals.referalURL, style='text-decoration: none; color:#CCC; font-size:12px')= locals.referalURL

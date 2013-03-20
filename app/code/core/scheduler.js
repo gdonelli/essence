@@ -238,9 +238,8 @@ function _isTheRightTime(userEntry)
     var dateFormat = 'HH:mm (D MMM)';
     // Correct delivery time
     
-    var deliveryWindowStart = 18;
-    var deliveryWindowEnd   = 19;
-    
+    var deliveryWindowStart = 17;
+    var deliveryWindowEnd   = 18;
     
     if ( hoursInUserTime >= deliveryWindowStart && 
          hoursInUserTime <= deliveryWindowEnd )

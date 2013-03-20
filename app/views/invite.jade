@@ -25,12 +25,13 @@ block content
                 label Enter email addresses here:
                 textarea#email-textarea(type="text", spellcheck="false", autocomplete="off", placeholder="Add email addresses")
                 br
-                a.btn.btn-primary#send-email(onclick="SendEmail()") Send Invites
+                button.btn.btn-primary#send-email-btn(onclick="SendEmail()") Send Invites
+                #inviteSentResult.alert.alert-success 3 invites sents
 
             .span6
                 h3 Send a Tweet
                 label Send a message to your followers
-                a.btn.btn-primary Tweet Invite
+                a.btn.btn-primary(disabled='disabled') Tweet Invite
 
         h3 Or give this link to friends
         pre=referalURL

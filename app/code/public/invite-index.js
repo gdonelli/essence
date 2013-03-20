@@ -26,7 +26,6 @@ invite_accept.route.accept   =
         var referalToken = quest.params.token;
         var userId = referal.userIdForToken(referalToken);
         
-        
         database.getUserEntryByTwitterId(userId,
             function(err, userEntry)
             {
@@ -43,7 +42,7 @@ invite_accept.route.accept   =
                 else
                 {
                     var title = 'Invitation from ' + userEntry.twitter.user.name;
-                    var h1 = userEntry.twitter.user.name + ' invites you to Essence App';
+                    var h1 = userEntry.twitter.user.name + ' invites you to never miss a tweet you care about';
                     var avatarURL = userEntry.twitter.user.profile_image_url;
 
                     ponse.render('index', {

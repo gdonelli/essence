@@ -126,11 +126,11 @@ function _addRoutesFromModule(name, module, middleware, middlewareName)
             
             if (middleware) {
                 app[method](path, middleware, route);
-                console.log('   ' + path + ' (' + middlewareName+ ')');
+                console.log('   ' + method + '\t' + path + ' (' + middlewareName+ ')');
             }
             else {
                 app[method](path, route);
-                console.log('   ' + path);
+                console.log('   ' + method + '\t' + path + ' ');
             }
         }); 
 }

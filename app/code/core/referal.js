@@ -5,6 +5,7 @@ var     crypto = require('crypto')
     
     ,   service  = use('service')
     ,   database = use('database')
+    ,   email    = use('email')
     ;
 
 var referal = exports;
@@ -56,6 +57,7 @@ function _referralSummaryForUserEntry(referredUserEntry)
     return result;
 }
 
+
 referal.rewardUserEntry = 
     function(userEntryToReward)
     {
@@ -65,7 +67,39 @@ referal.rewardUserEntry =
         userEntryToReward.maxVipCount++;
         
         return userEntryToReward;
-    }
+    };
+
+
+referal.emailNotificationToUser =
+    function(userEntryToReward, referredUserEntry)
+    {
+        if (!userEntryToReward.email) {
+            console.error('userEntryToReward.email is not valid');
+            return;
+        }
+        
+        var msg = {
+            from: email.from()
+           , bcc: email.bcc()
+           ,  to: userEntryToReward.email
+        };
+        
+        msg.subject = referredUserEntry.twitter.user.name + ' joined Essence!';
+        msg.text = 'Hi!\n';
+        msg.text += '    Good news, ' + referredUserEntry.twitter.user.name 
+                               + ' (@' + referredUserEntry.twitter.user.screen_name + '), has just joined Essence.\n';
+        msg.text += 'Thank you for your referal. We added space for one more VIP to your account.\n\nYou can have up to ' + userEntryToReward.maxVipCount + ' VIPs now.\n\n';
+        msg.text += 'The EssenceApp.com team';
+        
+        email.send(msg,
+            function(err, msg) {
+                if (err) {
+                    console.error('Failed to referal.emailNotificationToUser error:');
+                    console.error(err);
+                }
+            });
+    };
+    
 
 referal.rewardReferralWithToken =
     function(referredUserEntry, token)
@@ -118,7 +152,8 @@ referal.rewardReferralWithToken =
                 console.log(userToRewardEntry.referrals);
 
                 referal.rewardUserEntry(userToRewardEntry);
-
+                referal.emailNotificationToUser(userToRewardEntry, referredUserEntry);
+                
                 database.saveUserEntry(userToRewardEntry, 
                     function(err, userEntry)
                     {
