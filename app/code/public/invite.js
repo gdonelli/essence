@@ -3,13 +3,16 @@
  * GET home page.
  */
 
-var     path    = require('path')
-    ,   fs      = require('fs')
-    ,   async   = require('async')
+var     path  = require('path')
+    ,   fs    = require('fs')
+    ,   async = require('async')
+    ,   jade  = require('jade')
+    ,   fs    = require('fs')
     
     ,   authentication  = use('authentication')
     ,	database = use('database')
     ,	referal	 = use('referal')
+    ,	email	 = use('email')
     ;
 
 var invite = exports;
@@ -35,21 +38,15 @@ invite.route.index =
     };
 
 
-invite.path.testemail  = '/test/testemail';
+invite.path.testemail  = '/test/invite-message';
 invite.route.testemail = 
     function(quest, ponse)
     {
-        var user = authentication.userFromRequest(quest);
-        
-        console.log('user:');
-        console.log(user);
-        
-        ponse.render('email-invite-message', {
-                    user: user
-                ,   referalURL: referal.URLForUserName(quest, user.id_str)
-            } );
+        ponse.render('email-invite-message', 
+                     _inviteMessageOptions(quest) );
     }
-    
+
+
 invite.method.send = 'post';
 invite.path.send    = '/invite-send-email';
 invite.route.send   = 
@@ -72,12 +69,15 @@ invite.route.send   =
             return;
         }
         
+        var sentResult = false;
+        
         async.map(emails, 
-            function(email, callback)
+            function(anEmail, callback)
             {
-                _sendInvitationToEmail(user, email);
-                
-                callback(null, email);
+                _sendInvitationToEmail(quest, anEmail, 
+                    function(err){
+                        callback(err, anEmail);
+                    });
             },
             function(err, results)
             {
@@ -93,18 +93,64 @@ invite.route.send   =
             } );
         
     };
+
     
-    
-function _sendInvitationToEmail(fromUserEntry, email)
+function _inviteMessageOptions(quest)
 {
-    console.log('_sendInvitationToEmail: ' + email);
+    var user = authentication.userFromRequest(quest);
+        
+    return {    
+        user: user,
+        referalURL: referal.URLForUserName(quest, user.id_str)
+    };
 }
 
-function _isEmailValid(email)
+
+function _sendInvitationToEmail(quest, anEmail, callback)
+{
+    console.log('_sendInvitationToEmail: ' + anEmail);
+    
+    var viewPath = global.appPublicPath + '/../views/email-invite-message.jade';
+    
+    fs.readFile(viewPath, 
+        function(err, filedata) {
+            if (err) {
+                console.error('Failed to load view at path: ' + viewPath);
+                return callback(err);
+            }
+
+            console.log('filedata:');
+            console.log(filedata);
+            
+            var jadePage  = jade.compile( filedata, { filename: viewPath } );
+            var finalPage = jadePage( _inviteMessageOptions(quest) );
+            
+            if (finalPage) {
+                console.log('finalPage: ' + finalPage);
+                
+                var user = authentication.userFromRequest(quest);
+                
+                var msg = {};
+                msg.to = anEmail;
+                
+                msg.from = email.from();
+                msg.bcc  = email.bcc();
+                
+                msg.subject = user.name + ' invited you to check out EssenceApp';
+                msg.html = finalPage;
+                
+                email.send(msg, callback);
+            }
+            
+        });
+    
+}
+
+function _isEmailValid(anEmail)
 { 
 	var regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     
-    return email.match(regex);
+    return anEmail.match(regex);
 } 
 
 function _cleanUpString(value)

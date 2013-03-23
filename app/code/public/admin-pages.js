@@ -40,8 +40,8 @@ admin_pages.route.allusers  =
         row += '<tr>';
         
         row += '<td>Name</td>';
-        row += '<td>Email</td>';
-        row += '<td>VIP</td>';
+        // row += '<td>Email</td>';
+        row += '<td>VIP #</td>';
         row += '<td>last_activity</td>';
         row += '<td></td>';
         row += '<td></td>';
@@ -68,17 +68,21 @@ admin_pages.route.allusers  =
                 
                 row += '<tr>';
                 
-                row += '<td><strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong> @' + user.twitter.user.screen_name + '</td>';
+                row += '<td><strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong> @' + user.twitter.user.screen_name + ' #' + user.deliveryIndex +
+                        '<br>'; // + presentation.stringToHTML(user.email) + '</td>';
+                
+                // row += '<td>';
                 
                 if (user.email)
-                    row += '<td>' + presentation.stringToHTML(user.email) + '</td>';
+                    row += presentation.stringToHTML(user.email);
                 else if (user.email_to_confirm)
-                    row += '<td style="color:orange;">' + presentation.stringToHTML(user.email_to_confirm) + ' <a href="/admin/confirm-email/' + user._id + '">confirm </a></td>';
+                    row += '<span style="color:orange;">' + presentation.stringToHTML(user.email_to_confirm) + ' <a href="/admin/confirm-email/' + user._id + '">confirm </a></span>';
                 else
-                    row += '<td>-</td>';
+                    row += '-';
+                    
+                // row += '</td>';
                 
-                
-                row += '<td>#' + (user.vipList ? user.vipList.length : 0) + ' </td>';
+                row += '<td>' + (user.vipList ? user.vipList.length : 0) + ' / ' + (user.maxVipCount ? user.maxVipCount : '10') + ' </td>';
                 
                 row += '<td>';
                 
