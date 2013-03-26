@@ -41,8 +41,9 @@ var 	authentication  = use('authentication')
     ,   adminPages      = use('admin-pages')
     ,   tracking        = use('tracking')
 
-    ,   invite          = use('invite')
-    ,   invite_index   = use('invite-index')
+    ,   invite       = use('invite')
+    ,   upgrade      = use('upgrade')
+    ,   invite_index = use('invite-index')
     ;
 
 // Startup
@@ -139,11 +140,12 @@ _addRoutesFromModule( 'index',          index );
 _addRoutesFromModule( 'authentication', authentication );
 _addRoutesFromModule( 'tracking',       tracking );
 
-_addRoutesFromModule( 'userPages',  userPages,  authentication.middleware,  'user' );
-
 _addRoutesFromModule( 'adminPages', adminPages, authentication.admin,       'admin' );
 
+_addRoutesFromModule( 'userPages',  userPages,  authentication.middleware,  'user' );
 _addRoutesFromModule( 'invite',     invite,     authentication.middleware,  'user' );
+_addRoutesFromModule( 'upgrade',    upgrade,    authentication.middleware,  'user' );
+
 _addRoutesFromModule( 'invite-index',  invite_index );
 
 // ---------------------

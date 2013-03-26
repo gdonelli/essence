@@ -201,6 +201,10 @@ function _loginResponse(quest, ponse)
                             quest.session.version    = authentication.version;
                             quest.session.user.email = userEntry.email;
                             
+                            console.log('userEntry.maxVipCount: ' + userEntry.maxVipCount);
+                            if (userEntry.maxVipCount)
+                                quest.session.user.maxVipCount = userEntry.maxVipCount;
+                            
                             /*
                             console.log('perm_token:');
                             console.log(perm_token);
