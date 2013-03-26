@@ -58,3 +58,16 @@ function SendEmail()
         });
 }
 
+function TweetInvite()
+{
+    var tweet = 'I just discovered Essence, a service for Twitter that makes it easy to focus on people you care about the most';
+    var referalURL = $('#referalURL').text();
+    
+    var tweetURL = 'https://twitter.com/intent/tweet?text=';
+    
+    tweetURL += tweet.replace(' ', '%20');
+    tweetURL += '%0A';
+    tweetURL += referalURL;
+    
+    window.open(tweetURL, '_blank' );
+}

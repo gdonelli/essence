@@ -165,7 +165,7 @@ io.addRoutesFromModule('service');
 // Scheduler
 
 var scheduler  = use('scheduler');
-var schedulerOFF = true;
+var schedulerOFF = false;
 
 if (schedulerOFF)
 {

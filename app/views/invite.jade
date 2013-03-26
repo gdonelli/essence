@@ -26,13 +26,13 @@ block content
                 textarea#email-textarea(type="text", spellcheck="false", autocomplete="off", placeholder="Add email addresses")
                 br
                 button.btn.btn-primary#send-email-btn(onclick="SendEmail()") Send Invites
-                #inviteSentResult.alert.alert-success 3 invites sents
+                #inviteSentResult.alert.alert-success XXX invites sents
 
-            .span6(style='visibility: hidden;')
+            .span6
                 h3 Send a Tweet
                 label Send a message to your followers
-                a.btn.btn-primary(disabled='disabled') Tweet Invite
+                a.btn.btn-primary(href="https://twitter.com/intent/tweet?text=I%20just%20discovered%20Essence,%20a%20service%20for%20Twitter%20that%20makes%20it%20easy%20to%20focus%20on%20people%20you%20care%20about%20the%20most%0A" + referalURL) Tweet Invite
 
         h3 Or give this link to friends
-        pre=referalURL
+        pre#referalURL=referalURL
         
