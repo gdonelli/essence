@@ -38,7 +38,7 @@ service.socket.getTwitterFriends =
         console.log(oauth);
         
         var getFriends =
-            twitter.getFriends(oauth, user.id,
+            twitter.getSortedFriends(oauth, user.id,
                 function(err, data)
                 {
                     if (err)

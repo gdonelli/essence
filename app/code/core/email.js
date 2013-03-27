@@ -45,7 +45,7 @@ email.bcc =
 
 
 email.send =
-    function(msg, callback)
+    function(msg, callback /* (msg, msg) */)
     {
         var server = _nodemailerServer();
         

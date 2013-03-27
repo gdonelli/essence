@@ -506,3 +506,7 @@ function _isEmailValid(email)
     return email.match(regex);
 } 
 
+function DoneButton()
+{
+    window.location = '/';
+}

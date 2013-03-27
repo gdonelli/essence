@@ -399,7 +399,7 @@ twitter.friends.ids =
 // ---
 
 twitter.getFriends =
-    function(oauth, user_id, callback, cache)
+    function(oauth, user_id, callback/* (err, result) */, cache)
     {
         var progressEmitter = new EventEmitter();
         
@@ -449,6 +449,153 @@ twitter.getFriends =
                     });
 
             }, cache);
+        
+        return progressEmitter;
+    }
+    
+function _extractTwitterScreenNames(text)
+{
+    var regex = /(^|\s)@(\w+)/g;
+    
+    var matchArray = text.match(regex);
+   
+    return _.map(matchArray, 
+        function(string){
+            var result = string;
+            result = result.replace('@', '');
+            result = result.replace(' ', '');
+            return result;
+        } );
+}
+
+function _extractUserWeights(oauth, user_id, callback, cache)
+{
+    twitter.statuses.user_timeline(oauth, user_id, 
+        function(err, tweets){
+            if (err)
+                return callback(err);
+        
+            // -------------
+            // Get weights
+            var userWeight = {};
+            
+            tweets.forEach(
+                function(tweet, index) {
+                    var names = _extractTwitterScreenNames(tweet.text);
+                    
+                    if (!names)
+                        return;
+                        
+                    names.forEach(
+                        function(name) {
+                            if (userWeight[name])
+                                userWeight[name].weight += 1;
+                            else
+                                userWeight[name] = {
+                                        weight: 1,
+                                        index: index
+                                    };
+                        });
+                });
+            
+            // --------------
+            // Sort weigths
+            /*
+            
+            var userWeightArray = [];
+            
+            Object.keys(userWeight).forEach(
+                function(screen_name) {
+                    var entry = userWeight[screen_name];
+                    entry.screen_name = screen_name;
+                    userWeightArray.push(entry);
+                })
+            
+            userWeightArray.sort(
+                function(a, b) {
+                    if (a.weight == b.weight)
+                        return a.index - b.index;
+                    else
+                        return b.weight - a.weight;
+                });
+            
+
+            // ----------------------
+            // Distil list of users
+            
+            var result = _.map(userWeightArray, 
+                function(entry) {
+                    return entry.screen_name;
+                });
+            */
+            
+            callback(null, userWeight);
+        },
+        cache);
+}
+
+twitter.getSortedFriends =
+    function(oauth, user_id, callback, cache)
+    {
+        var progressEmitter = new EventEmitter();
+
+        async.parallel( [
+                function(localCallback)
+                {
+                    _extractUserWeights(oauth, user_id, localCallback, cache);
+                },
+                function(localCallback)
+                {
+                    var getFriendsEmitter = twitter.getFriends(oauth, user_id, localCallback, cache);
+                    
+                    getFriendsEmitter.on('progress', 
+                        function(value) {
+                            progressEmitter.emit('progress', value);
+                        });
+                },
+            
+            ],
+            function(err, results) {
+                if (err)
+                    return callback(err);
+                    
+                var weights    = results[0];
+                var allFriends = results[1];
+                
+                var topPeopleList = [];
+                var othersList = [];
+                
+                allFriends.forEach(
+                    function(friend)
+                    {
+                        var friendScreenName = friend.screen_name;
+                        var friendWeight = weights[friendScreenName];
+                        
+                        if (!friendWeight)
+                            return othersList.push(friend);
+                        
+                        friend.weight = friendWeight.weight;
+                        friend.weightIndex = friendWeight.index;
+                        
+                        topPeopleList.push(friend);
+                    });
+                
+                topPeopleList.sort(
+                    function(a, b) {
+                        if (a.weight == b.weight)
+                            return a.weightIndex - b.weightIndex;
+                        else
+                            return b.weight - a.weight;
+                    });
+                    
+                var result = _.flatten([ topPeopleList, othersList ]);
+
+//                console.log('result: ');
+//                console.log(result);
+                
+                callback(null, result);
+            });
+            
         
         return progressEmitter;
     }

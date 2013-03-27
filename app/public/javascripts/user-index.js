@@ -43,8 +43,8 @@ function _updateState(state)
     if (state == 'NO-EMAIL' || 
         state == 'NO-VIP'   )
     {
-        title    = '<span style="color:red;">Essence needs your settings...</span>';
-        subtitle = 'Go to settings to configure Essence';
+        title    = '<span style="color:red;">You need to setup Essence</span>';
+        subtitle = 'Go to <a href="/settings">Settings</a> to configure Essence';
         
         $('#settings').addClass('btn-primary');
     }
