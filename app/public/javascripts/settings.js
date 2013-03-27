@@ -77,7 +77,7 @@ function _showVipList(array)
 
     if (!array || array.length == 0)
     {
-        vipTableRows.html('<div id="vip-placeholder" class="muted">To add friends to your VIP list use the table on the left</div>');
+        vipTableRows.html('<div id="vip-placeholder" class="muted">Select the friends you want in your VIP list</div>');
         return;
     }
 
@@ -368,7 +368,7 @@ function AddVip(id, element)
     $(element).html('&nbsp;&nbsp;&nbsp;&nbsp;<i class="icon-ok"></i>&nbsp;&nbsp;&nbsp;&nbsp;');
     $(element).attr('disabled', 'disabled');
     
-    console.log(element);
+    // console.log(element);
 }
 
 
@@ -508,5 +508,20 @@ function _isEmailValid(email)
 
 function DoneButton()
 {
-    window.location = '/';
+    var saveButtonLen = $('#save-email').text().length ;
+    var emailLen = $('#email').val().length;
+    
+    if (saveButtonLen > 2 || emailLen < 4 || $('#confirm-alert').is(":visible")) {
+        var emailSectionTop = $('#your-email').offset().top;
+        console.log('no good emailSectionTop: ' + emailSectionTop);
+        window.scrollTo(0, emailSectionTop);
+
+        $('#your-email').css('background-color', '#fff4db');
+    }
+    else if ( $('#vip-placeholder').length )
+    {
+        $('#vip-placeholder').css('background-color', '#fff4db');
+    }
+    else
+        window.location = '/';
 }

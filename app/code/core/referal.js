@@ -85,11 +85,14 @@ referal.emailNotificationToUser =
         };
         
         msg.subject = referredUserEntry.twitter.user.name + ' joined Essence!';
-        msg.text = 'Hi!\n';
+        msg.text = 'Hi ' + userEntryToReward.twitter.user.name + '!\n';
         msg.text += '    Good news, ' + referredUserEntry.twitter.user.name 
                                + ' (@' + referredUserEntry.twitter.user.screen_name + '), has just joined Essence.\n';
         msg.text += 'Thank you for your referal. We added space for one more VIP to your account.\n\nYou can have up to ' + userEntryToReward.maxVipCount + ' VIPs now.\n\n';
         msg.text += 'The EssenceApp.com team';
+        msg.text += '\n';
+        msg.text += '\n';
+        msg.text += 'PS: You might need to logout and login again to see the changes in your account';
         
         email.send(msg,
             function(err, msg) {

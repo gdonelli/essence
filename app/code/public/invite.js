@@ -119,14 +119,14 @@ function _sendInvitationToEmail(quest, anEmail, callback)
                 return callback(err);
             }
 
-            console.log('filedata:');
-            console.log(filedata);
+            // console.log('filedata:');
+            // console.log(filedata);
             
             var jadePage  = jade.compile( filedata, { filename: viewPath } );
             var finalPage = jadePage( _inviteMessageOptions(quest) );
             
             if (finalPage) {
-                console.log('finalPage: ' + finalPage);
+                // console.log('finalPage: ' + finalPage);
                 
                 var user = authentication.userFromRequest(quest);
                 
