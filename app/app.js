@@ -27,10 +27,14 @@ require('use-require').setup([ __dirname + '/code' ]);
 // require
 var     express = require('express')
     ,   http    = require('http')
+    ,   https   = require('https')
     ,   path    = require('path')
     ,	assert  = require('assert')
     ,	fs      = require('fs')
     ;
+
+http.globalAgent.maxSockets  = 50;
+https.globalAgent.maxSockets = 50;
 
 // use
 var 	authentication  = use('authentication')
