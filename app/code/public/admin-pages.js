@@ -56,6 +56,8 @@ admin_pages.route.allusers  =
         
         ponse.write(row);
         
+        var userIndex = 0;
+        
         database.forEachUser(
             function(err, user) {
                 if (err)
@@ -68,7 +70,7 @@ admin_pages.route.allusers  =
                 
                 row += '<tr>';
                 
-                row += '<td><strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong> @' + user.twitter.user.screen_name + ' #' + user.deliveryIndex +
+                row += '<td>'+ userIndex++ +'. <strong>' + presentation.stringToHTML(user.twitter.user.name) + '</strong> @' + user.twitter.user.screen_name + ' #' + user.deliveryIndex +
                         '<br>'; // + presentation.stringToHTML(user.email) + '</td>';
                 
                 // row += '<td>';

@@ -249,7 +249,7 @@ twitter.users.lookup =
         
         var userSegments = [];
         
-        var count = Math.min( 1000, arrayOfUserIds.length );
+        var count = Math.min( 3000, arrayOfUserIds.length );
         for (var i=0; i<count; i+=100 )
         {
             var slice = arrayOfUserIds.slice(i, Math.min(count, i + 100) );

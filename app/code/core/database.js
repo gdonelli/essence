@@ -149,7 +149,9 @@ function _getCursor(getCollection_f, limit, sort, callback)
                 return callback(err);
                 
             var options = {};
-            options.limit = limit;
+            
+            if (limit > 0)
+                options.limit = limit;
                     
             if (sort)
                options.sort = sort;
@@ -168,7 +170,7 @@ database.getCursorOnTracking =
 database.getCursorOnUsers =
     function(callback /* (err, cursor) */ )
     {
-        _getCursor(_getUserCollection, 100, [ [ 'last_activity' , -1 ] ], callback);
+        _getCursor(_getUserCollection, 0, [ [ 'last_activity' , -1 ] ], callback);
     };
 
 database.removeUserWithId =
