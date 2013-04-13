@@ -49,7 +49,15 @@ userly.deliverEssenceToUser =
     	async.waterfall(
             [   function(callback)
                 {
-                    _getAugmentedVipList(userEntry, options, callback);
+                    _getAugmentedVipList(userEntry, options, 
+                        function(err, augmentedVipList)
+                        {
+                            if (err) {
+                                console.error('_getAugmentedVipList failed for ' + userEntry._id);
+                            }
+                            
+                            callback(err, augmentedVipList);
+                        });
                 }
             ,   function(augmentedVipList, callback)
                 {
@@ -169,13 +177,29 @@ function _getAugmentedVips(oauth, options, vipList, callback /* (err, vipList) *
     async.map(vipList
         ,	function(vipEntry, callback)
             {
-                _fillUpEssenceForVip(oauth, vipEntry, options, callback, cache); 
+                _fillUpEssenceForVip(oauth, vipEntry, options, 
+                    function(err, resultVipEntry)
+                    {
+                        // If there is an error loading the essence for the user 
+                        // we take note, but don't fail.
+                        if (err) {
+                            vipEntry.essence = [];
+                            vipEntry.error = err;
+                            callback(null, vipEntry);
+                        }
+                        else
+                            callback(err, resultVipEntry);
+                        
+                    }, cache); 
             }
         ,	function(err, results)
             {
-                if (err)
+                if (err) {
+                    console.error('_getAugmentedVips failed with error: ');
+                	console.error(err);
                     return callback(err);
-                
+                }
+
                 vipList = vipList.sort(
                     function(a, b){
                         return a.essence.length - b.essence.length;

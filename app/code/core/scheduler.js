@@ -204,8 +204,8 @@ function _processUserEntry(userEntry, callback /* ( state ) */ )
                 function(err, list)
                 {
                     if (err) {
-                        console.error('Failed to setup Essence list for user: ' + userEntry._id);
-                        console.error(err.stack);
+                        console.error('Failed to setup Essence list for user: ' + userEntry._id + ' email:' + userEntry.email);
+                        console.error(err);
                     }
                 });
         });
